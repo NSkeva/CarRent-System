@@ -1,0 +1,32 @@
+# Build artifacts
+bin/
+obj/
+out/
+dist/
+build/
+
+# User and IDE files
+.DS_Store
+Thumbs.db
+.dotnet-home/
+.nuget/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# JetBrains
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Logs
+*.log
+
+# Secrets
+.env
+.env.*
+!.env.example
