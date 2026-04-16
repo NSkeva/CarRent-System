@@ -1,0 +1,13 @@
+@model Vehicle
+
+<section class="panel detail-card">
+    <h1>@Model.Brand @Model.Model</h1>
+    <p><strong>Registracija:</strong> @Model.RegistrationNumber</p>
+    <p><strong>Tip:</strong> @Model.Type</p>
+    <p><strong>Godina:</strong> @Model.Year</p>
+    <p><strong>Kilometraza:</strong> @Model.MileageKm km</p>
+    <p><strong>Cijena/dan:</strong> @Model.DailyPrice EUR</p>
+    <p><strong>Status:</strong> @(Model.IsActive ? "Aktivno" : "Neaktivno")</p>
+    <p><strong>Servisni zapisi:</strong> @Model.ServiceRecords.Count</p>
+    <a asp-action="Index">Natrag na listu</a>
+</section>

@@ -1,0 +1,10 @@
+@model BranchOffice
+
+<section class="panel detail-card">
+    <h1>@Model.Name</h1>
+    <p><strong>Tip:</strong> @Model.LocationType</p>
+    <p><strong>Adresa:</strong> @Model.Address</p>
+    <p><strong>Telefon:</strong> @Model.Phone</p>
+    <p><strong>Broj vozila:</strong> @Model.Vehicles.Count</p>
+    <a asp-action="Index">Natrag na listu</a>
+</section>

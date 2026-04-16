@@ -2,57 +2,84 @@
 
 Projekt za kolegij Programiranje web aplikacija u ASP.NET.
 
-## Status
+## Struktura repozitorija
 
-Repozitorij je inicijalno postavljen.
-Opis projekta, arhitektura i upute za pokretanje bit ce dodani naknadno.
+- `src/CarRent.Console/` - Lab 1 model, seed podaci i LINQ upiti
+- `src/CarRent.Web/` - Lab 2 ASP.NET Core MVC aplikacija (HTML binding)
+- `lab-1/` - Lab 1 dokumentacija i logovi
+- `lab2/` - Lab 2 upute, report i log artefakti
+- `.github/hooks/` - skripte za transcript/agent logging workflow
 
-Lab 1 dokumentacija i inicijalni kod nalaze se u `lab-1/` i `src/CarRent.Console/`.
+## Lab 2 (MVC + HTML Binding)
 
-## Struktura
+Web aplikacija je u projektu `src/CarRent.Web/` i koristi:
 
-- `lab-1/` - materijali i logovi za Lab 1
-- `.github/hooks/` - skripte za lokalne hookove
-- `.github/hooks.json` - konfiguracija hookova
-- `src/CarRent.Console/` - inicijalni C# projekt (model, seed, LINQ, async demo)
+- MVC routing: `{controller=Home}/{action=Index}/{id?}`
+- mock repository sloj nad statickim podacima iz Lab 1 (`SeedData`)
+- obavezne `Index` i `Details` stranice po entitetima
+- custom stranice: `Timeline`, `Dnevni plan`, `Vozni park`, `Partneri`
+- unique glassmorphism UI
 
-## AI log za predaju
+## Pokretanje
 
-Ako hook eventovi ne upisuju sve poruke, koristi export cijelog Cursor transkripta:
+Projekti ciljaju `net10.0`.
+
+```bash
+dotnet --version
+dotnet build CarRent-System.slnx
+dotnet run --project src/CarRent.Web/CarRent.Web.csproj
+```
+
+Opcionalno za konzolni demo:
+
+```bash
+dotnet run --project src/CarRent.Console/CarRent.Console.csproj
+```
+
+Ako imas problem s pravima na `~/.dotnet` ili NuGet cache:
+
+```bash
+DOTNET_CLI_HOME="$PWD/.dotnet-home" NUGET_PACKAGES="$PWD/.nuget/packages" dotnet run --project src/CarRent.Web/CarRent.Web.csproj
+```
+
+## AI log workflow (Lab 1)
+
+Export zadnjeg transkripta:
 
 ```bash
 bash .github/hooks/export_cursor_transcript.sh
 ```
 
-To ce kopirati zadnji kompletni transcript u `lab-1/ai_conversation.jsonl`.
-
-Za automatsko osvjezavanje tijekom rada:
+Auto watch:
 
 ```bash
 bash .github/hooks/start_transcript_watch.sh
-```
-
-Za zaustavljanje:
-
-```bash
 bash .github/hooks/stop_transcript_watch.sh
 ```
 
-## Pokretanje C# koda
+## AI log workflow (Lab 2)
 
-Projekt je postavljen na `net10.0`.
+Lab 2 koristi istu logiku, ali izlaz ide u `lab2/`.
 
-Za lokalni run/build:
-
-```bash
-dotnet --version
-dotnet build CarRent-System.slnx
-dotnet run --project src/CarRent.Console/CarRent.Console.csproj
-dotnet test CarRent-System.slnx
-```
-
-Ako imas problem s pravima na `~/.dotnet` ili NuGet cache, koristi:
+Export:
 
 ```bash
-DOTNET_CLI_HOME="$PWD/.dotnet-home" NUGET_PACKAGES="$PWD/.nuget/packages" dotnet run --project src/CarRent.Console/CarRent.Console.csproj
+bash .github/hooks/export_cursor_transcript_lab2.sh
 ```
+
+Auto watch:
+
+```bash
+bash .github/hooks/start_transcript_watch_lab2.sh
+bash .github/hooks/stop_transcript_watch_lab2.sh
+```
+
+Hook skripta za agent log:
+
+```bash
+bash .github/hooks/log_ai_lab2.sh
+```
+
+Ako zelis zasebnu hook konfiguraciju za Lab 2, koristi datoteku:
+
+- `.github/hooks.lab2.json`

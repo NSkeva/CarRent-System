@@ -1,0 +1,35 @@
+@model IReadOnlyList<Partner>
+
+<section class="panel">
+    <h1>Partneri</h1>
+    <p>Popis partnera i kontakt osoba s pripremom za kasnije edit/brisanje workflowe.</p>
+</section>
+
+<section class="panel">
+    <table class="data-table">
+        <thead>
+        <tr>
+            <th>Tvrtka</th>
+            <th>Kontakt osoba</th>
+            <th>Kontakt broj</th>
+            <th>Email</th>
+            <th>Akcije</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var partner in Model)
+        {
+            <tr>
+                <td>@partner.CompanyName</td>
+                <td>@partner.ContactPerson</td>
+                <td>@partner.Phone</td>
+                <td>@partner.Email</td>
+                <td>
+                    <button type="button">Edit</button>
+                    <button type="button">Delete</button>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</section>

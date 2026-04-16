@@ -1,0 +1,5 @@
+Lab2 agent log file.
+Hook skripta: .github/hooks/log_ai_lab2.sh
+----- 2026-04-16 11:12:11 -----
+manual-lab2-log-trigger
+

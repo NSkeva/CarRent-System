@@ -1,0 +1,12 @@
+@model Customer
+
+<section class="panel detail-card">
+    <h1>@Model.FirstName @Model.LastName</h1>
+    <p><strong>Email:</strong> @Model.Email</p>
+    <p><strong>Telefon:</strong> @Model.Phone</p>
+    <p><strong>Datum rodenja:</strong> @Model.DateOfBirth:yyyy-MM-dd</p>
+    <p><strong>Vozacka dozvola:</strong> @Model.DriverLicenseNumber</p>
+    <p><strong>Kreirano:</strong> @Model.CreatedAt:yyyy-MM-dd</p>
+    <p><strong>Rezervacije:</strong> @Model.Reservations.Count</p>
+    <a asp-action="Index">Natrag na listu</a>
+</section>

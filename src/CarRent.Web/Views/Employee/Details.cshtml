@@ -1,0 +1,9 @@
+@model Employee
+
+<section class="panel detail-card">
+    <h1>@Model.FirstName @Model.LastName</h1>
+    <p><strong>Pozicija:</strong> @Model.JobTitle</p>
+    <p><strong>Poslovnica ID:</strong> @Model.BranchOfficeId</p>
+    <p><strong>Zaposlen od:</strong> @Model.HiredAt:yyyy-MM-dd</p>
+    <a asp-action="Index">Natrag na listu</a>
+</section>

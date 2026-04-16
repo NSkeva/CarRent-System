@@ -1,0 +1,16 @@
+@model Reservation
+
+<section class="panel detail-card">
+    <h1>Rezervacija #@Model.Id</h1>
+    <p><strong>Kupac ID:</strong> @Model.CustomerId</p>
+    <p><strong>Vozilo ID:</strong> @Model.VehicleId</p>
+    <p><strong>Od:</strong> @Model.StartDate:yyyy-MM-dd</p>
+    <p><strong>Do:</strong> @Model.EndDate:yyyy-MM-dd</p>
+    <p><strong>Status:</strong> @Model.Status</p>
+    <p><strong>Preuzimanje:</strong> @Model.PickupLocation</p>
+    <p><strong>Povrat:</strong> @Model.DropoffLocation</p>
+    <p><strong>Bazna cijena:</strong> @Model.BasePrice EUR</p>
+    <p><strong>Ukupno:</strong> @Model.TotalCost() EUR</p>
+    <p><strong>Addons:</strong> @Model.Addons.Count</p>
+    <a asp-action="Index">Natrag na listu</a>
+</section>

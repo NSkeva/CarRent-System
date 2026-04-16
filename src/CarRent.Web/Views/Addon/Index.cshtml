@@ -1,0 +1,18 @@
+@model IReadOnlyList<Addon>
+
+<section class="panel"><h1>Dodaci</h1></section>
+<section class="panel">
+    <table class="data-table">
+        <thead><tr><th>Naziv</th><th>Cijena/dan</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>@item.PricePerDay</td>
+                <td><a asp-action="Details" asp-route-id="@item.Id">Detalji</a></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</section>

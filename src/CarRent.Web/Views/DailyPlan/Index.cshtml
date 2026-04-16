@@ -1,0 +1,56 @@
+@model DailyPlanVm
+@{
+    var dayInputValue = $"{Model.Day:yyyy-MM-dd}";
+}
+
+<section class="panel daily-header">
+    <h1>Dnevni plan</h1>
+    <form method="get" class="toolbar">
+        <input type="date" name="day" value="@dayInputValue" />
+        <button type="submit">Ucitaj dan</button>
+        <button type="button" onclick="window.print()">Print A4</button>
+    </form>
+</section>
+
+<section class="two-column">
+    <article class="panel">
+        <h2>Vozila koja se vracaju danas</h2>
+        @if (!Model.Returns.Any())
+        {
+            <p>Nema povrata za odabrani dan.</p>
+        }
+        else
+        {
+            <ul class="event-list">
+                @foreach (var item in Model.Returns)
+                {
+                    <li>
+                        <strong>@item.Vehicle.Brand @item.Vehicle.Model (@item.Vehicle.RegistrationNumber)</strong>
+                        <span>Kupac: @item.Customer.FirstName @item.Customer.LastName</span>
+                        <span>Rezervacija #@item.Reservation.Id</span>
+                    </li>
+                }
+            </ul>
+        }
+    </article>
+    <article class="panel">
+        <h2>Vozila koja odlaze danas</h2>
+        @if (!Model.Departures.Any())
+        {
+            <p>Nema odlazaka za odabrani dan.</p>
+        }
+        else
+        {
+            <ul class="event-list">
+                @foreach (var item in Model.Departures)
+                {
+                    <li>
+                        <strong>@item.Vehicle.Brand @item.Vehicle.Model (@item.Vehicle.RegistrationNumber)</strong>
+                        <span>Kupac: @item.Customer.FirstName @item.Customer.LastName</span>
+                        <span>Rezervacija #@item.Reservation.Id</span>
+                    </li>
+                }
+            </ul>
+        }
+    </article>
+</section>

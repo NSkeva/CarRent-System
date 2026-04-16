@@ -1,0 +1,28 @@
+@model IReadOnlyList<FleetCardVm>
+
+<section class="panel">
+    <h1>Vozni park</h1>
+    <p>Karticni prikaz vozila s pripremnim akcijama za buduce module (servisi, registracije, izmjene).</p>
+</section>
+
+<section class="fleet-grid">
+    @foreach (var item in Model)
+    {
+        <article class="fleet-card">
+            <img src="@item.ImageUrl" alt="@item.Vehicle.Brand @item.Vehicle.Model" />
+            <div class="fleet-content">
+                <h3>@item.Vehicle.Brand @item.Vehicle.Model</h3>
+                <p><strong>Reg:</strong> @item.Vehicle.RegistrationNumber</p>
+                <p><strong>Poslovnica:</strong> @item.BranchName</p>
+                <p><strong>Cijena/dan:</strong> @item.Vehicle.DailyPrice EUR</p>
+                <div class="actions">
+                    <a asp-controller="Vehicle" asp-action="Details" asp-route-id="@item.Vehicle.Id">Detalji</a>
+                    <button type="button">Uredi</button>
+                    <button type="button">Izbrisi</button>
+                    <button type="button">Servisi</button>
+                    <button type="button">Registracije</button>
+                </div>
+            </div>
+        </article>
+    }
+</section>

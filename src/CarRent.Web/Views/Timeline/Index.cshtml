@@ -1,0 +1,58 @@
+@model TimelineVm
+@{
+    var monthInputValue = $"{Model.Month:yyyy-MM}-01";
+}
+
+<section class="panel">
+    <h1>Timeline</h1>
+    <form method="get" class="toolbar">
+        <input type="text" name="q" value="@Model.SearchText" placeholder="Search vozilo / registracija" />
+        <select name="reservationStatus">
+            <option value="">Svi eventi</option>
+            @foreach (var item in Model.ReservationStatuses)
+            {
+                <option value="@item" selected="@(Model.ReservationStatus == item.ToString())">@item</option>
+            }
+        </select>
+        <select name="vehicleType">
+            <option value="">Svi tipovi vozila</option>
+            @foreach (var item in Model.VehicleTypes)
+            {
+                <option value="@item" selected="@(Model.VehicleType == item.ToString())">@item</option>
+            }
+        </select>
+        <input type="date" name="month" value="@monthInputValue" />
+        <button type="submit">Primijeni</button>
+    </form>
+</section>
+
+<section class="panel timeline-wrap">
+    <table class="timeline-table">
+        <thead>
+        <tr>
+            <th>Vozilo</th>
+            @foreach (var day in Model.Days)
+            {
+                <th>@day.Day</th>
+            }
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var row in Model.Rows)
+        {
+            <tr>
+                <td class="resource-title">@row.Vehicle.Brand @row.Vehicle.Model<br /><small>@row.Vehicle.RegistrationNumber</small></td>
+                @foreach (var cell in row.Cells)
+                {
+                    <td>
+                        @foreach (var res in cell.Reservations)
+                        {
+                            <span class="chip">@res.Status</span>
+                        }
+                    </td>
+                }
+            </tr>
+        }
+        </tbody>
+    </table>
+</section>

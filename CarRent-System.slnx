@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/CarRent.Console/CarRent.Console.csproj" />
+    <Project Path="src/CarRent.Web/CarRent.Web.csproj" />
   </Folder>
 </Solution>

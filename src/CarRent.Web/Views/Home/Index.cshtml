@@ -1,0 +1,23 @@
+@model HomeIndexVm
+
+<section class="hero">
+    <h1>Fleet Pulse Dashboard</h1>
+    <p>Pregled operacija voznog parka, rezervacija i partnerske mreze.</p>
+</section>
+
+<section class="stats-grid">
+    <article class="glass-card"><span>Vozila</span><strong>@Model.TotalVehicles</strong></article>
+    <article class="glass-card"><span>Aktivne rezervacije</span><strong>@Model.ActiveReservations</strong></article>
+    <article class="glass-card"><span>Poslovnice</span><strong>@Model.Branches</strong></article>
+    <article class="glass-card"><span>Servisi uskoro</span><strong>@Model.ServicesDueSoon</strong></article>
+</section>
+
+<section class="quick-links">
+    @foreach (var item in Model.QuickLinks)
+    {
+        <a class="quick-link-card" asp-controller="@item.Controller" asp-action="@item.Action">
+            <h3>@item.Title</h3>
+            <p>@item.Subtitle</p>
+        </a>
+    }
+</section>

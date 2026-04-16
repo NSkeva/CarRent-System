@@ -1,0 +1,20 @@
+@model IReadOnlyList<Employee>
+
+<section class="panel"><h1>Zaposlenici</h1></section>
+<section class="panel">
+    <table class="data-table">
+        <thead><tr><th>Ime</th><th>Pozicija</th><th>Poslovnica ID</th><th>Zaposlen od</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.FirstName @item.LastName</td>
+                <td>@item.JobTitle</td>
+                <td>@item.BranchOfficeId</td>
+                <td>@item.HiredAt:yyyy-MM-dd</td>
+                <td><a asp-action="Details" asp-route-id="@item.Id">Detalji</a></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</section>
