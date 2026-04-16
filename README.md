@@ -24,6 +24,44 @@ Web aplikacija je u projektu `src/CarRent.Web/` i koristi:
 
 Projekti ciljaju `net10.0`.
 
+### Lab2 - tocno pokretanje (provjereno)
+
+Ako na sustavu nemas globalni `dotnet`, pokreni lokalni SDK u repozitoriju:
+
+```bash
+mkdir -p .dotnet
+curl -fsSL https://dot.net/v1/dotnet-install.sh -o .dotnet/dotnet-install.sh
+bash .dotnet/dotnet-install.sh --channel 10.0 --install-dir .dotnet
+```
+
+Ako `dotnet-install.sh` javi `Cannot change ownership`, koristi fallback:
+
+```bash
+rm -rf .dotnet && mkdir -p .dotnet
+curl -fsSL https://builds.dotnet.microsoft.com/dotnet/Sdk/10.0.202/dotnet-sdk-10.0.202-linux-x64.tar.gz -o .dotnet/dotnet-sdk.tar.gz
+tar -xzf .dotnet/dotnet-sdk.tar.gz --no-same-owner -C .dotnet
+rm .dotnet/dotnet-sdk.tar.gz
+```
+
+Build + run (s lokalnim cache putanjama):
+
+```bash
+DOTNET_CLI_HOME="$PWD/.dotnet-home" NUGET_PACKAGES="$PWD/.nuget/packages" ./.dotnet/dotnet build CarRent-System.slnx
+DOTNET_CLI_HOME="$PWD/.dotnet-home" NUGET_PACKAGES="$PWD/.nuget/packages" ./.dotnet/dotnet run --project src/CarRent.Web/CarRent.Web.csproj
+```
+
+Nakon pokretanja otvori:
+
+- `http://localhost:5000`
+
+Brza provjera endpointa:
+
+```bash
+curl -I http://localhost:5000
+```
+
+### Pokretanje s globalnim dotnet (ako je instaliran)
+
 ```bash
 dotnet --version
 dotnet build CarRent-System.slnx
