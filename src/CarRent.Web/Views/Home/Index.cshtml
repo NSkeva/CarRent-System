@@ -1,23 +1,107 @@
 @model HomeIndexVm
+@{
+    ViewData["Title"] = "Početna";
+    ViewData["Breadcrumbs"] = BreadcrumbHelper.Build("Home");
+    var now = DateTime.Now;
+    var dani = new[] { "nedjelja", "ponedjeljak", "utorak", "srijeda", "četvrtak", "petak", "subota" };
+    var mjeseci = new[] { "siječnja", "veljače", "ožujka", "travnja", "svibnja", "lipnja", "srpnja", "kolovoza", "rujna", "listopada", "studenog", "prosinca" };
+    var dateLabel = $"{dani[(int)now.DayOfWeek]}, {now.Day}. {mjeseci[now.Month - 1]} {now.Year}.";
+}
 
-<section class="hero">
-    <h1>Fleet Pulse Dashboard</h1>
-    <p>Pregled operacija voznog parka, rezervacija i partnerske mreze.</p>
-</section>
+<div class="glass hero-panel rise-in">
+    <div>
+        <div class="hero-eyebrow">Fleet Pulse</div>
+        <h1 class="hero-title">Operativni pregled</h1>
+        <p class="hero-subtitle">Dnevni pregled stanja flote, aktivnih rezervacija i nadolazećih servisa.</p>
+        <div class="hero-date">@dateLabel</div>
+    </div>
+    <div class="hero-actions">
+        <a asp-controller="Reservation" asp-action="Create" class="btn btn-primary">+ Nova rezervacija</a>
+        <a asp-controller="DailyPlan" asp-action="Index" class="btn btn-secondary btn-sm">📋 Dnevni plan →</a>
+    </div>
+</div>
 
-<section class="stats-grid">
-    <article class="glass-card"><span>Vozila</span><strong>@Model.TotalVehicles</strong></article>
-    <article class="glass-card"><span>Aktivne rezervacije</span><strong>@Model.ActiveReservations</strong></article>
-    <article class="glass-card"><span>Poslovnice</span><strong>@Model.Branches</strong></article>
-    <article class="glass-card"><span>Servisi uskoro</span><strong>@Model.ServicesDueSoon</strong></article>
-</section>
+<div class="kpi-grid section-gap">
+    <a asp-controller="Fleet" asp-action="Index" class="kpi-card rise-in" style="text-decoration:none;color:inherit">
+        <div class="kpi-icon">🚗</div>
+        <div class="kpi-value">@Model.TotalVehicles</div>
+        <div class="kpi-label">Ukupno vozila</div>
+    </a>
+    <a asp-controller="Reservation" asp-action="Index" class="kpi-card rise-in rise-in-1" style="text-decoration:none;color:inherit">
+        <div class="kpi-icon cyan">📅</div>
+        <div class="kpi-value" style="color:var(--acc-2)">@Model.ActiveReservations</div>
+        <div class="kpi-label">Aktivne rezervacije</div>
+    </a>
+    <a asp-controller="BranchOffice" asp-action="Index" class="kpi-card rise-in rise-in-2" style="text-decoration:none;color:inherit">
+        <div class="kpi-icon green">🏢</div>
+        <div class="kpi-value" style="color:var(--success)">@Model.Branches</div>
+        <div class="kpi-label">Poslovnice</div>
+    </a>
+    <a asp-controller="ServiceRecord" asp-action="Index" class="kpi-card rise-in rise-in-3" style="text-decoration:none;color:inherit">
+        <div class="kpi-icon warn">🔧</div>
+        <div class="kpi-value" style="color:var(--warning)">@Model.ServicesDueSoon</div>
+        <div class="kpi-label">Servisi (30 dana)</div>
+    </a>
+</div>
 
-<section class="quick-links">
-    @foreach (var item in Model.QuickLinks)
-    {
-        <a class="quick-link-card" asp-controller="@item.Controller" asp-action="@item.Action">
-            <h3>@item.Title</h3>
-            <p>@item.Subtitle</p>
-        </a>
-    }
-</section>
+<div class="activity-panel section-gap">
+    <div class="glass">
+        <div class="section-heading" style="margin-bottom:var(--space-md)">
+            <h2 style="font-size:16px;font-weight:700">Današnji događaji</h2>
+            <div class="actions"><a asp-controller="DailyPlan" asp-action="Index" style="font-size:12px;color:var(--acc)">Svi →</a></div>
+        </div>
+        <div style="font-size:11px;font-weight:700;color:var(--acc);text-transform:uppercase;margin-bottom:8px">Odlasci (@Model.TodayDepartures.Count)</div>
+        <div class="event-list" style="margin-bottom:var(--space-md)">
+            @if (!Model.TodayDepartures.Any())
+            {
+                <p style="color:var(--muted);font-size:13px">Nema odlazaka danas.</p>
+            }
+            @foreach (var item in Model.TodayDepartures.Take(5))
+            {
+                <div class="event-row">
+                    <div class="event-icon out">↗</div>
+                    <div class="event-body">
+                        <div class="event-vehicle">@item.Vehicle.Brand @item.Vehicle.Model · <span style="color:var(--acc-2);font-family:monospace;font-size:12px">@item.Vehicle.RegistrationNumber</span></div>
+                        <div class="event-customer">@item.Customer.FirstName @item.Customer.LastName</div>
+                    </div>
+                    <div class="event-time">@item.Reservation.StartDate.ToString("HH:mm")</div>
+                    <a class="event-link" asp-controller="Reservation" asp-action="Details" asp-route-id="@item.Reservation.Id">→</a>
+                </div>
+            }
+        </div>
+        <div style="font-size:11px;font-weight:700;color:var(--acc-2);text-transform:uppercase;margin-bottom:8px">Povrati (@Model.TodayReturns.Count)</div>
+        <div class="event-list">
+            @if (!Model.TodayReturns.Any())
+            {
+                <p style="color:var(--muted);font-size:13px">Nema povrata danas.</p>
+            }
+            @foreach (var item in Model.TodayReturns.Take(5))
+            {
+                <div class="event-row">
+                    <div class="event-icon in">↙</div>
+                    <div class="event-body">
+                        <div class="event-vehicle">@item.Vehicle.Brand @item.Vehicle.Model · <span style="color:var(--acc-2);font-family:monospace;font-size:12px">@item.Vehicle.RegistrationNumber</span></div>
+                        <div class="event-customer">@item.Customer.FirstName @item.Customer.LastName</div>
+                    </div>
+                    <div class="event-time">@item.Reservation.EndDate.ToString("HH:mm")</div>
+                    <a class="event-link" asp-controller="Reservation" asp-action="Details" asp-route-id="@item.Reservation.Id">→</a>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="glass">
+        <div class="section-heading" style="margin-bottom:var(--space-md)">
+            <h2 style="font-size:16px;font-weight:700">Brzi pristup</h2>
+        </div>
+        <div class="quick-grid" style="grid-template-columns:1fr 1fr">
+            @foreach (var link in Model.QuickLinks)
+            {
+                <a class="quick-card" asp-controller="@link.Controller" asp-action="@link.Action">
+                    <h3>@link.Title</h3>
+                    <p>@link.Subtitle</p>
+                    <div class="quick-card-arrow">→</div>
+                </a>
+            }
+        </div>
+    </div>
+</div>

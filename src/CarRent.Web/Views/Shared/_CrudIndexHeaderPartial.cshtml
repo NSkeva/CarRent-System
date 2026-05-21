@@ -1,0 +1,11 @@
+@model (string Title, string CreateLabel, string SearchUrl, string RowsTargetId)
+
+<div class="crud-toolbar rise-in" style="margin-bottom:var(--space-md)">
+    <h1 class="crud-toolbar-title">@Model.Title</h1>
+    <div class="search-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="search" class="search-input" placeholder="AJAX pretraga…"
+               data-ajax-search="@Model.SearchUrl" data-target="#@Model.RowsTargetId" />
+    </div>
+    <a asp-action="Create" class="btn btn-primary">@Model.CreateLabel</a>
+</div>

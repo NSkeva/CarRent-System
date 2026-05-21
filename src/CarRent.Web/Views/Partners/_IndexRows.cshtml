@@ -1,0 +1,17 @@
+@model IReadOnlyList<Partner>
+@foreach (var partner in Model)
+{
+    <tr>
+        <td>@partner.CompanyName</td>
+        <td>@partner.ContactPerson</td>
+        <td>@partner.Phone</td>
+        <td>@partner.Email</td>
+        <td class="row-actions">
+            <a asp-action="Edit" asp-route-id="@partner.Id">Uredi</a>
+            <form asp-action="Delete" asp-route-id="@partner.Id" method="post" class="inline-form">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="link-btn">Obriši</button>
+            </form>
+        </td>
+    </tr>
+}

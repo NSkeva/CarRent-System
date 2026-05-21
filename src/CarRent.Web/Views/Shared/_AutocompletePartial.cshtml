@@ -1,0 +1,8 @@
+@model AutocompleteFieldVm
+<div class="autocomplete-wrap" data-autocomplete="@Model.SearchUrl">
+    <label for="@Model.InputId">@Model.Label</label>
+    <input type="text" id="@Model.InputId" class="field-input" data-autocomplete-input
+           value="@Model.DisplayText" autocomplete="off" />
+    <input type="hidden" name="@Model.HiddenName" data-autocomplete-id value="@Model.SelectedId" />
+    <ul data-autocomplete-list class="autocomplete-list"></ul>
+</div>

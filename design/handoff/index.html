@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CarRent Control Surface — Design Mockups</title>
+<link rel="stylesheet" href="glass.css">
+<style>
+  .launcher-hero {
+    text-align: center; padding: var(--space-xl) var(--space-lg);
+    border-bottom: 1px solid var(--line); margin-bottom: var(--space-xl);
+  }
+  .launcher-mark {
+    width: 64px; height: 64px; border-radius: 18px;
+    background: linear-gradient(135deg, var(--acc), var(--acc-2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px; margin: 0 auto var(--space-md);
+    box-shadow: 0 12px 40px rgba(138,125,255,0.35);
+  }
+  .launcher-hero h1 { font-size: 36px; font-weight: 800; letter-spacing: -0.025em; margin-bottom: 10px; }
+  .launcher-hero p { color: var(--muted); font-size: 16px; max-width: 520px; margin: 0 auto; line-height: 1.6; }
+  .meta-strip { display: flex; align-items: center; justify-content: center; gap: var(--space-lg); margin-top: var(--space-md); flex-wrap: wrap; }
+  .meta-strip span { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 5px; }
+  .meta-strip strong { color: var(--txt); }
+
+  .screens-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--space-lg); }
+  .screen-card {
+    background: var(--glass); border: 1px solid var(--line);
+    border-radius: var(--radius-lg); overflow: hidden;
+    transition: all var(--transition); text-decoration: none; color: var(--txt);
+    display: flex; flex-direction: column;
+  }
+  .screen-card:hover { transform: translateY(-3px); border-color: rgba(138,125,255,0.4); box-shadow: 0 12px 40px rgba(138,125,255,0.18); color: var(--txt); }
+  .screen-preview {
+    height: 160px; background: var(--bg-soft);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 48px; position: relative; overflow: hidden;
+    border-bottom: 1px solid var(--line);
+  }
+  .screen-preview::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(138,125,255,0.12), rgba(63,208,255,0.06));
+  }
+  .screen-preview-icon { position: relative; z-index: 1; filter: drop-shadow(0 4px 16px rgba(138,125,255,0.4)); }
+  .screen-badge {
+    position: absolute; top: 10px; right: 10px; z-index: 1;
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+    padding: 3px 8px; border-radius: 20px;
+  }
+  .badge-done { background: rgba(93,255,176,0.15); color: var(--success); border: 1px solid rgba(93,255,176,0.3); }
+  .badge-wip  { background: rgba(255,209,102,0.12); color: var(--warning); border: 1px solid rgba(255,209,102,0.25); }
+  .badge-todo { background: var(--glass); color: var(--muted); border: 1px solid var(--line); }
+  .screen-body { padding: var(--space-md); flex: 1; display: flex; flex-direction: column; gap: 6px; }
+  .screen-title { font-size: 16px; font-weight: 700; }
+  .screen-url { font-size: 11px; color: var(--muted); font-family: ui-monospace, monospace; }
+  .screen-desc { font-size: 13px; color: var(--muted); line-height: 1.5; flex: 1; }
+  .screen-link { margin-top: var(--space-sm); font-size: 13px; color: var(--acc); font-weight: 600; display: flex; align-items: center; gap: 5px; }
+  .screen-card:hover .screen-link { color: var(--acc-2); }
+
+  .section-group { margin-bottom: var(--space-xl); }
+  .group-label {
+    font-size: 11px; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.1em;
+    margin-bottom: var(--space-md); display: flex; align-items: center; gap: 10px;
+  }
+  .group-label::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+
+  @media (max-width: 640px) {
+    .screens-grid { grid-template-columns: 1fr; }
+    .launcher-hero h1 { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+<div class="page-shell">
+
+  <!-- Minimal header for launcher -->
+  <header style="background:rgba(11,16,32,0.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:12px var(--space-lg);display:flex;align-items:center;justify-content:space-between">
+    <div class="site-logo">
+      <div class="logo-mark">🚗</div>
+      CarRent <span>Control Surface</span>
+    </div>
+    <span style="font-size:12px;color:var(--muted)">Design Mockups · v1.0 · 21.05.2026.</span>
+  </header>
+
+  <main class="page-content">
+
+    <!-- Hero -->
+    <div class="launcher-hero rise-in">
+      <div class="launcher-mark">🚗</div>
+      <h1>CarRent Control Surface</h1>
+      <p>Interna web aplikacija za upravljanje rent-a-car operacijama — flota, rezervacije, servisi, partneri, poslovnice.</p>
+      <div class="meta-strip">
+        <span>🎨 <strong>Dark glassmorphism</strong></span>
+        <span>🔤 <strong>Inter</strong></span>
+        <span>🟣 <strong>#8A7DFF</strong> + <strong style="color:var(--acc-2)">#3FD0FF</strong></span>
+        <span>📐 <strong>Desktop 1440px</strong></span>
+        <span>✅ <strong>8 ekrana · iteracija 1 kompletna</strong></span>
+      </div>
+    </div>
+
+    <!-- Operativa + CRUD — iteracija 1 kompletna -->
+    <div class="section-group">
+      <div class="group-label">Svi ekrani — iteracija 1</div>
+      <div class="screens-grid">
+
+        <a href="dashboard.html" class="screen-card rise-in">
+          <div class="screen-preview">
+            <span class="screen-badge badge-done">Gotovo</span>
+            <div class="screen-preview-icon">🏠</div>
+          </div>
+          <div class="screen-body">
+            <div class="screen-title">Dashboard</div>
+            <div class="screen-url">/pocetna · /</div>
+            <div class="screen-desc">4 KPI kartice (vozila, rezervacije, poslovnice, servisi) + mini activity sparkline + današnji odlasci/povrati + quick links.</div>
+            <div class="screen-link">Otvori ekran →</div>
+          </div>
+        </a>
+
+        <a href="timeline.html" class="screen-card rise-in rise-in-1">
+          <div class="screen-preview">
+            <span class="screen-badge badge-done">Gotovo</span>
+            <div class="screen-preview-icon">📅</div>
+          </div>
+          <div class="screen-body">
+            <div class="screen-title">Timeline</div>
+            <div class="screen-url">/raspored</div>
+            <div class="screen-desc">Gantt-style matrix vozila × dani. 8 vozila, rezervacije kao obojeni barovi po statusu, navigacija po mjesecu, today-line marker.</div>
+            <div class="screen-link">Otvori ekran →</div>
+          </div>
+        </a>
+
+        <a href="dnevni-plan.html" class="screen-card rise-in rise-in-2">
+          <div class="screen-preview">
+            <span class="screen-badge badge-done">Gotovo</span>
+            <div class="screen-preview-icon">📋</div>
+          </div>
+          <div class="screen-body">
+            <div class="screen-title">Dnevni plan</div>
+            <div class="screen-url">/dnevni-plan</div>
+            <div class="screen-desc">Dvije kolone — Povrati danas / Odlasci danas. Date picker, kartice s vozilom, kupcem, statusom i kontaktom. Print A4 CSS.</div>
+            <div class="screen-link">Otvori ekran →</div>
+          </div>
+        </a>
+
+        <a href="vozni-park.html" class="screen-card rise-in rise-in-3">
+          <div class="screen-preview">
+            <span class="screen-badge badge-done">Gotovo</span>
+            <div class="screen-preview-icon">🚗</div>
+          </div>
+          <div class="screen-body">
+            <div class="screen-title">Vozni park</div>
+            <div class="screen-url">/vozni-park</div>
+            <div class="screen-desc">Grid kartica vozila — slika, registracija, poslovnica, status, cijena, brze akcije. Filter po tipu, poslovnici, dostupnosti.</div>
+            <div class="screen-link">Otvori ekran →</div>
+          </div>
+        </a>
+
+        <a href="rezervacije.html" class="screen-card rise-in">
+          <div class="screen-preview">
+            <span class="screen-badge badge-done">Gotovo</span>
+            <div class="screen-preview-icon">🗓</div>
+          </div>
+          <div class="screen-body">
+            <div class="screen-title">Rezervacije — lista</div>
+            <div class="screen-url">/rezervacije</div>
+            <div class="screen-desc">Tablica 12 rezervacija, live search, filter chips po statusu, delete modal s potvrdom, toast notifikacija.</div>
+            <div class="screen-link">Otvori ekran →</div>
+          </div>
+        </a>
+
+        <a href="rezervacije-forma.html" class="screen-card rise-in rise-in-1">
+          <div class="screen-preview">
+            <span class="screen-badge badge-done">Gotovo</span>
+            <div class="screen-preview-icon">📝</div>
+          </div>
+          <div class="screen-body">
+            <div class="screen-title">Rezervacije — forma</div>
+            <div class="screen-url">/rezervacije/nova</div>
+            <div class="screen-desc">Create/Edit s autocomplete kupac/vozilo, custom datetime picker, dodaci checkboxe, live kalkulacija cijene, validacija.</div>
+            <div class="screen-link">Otvori ekran →</div>
+          </div>
+        </a>
+
+        <a href="vozilo-detalji.html" class="screen-card rise-in rise-in-2">
+          <div class="screen-preview">
+            <span class="screen-badge badge-done">Gotovo</span>
+            <div class="screen-preview-icon">🔍</div>
+          </div>
+          <div class="screen-body">
+            <div class="screen-title">Vozilo — detalji</div>
+            <div class="screen-url">/vozila/1</div>
+            <div class="screen-desc">Hero strip s SVG car + tabovi: Pregled (tehnički + operativni podaci), Rezervacije (tablica), Servisi (povijest sa troškovima).</div>
+            <div class="screen-link">Otvori ekran →</div>
+          </div>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- Component library -->
+    <div class="section-group">
+      <div class="group-label">Design system</div>
+      <div class="screens-grid" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr))">
+
+        <a href="component-library.html" class="screen-card rise-in">
+          <div class="screen-preview">
+            <span class="screen-badge badge-done">Gotovo</span>
+            <div class="screen-preview-icon">🧩</div>
+          </div>
+          <div class="screen-body">
+            <div class="screen-title">Component Library</div>
+            <div class="screen-url">component-library.html</div>
+            <div class="screen-desc">Glass panel, KPI card, data table, CRUD toolbar, autocomplete, datetime picker, status chips, buttons, validation, toast, modal, empty state, skeleton.</div>
+            <div class="screen-link">Otvori library →</div>
+          </div>
+        </a>
+
+        <div class="screen-card" style="cursor:default">
+          <div class="screen-preview">
+            <span class="screen-badge badge-done">Gotovo</span>
+            <div class="screen-preview-icon">🎨</div>
+          </div>
+          <div class="screen-body">
+            <div class="screen-title">glass.css — Token system</div>
+            <div class="screen-url">glass.css</div>
+            <div class="screen-desc">Sve CSS varijable, base stilovi, sve komponente. Import u svaki ekran. Usklađeno s design-tokens.md (#0B1020 bg, #8A7DFF acc, #3FD0FF acc-2).</div>
+            <div class="screen-link" style="color:var(--success)">✓ Eksportiran</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <footer style="border-top:1px solid var(--line);padding:var(--space-md) var(--space-lg);display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted)">
+    <span>CarRent Control Surface · Open Design v1.0 · 21.05.2026.</span>
+    <span>ASP.NET Core MVC · Razor · HTML/CSS/JS · No React</span>
+  </footer>
+</div>
+</body>
+</html>

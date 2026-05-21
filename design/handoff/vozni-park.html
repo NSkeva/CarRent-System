@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vozni park — CarRent Control Surface</title>
+<link rel="stylesheet" href="glass.css">
+<style>
+  .filter-bar {
+    display: flex; align-items: center; gap: var(--space-sm);
+    flex-wrap: wrap; padding: var(--space-md) var(--space-lg);
+    border-top: 1px solid var(--line);
+  }
+  .filter-bar .field-select { width: auto; padding: 7px 32px 7px 12px; font-size: 13px; }
+  .filter-bar .search-input { width: 220px; font-size: 13px; padding: 7px 12px 7px 32px; }
+  .filter-chip {
+    display: flex; align-items: center; gap: 5px; padding: 5px 12px;
+    border: 1px solid var(--line); border-radius: 20px;
+    background: var(--glass); font-size: 13px; color: var(--muted);
+    cursor: pointer; transition: all var(--transition);
+    user-select: none;
+  }
+  .filter-chip input { display: none; }
+  .filter-chip.active { color: var(--acc-2); border-color: rgba(63,208,255,0.4); background: rgba(63,208,255,0.08); }
+  .view-toggle { display: flex; border: 1px solid var(--line); border-radius: var(--radius-md); overflow: hidden; margin-left: auto; }
+  .view-btn { padding: 6px 12px; font-size: 13px; cursor: pointer; color: var(--muted); transition: all var(--transition); background: none; border: none; font-family: inherit; }
+  .view-btn.active { background: var(--acc); color: #fff; }
+
+  /* Stats strip */
+  .stats-strip { display: flex; gap: var(--space-lg); padding: var(--space-sm) var(--space-lg); border-top: 1px solid var(--line); flex-wrap: wrap; }
+  .stat-item { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  .stat-item strong { color: var(--txt); font-weight: 600; }
+  .stat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* Fleet grid */
+  .fleet-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: var(--space-md); }
+  .fleet-card {
+    background: var(--glass); border: 1px solid var(--line);
+    border-radius: var(--radius-lg); overflow: hidden;
+    transition: all var(--transition); display: flex; flex-direction: column;
+  }
+  .fleet-card:hover { transform: translateY(-3px); border-color: rgba(138,125,255,0.35); box-shadow: 0 8px 32px rgba(138,125,255,0.2); }
+  .fleet-card-img { position: relative; aspect-ratio: 16/9; background: var(--bg-soft); overflow: hidden; }
+  .fleet-card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 350ms ease; }
+  .fleet-card:hover .fleet-card-img img { transform: scale(1.05); }
+  .img-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(11,16,32,0.55) 0%, transparent 60%); }
+  .fleet-card-img .status-badge { position: absolute; top: 10px; right: 10px; }
+  .fleet-card-img .type-badge { position: absolute; bottom: 10px; left: 10px; font-size: 11px; background: rgba(0,0,0,0.6); border: 1px solid var(--line); border-radius: 20px; padding: 2px 8px; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+  .fleet-card-body { padding: var(--space-md); flex: 1; display: flex; flex-direction: column; gap: 5px; }
+  .fleet-card-name { font-size: 17px; font-weight: 700; line-height: 1.2; }
+  .fleet-card-reg { font-size: 12px; font-weight: 700; color: var(--acc-2); letter-spacing: 0.1em; font-family: ui-monospace, monospace; margin-top: 1px; }
+  .fleet-meta-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
+  .fleet-meta-tag { display: flex; align-items: center; gap: 3px; font-size: 11px; color: var(--muted); background: rgba(255,255,255,0.05); padding: 2px 7px; border-radius: 20px; border: 1px solid var(--line); }
+  .fleet-price { font-size: 20px; font-weight: 800; color: var(--acc); margin-top: auto; padding-top: 8px; }
+  .fleet-price span { font-size: 12px; font-weight: 400; color: var(--muted); }
+  .fleet-actions { display: flex; border-top: 1px solid var(--line); }
+  .fleet-action-btn {
+    flex: 1; padding: 10px 4px; text-align: center; cursor: pointer;
+    font-size: 12px; font-weight: 500; color: var(--muted);
+    transition: all var(--transition); display: flex; align-items: center; justify-content: center; gap: 4px;
+    border-right: 1px solid var(--line); text-decoration: none;
+  }
+  .fleet-action-btn:last-child { border-right: none; }
+  .fleet-action-btn:hover { color: var(--acc-2); background: rgba(63,208,255,0.06); }
+  .fleet-action-btn.accent:hover { color: var(--acc); background: rgba(138,125,255,0.08); }
+
+  @media (max-width: 640px) {
+    .filter-bar { flex-direction: column; align-items: flex-start; }
+    .view-toggle { margin-left: 0; }
+    .fleet-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="page-shell">
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="site-logo" href="index.html">
+        <div class="logo-mark">🚗</div>
+        CarRent <span>Control Surface</span>
+      </a>
+      <nav class="nav-primary">
+        <div class="nav-group">
+          <button class="nav-group-btn active">
+            Operativa
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown">
+            <a href="dashboard.html">🏠 Početna</a>
+            <a href="timeline.html">📅 Timeline</a>
+            <a href="dnevni-plan.html">📋 Dnevni plan</a>
+            <a href="vozni-park.html" class="active">🚗 Vozni park</a>
+          </div>
+        </div>
+        <div class="nav-group">
+          <button class="nav-group-btn">
+            Podaci
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown">
+            <a href="rezervacije.html">🗓 Rezervacije</a>
+            <a href="vozilo-detalji.html">🚘 Vozila</a>
+            <a href="#">👤 Kupci</a>
+            <div class="nav-dropdown-divider"></div>
+            <a href="#">🔧 Servisi</a>
+            <a href="#">🏢 Poslovnice</a>
+            <a href="#">➕ Dodaci</a>
+            <a href="#">👥 Zaposlenici</a>
+            <a href="#">🤝 Partneri</a>
+          </div>
+        </div>
+      </nav>
+      <div class="header-actions">
+        <button class="lang-toggle">HR</button>
+        <div class="user-chip"><div class="user-avatar">MK</div>Marko K.</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="breadcrumbs">
+    <a href="dashboard.html">Početna</a>
+    <span class="sep">›</span>
+    <span class="current">Vozni park</span>
+  </div>
+
+  <main class="page-content">
+
+    <!-- Toolbar panel -->
+    <div class="glass glass-flush rise-in" style="margin-bottom:var(--space-lg)">
+      <div class="crud-toolbar" style="padding:var(--space-md) var(--space-lg)">
+        <div>
+          <h1 style="font-size:22px;font-weight:800;letter-spacing:-0.02em">Vozni park</h1>
+          <p style="font-size:13px;color:var(--muted);margin-top:2px">48 vozila · 6 poslovnica</p>
+        </div>
+        <div class="search-box">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position:absolute;left:10px;color:var(--muted)"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input class="search-input" type="text" placeholder="Pretraži po reg, marki…" oninput="filterCards(this.value)">
+        </div>
+        <button class="btn btn-primary btn-sm">+ Novo vozilo</button>
+      </div>
+
+      <!-- Filters -->
+      <div class="filter-bar">
+        <select class="field-select" onchange="filterCards()">
+          <option value="">Svi tipovi</option>
+          <option>Osobni automobil</option>
+          <option>Kombi</option>
+          <option>Skuter</option>
+          <option>Motocikl</option>
+          <option>Bicikl</option>
+        </select>
+        <select class="field-select" onchange="filterCards()">
+          <option value="">Sve poslovnice</option>
+          <option>Zagreb — centar</option>
+          <option>Zagreb — aerodrom</option>
+          <option>Split — centar</option>
+          <option>Rijeka</option>
+          <option>Osijek</option>
+          <option>Dubrovnik</option>
+        </select>
+        <label class="filter-chip active" id="chip-active">
+          <input type="checkbox" checked onchange="this.closest('.filter-chip').classList.toggle('active',this.checked)">
+          ✓ Samo aktivna
+        </label>
+        <div class="view-toggle" style="margin-left:auto">
+          <button class="view-btn active" id="btn-grid" onclick="setView('grid')">⊞ Kartice</button>
+          <button class="view-btn" id="btn-table" onclick="setView('table')">☰ Tablica</button>
+        </div>
+      </div>
+
+      <!-- Stats strip -->
+      <div class="stats-strip">
+        <div class="stat-item"><div class="stat-dot" style="background:var(--success)"></div>Dostupna <strong>31</strong></div>
+        <div class="stat-item"><div class="stat-dot" style="background:var(--acc)"></div>Rezervirana <strong>13</strong></div>
+        <div class="stat-item"><div class="stat-dot" style="background:var(--warning)"></div>Na servisu <strong>2</strong></div>
+        <div class="stat-item"><div class="stat-dot" style="background:var(--muted);opacity:.5"></div>Neaktivna <strong>2</strong></div>
+      </div>
+    </div>
+
+    <!-- Fleet Grid -->
+    <div class="fleet-grid" id="fleet-grid">
+
+      <!-- Card 1 -->
+      <div class="fleet-card rise-in" data-brand="VW Golf VII" data-reg="ZG-123-AB">
+        <div class="fleet-card-img">
+          <img src="https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=600&q=80" alt="VW Golf VII" loading="lazy">
+          <div class="img-overlay"></div>
+          <span class="status-badge chip chip-completed" style="font-size:11px">Dostupno</span>
+          <span class="type-badge">🚗 Osobni</span>
+        </div>
+        <div class="fleet-card-body">
+          <div class="fleet-card-name">VW Golf VII 1.6 TDI</div>
+          <div class="fleet-card-reg">ZG-123-AB</div>
+          <div class="fleet-meta-row">
+            <span class="fleet-meta-tag">🏢 Zagreb — centar</span>
+            <span class="fleet-meta-tag">📅 2021.</span>
+            <span class="fleet-meta-tag">⚡ 52.400 km</span>
+          </div>
+          <div class="fleet-price">€ 120 <span>/ dan</span></div>
+        </div>
+        <div class="fleet-actions">
+          <a href="vozilo-detalji.html" class="fleet-action-btn">👁 Detalji</a>
+          <a href="vozilo-detalji.html" class="fleet-action-btn accent">✏ Uredi</a>
+          <a href="vozilo-detalji.html#tab-servisi" class="fleet-action-btn">🔧 Servisi</a>
+          <a href="rezervacije-forma.html" class="fleet-action-btn accent">+ Rez.</a>
+        </div>
+      </div>
+
+      <!-- Card 2 — Rezervirano -->
+      <div class="fleet-card rise-in rise-in-1" data-brand="VW Golf" data-reg="ST-456-CD">
+        <div class="fleet-card-img">
+          <img src="https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=600&q=80" alt="VW Golf" loading="lazy">
+          <div class="img-overlay"></div>
+          <span class="status-badge chip chip-active" style="font-size:11px">Rezervirano</span>
+          <span class="type-badge">🚗 Osobni</span>
+        </div>
+        <div class="fleet-card-body">
+          <div class="fleet-card-name">Volkswagen Golf</div>
+          <div class="fleet-card-reg">ST-456-CD</div>
+          <div class="fleet-meta-row">
+            <span class="fleet-meta-tag">🏢 Split — centar</span>
+            <span class="fleet-meta-tag">📅 2021.</span>
+            <span class="fleet-meta-tag">⚡ 112.000 km</span>
+          </div>
+          <div class="fleet-price">€ 42 <span>/ dan</span></div>
+        </div>
+        <div class="fleet-actions">
+          <a href="#" class="fleet-action-btn">👁 Detalji</a>
+          <a href="#" class="fleet-action-btn accent">✏ Uredi</a>
+          <a href="#" class="fleet-action-btn">🔧 Servisi</a>
+          <a href="rezervacije-forma.html" class="fleet-action-btn accent">+ Rez.</a>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="fleet-card rise-in rise-in-2" data-brand="Audi A4" data-reg="OS-789-EF">
+        <div class="fleet-card-img">
+          <img src="https://images.unsplash.com/photo-1616422285623-13ff0162193c?w=600&q=80" alt="Audi A4" loading="lazy">
+          <div class="img-overlay"></div>
+          <span class="status-badge chip chip-completed" style="font-size:11px">Dostupno</span>
+          <span class="type-badge">🚗 Osobni</span>
+        </div>
+        <div class="fleet-card-body">
+          <div class="fleet-card-name">Audi A4</div>
+          <div class="fleet-card-reg">OS-789-EF</div>
+          <div class="fleet-meta-row">
+            <span class="fleet-meta-tag">🏢 Osijek</span>
+            <span class="fleet-meta-tag">📅 2023.</span>
+            <span class="fleet-meta-tag">⚡ 34.200 km</span>
+          </div>
+          <div class="fleet-price">€ 75 <span>/ dan</span></div>
+        </div>
+        <div class="fleet-actions">
+          <a href="#" class="fleet-action-btn">👁 Detalji</a>
+          <a href="#" class="fleet-action-btn accent">✏ Uredi</a>
+          <a href="#" class="fleet-action-btn">🔧 Servisi</a>
+          <a href="rezervacije-forma.html" class="fleet-action-btn accent">+ Rez.</a>
+        </div>
+      </div>
+
+      <!-- Card 4 — Na servisu -->
+      <div class="fleet-card rise-in rise-in-3" data-brand="VW Passat" data-reg="RI-321-GH">
+        <div class="fleet-card-img">
+          <img src="https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=600&q=80" alt="VW Passat" loading="lazy">
+          <div class="img-overlay"></div>
+          <span class="status-badge chip chip-planned" style="font-size:11px">Na servisu</span>
+          <span class="type-badge">🚗 Osobni</span>
+        </div>
+        <div class="fleet-card-body">
+          <div class="fleet-card-name">Volkswagen Passat</div>
+          <div class="fleet-card-reg">RI-321-GH</div>
+          <div class="fleet-meta-row">
+            <span class="fleet-meta-tag">🏢 Rijeka</span>
+            <span class="fleet-meta-tag">📅 2020.</span>
+            <span class="fleet-meta-tag">⚡ 187.500 km</span>
+          </div>
+          <div class="fleet-price">€ 50 <span>/ dan</span></div>
+        </div>
+        <div class="fleet-actions">
+          <a href="#" class="fleet-action-btn">👁 Detalji</a>
+          <a href="#" class="fleet-action-btn accent">✏ Uredi</a>
+          <a href="#" class="fleet-action-btn">🔧 Servisi</a>
+          <a href="#" class="fleet-action-btn accent" style="opacity:.4;pointer-events:none">+ Rez.</a>
+        </div>
+      </div>
+
+      <!-- Card 5 -->
+      <div class="fleet-card rise-in" data-brand="Ford Focus" data-reg="ZD-654-IJ">
+        <div class="fleet-card-img">
+          <img src="https://images.unsplash.com/photo-1502877338535-766e1452684a?w=600&q=80" alt="Ford Focus" loading="lazy">
+          <div class="img-overlay"></div>
+          <span class="status-badge chip chip-completed" style="font-size:11px">Dostupno</span>
+          <span class="type-badge">🚗 Osobni</span>
+        </div>
+        <div class="fleet-card-body">
+          <div class="fleet-card-name">Ford Focus</div>
+          <div class="fleet-card-reg">ZD-654-IJ</div>
+          <div class="fleet-meta-row">
+            <span class="fleet-meta-tag">✈ Zagreb — aerodrom</span>
+            <span class="fleet-meta-tag">📅 2021.</span>
+            <span class="fleet-meta-tag">⚡ 98.000 km</span>
+          </div>
+          <div class="fleet-price">€ 45 <span>/ dan</span></div>
+        </div>
+        <div class="fleet-actions">
+          <a href="#" class="fleet-action-btn">👁 Detalji</a>
+          <a href="#" class="fleet-action-btn accent">✏ Uredi</a>
+          <a href="#" class="fleet-action-btn">🔧 Servisi</a>
+          <a href="rezervacije-forma.html" class="fleet-action-btn accent">+ Rez.</a>
+        </div>
+      </div>
+
+      <!-- Card 6 — Kombi -->
+      <div class="fleet-card rise-in rise-in-1" data-brand="Mercedes Vito" data-reg="ZG-888-MN">
+        <div class="fleet-card-img">
+          <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80" alt="Mercedes Vito" loading="lazy">
+          <div class="img-overlay"></div>
+          <span class="status-badge chip chip-completed" style="font-size:11px">Dostupno</span>
+          <span class="type-badge">🚐 Kombi</span>
+        </div>
+        <div class="fleet-card-body">
+          <div class="fleet-card-name">Mercedes Vito</div>
+          <div class="fleet-card-reg">ZG-888-MN</div>
+          <div class="fleet-meta-row">
+            <span class="fleet-meta-tag">🏢 Zagreb — centar</span>
+            <span class="fleet-meta-tag">📅 2022.</span>
+            <span class="fleet-meta-tag">⚡ 65.300 km</span>
+          </div>
+          <div class="fleet-price">€ 95 <span>/ dan</span></div>
+        </div>
+        <div class="fleet-actions">
+          <a href="#" class="fleet-action-btn">👁 Detalji</a>
+          <a href="#" class="fleet-action-btn accent">✏ Uredi</a>
+          <a href="#" class="fleet-action-btn">🔧 Servisi</a>
+          <a href="rezervacije-forma.html" class="fleet-action-btn accent">+ Rez.</a>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer style="border-top:1px solid var(--line);padding:var(--space-md) var(--space-lg);display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted)">
+    <span>CarRent Control Surface · Vozni park</span>
+    <span>48 vozila · Zadnje osvježeno: 21.05.2026. 09:12</span>
+  </footer>
+</div>
+
+<script>
+  document.querySelectorAll('.nav-group-btn').forEach(btn => {
+    btn.addEventListener('click', () => btn.closest('.nav-group').classList.toggle('open'));
+  });
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.nav-group'))
+      document.querySelectorAll('.nav-group').forEach(g => g.classList.remove('open'));
+  });
+
+  function filterCards(query = '') {
+    const q = query.toLowerCase();
+    document.querySelectorAll('.fleet-card').forEach(card => {
+      const brand = (card.dataset.brand || '').toLowerCase();
+      const reg   = (card.dataset.reg   || '').toLowerCase();
+      card.style.display = (!q || brand.includes(q) || reg.includes(q)) ? '' : 'none';
+    });
+  }
+
+  function setView(v) {
+    document.getElementById('btn-grid').classList.toggle('active', v === 'grid');
+    document.getElementById('btn-table').classList.toggle('active', v === 'table');
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+@model (string Title, string? Subtitle)
+
+<div class="hero">
+    <h1>@Model.Title</h1>
+    @if (!string.IsNullOrWhiteSpace(Model.Subtitle))
+    {
+        <p>@Model.Subtitle</p>
+    }
+</div>

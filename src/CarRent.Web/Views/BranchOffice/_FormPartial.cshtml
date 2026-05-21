@@ -1,0 +1,27 @@
+@model BranchOfficeFormVm
+<form asp-action="@(Model.Id == 0 ? "Create" : "Edit")" method="post" class="crud-form">
+    <input type="hidden" asp-for="Id" />
+    <div class="field">
+        <label asp-for="Name"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="field-error"></span>
+    </div>
+    <div class="field">
+        <label asp-for="LocationType"></label>
+        <select asp-for="LocationType" asp-items="Html.GetEnumSelectList<LocationType>()" class="form-control"></select>
+    </div>
+    <div class="field">
+        <label asp-for="Address"></label>
+        <input asp-for="Address" class="form-control" />
+        <span asp-validation-for="Address" class="field-error"></span>
+    </div>
+    <div class="field">
+        <label asp-for="Phone"></label>
+        <input asp-for="Phone" class="form-control" />
+        <span asp-validation-for="Phone" class="field-error"></span>
+    </div>
+    <div class="actions">
+        <button type="submit" class="btn-primary">Spremi</button>
+        <a asp-action="Index">Odustani</a>
+    </div>
+</form>

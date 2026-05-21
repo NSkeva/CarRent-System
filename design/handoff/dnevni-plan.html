@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dnevni plan — CarRent Control Surface</title>
+<link rel="stylesheet" href="glass.css">
+<style>
+  .plan-header {
+    display: flex; align-items: center; gap: var(--space-md); flex-wrap: wrap;
+    margin-bottom: var(--space-lg);
+  }
+  .plan-header h1 { font-size: 24px; font-weight: 800; flex: 1; }
+  .date-input-group { display: flex; align-items: center; gap: var(--space-sm); }
+  .date-input-group label { font-size: 13px; color: var(--muted); font-weight: 600; }
+  .date-native {
+    background: var(--glass); border: 1px solid var(--line); border-radius: var(--radius-md);
+    color: var(--txt); padding: 8px 12px; font-size: 14px; outline: none;
+    font-family: var(--font); cursor: pointer; transition: all var(--transition);
+    color-scheme: dark;
+  }
+  .date-native:focus { border-color: var(--acc); box-shadow: 0 0 0 3px rgba(138,125,255,0.15); }
+
+  .plan-cols { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-lg); }
+  .plan-col-header {
+    display: flex; align-items: center; gap: 10px;
+    padding-bottom: var(--space-md); border-bottom: 1px solid var(--line);
+    margin-bottom: var(--space-md);
+  }
+  .plan-col-header .col-icon {
+    width: 36px; height: 36px; border-radius: var(--radius-md);
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+    flex-shrink: 0;
+  }
+  .col-icon.povrat { background: rgba(63,208,255,0.12); border: 1px solid rgba(63,208,255,0.25); }
+  .col-icon.odlaz  { background: rgba(138,125,255,0.12); border: 1px solid rgba(138,125,255,0.25); }
+  .plan-col-header h2 { font-size: 17px; font-weight: 700; }
+  .plan-col-header .count { font-size: 13px; color: var(--muted); margin-left: auto; background: var(--glass); border: 1px solid var(--line); border-radius: 20px; padding: 2px 10px; }
+
+  .event-cards { display: flex; flex-direction: column; gap: var(--space-sm); }
+  .ev-card {
+    background: var(--glass); border: 1px solid var(--line);
+    border-radius: var(--radius-md); padding: var(--space-md);
+    transition: all var(--transition);
+  }
+  .ev-card:hover { border-color: var(--line-strong); background: var(--glass-hover); }
+  .ev-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-sm); margin-bottom: 8px; }
+  .ev-vehicle { font-size: 16px; font-weight: 700; line-height: 1.2; }
+  .ev-reg { font-size: 11px; font-weight: 700; color: var(--acc-2); letter-spacing: 0.1em; font-family: ui-monospace, monospace; margin-top: 2px; }
+  .ev-time { font-size: 18px; font-weight: 800; color: var(--acc); flex-shrink: 0; letter-spacing: -0.01em; }
+  .ev-customer { font-size: 13px; color: var(--muted); margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
+  .ev-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .ev-meta-tag { font-size: 11px; color: var(--muted); background: rgba(255,255,255,0.05); border: 1px solid var(--line); border-radius: 20px; padding: 2px 8px; display: flex; align-items: center; gap: 4px; }
+  .ev-actions { display: flex; gap: 6px; }
+  .ev-card.return .ev-time { color: var(--acc-2); }
+
+  /* Print overrides */
+  @media print {
+    .plan-cols { grid-template-columns: 1fr 1fr; gap: 24px; }
+    .ev-card { background: #fff; border: 1px solid #ccc; color: #000; border-radius: 6px; }
+    .ev-vehicle { color: #000; }
+    .ev-reg { color: #555; }
+    .ev-time { color: #222; }
+    .ev-customer { color: #444; }
+    .ev-meta-tag { color: #555; background: #f5f5f5; border-color: #ccc; }
+    .ev-actions, .no-print, .plan-header .btn-secondary, .plan-header .btn-primary { display: none !important; }
+    .glass { background: #fff; border: 1px solid #ccc; backdrop-filter: none; }
+    .plan-col-header { border-color: #ccc; }
+    .col-icon { background: #f0f0f0; border-color: #ccc; }
+    h1, h2 { color: #000; }
+    .count { background: #f0f0f0; border-color: #ccc; color: #555; }
+  }
+
+  @media (max-width: 768px) {
+    .plan-cols { grid-template-columns: 1fr; }
+    .plan-header { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+<div class="page-shell">
+
+  <!-- Header -->
+  <header class="site-header no-print">
+    <div class="header-inner">
+      <a class="site-logo" href="index.html">
+        <div class="logo-mark">🚗</div>
+        CarRent <span>Control Surface</span>
+      </a>
+      <nav class="nav-primary">
+        <div class="nav-group">
+          <button class="nav-group-btn active">
+            Operativa
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown">
+            <a href="dashboard.html">🏠 Početna</a>
+            <a href="timeline.html">📅 Timeline</a>
+            <a href="dnevni-plan.html" class="active">📋 Dnevni plan</a>
+            <a href="vozni-park.html">🚗 Vozni park</a>
+          </div>
+        </div>
+        <div class="nav-group">
+          <button class="nav-group-btn">
+            Podaci
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown">
+            <a href="rezervacije.html">🗓 Rezervacije</a>
+            <a href="vozilo-detalji.html">🚘 Vozila</a>
+            <a href="#">👤 Kupci</a>
+            <div class="nav-dropdown-divider"></div>
+            <a href="#">🔧 Servisi</a>
+            <a href="#">🏢 Poslovnice</a>
+            <a href="#">➕ Dodaci</a>
+            <a href="#">👥 Zaposlenici</a>
+            <a href="#">🤝 Partneri</a>
+          </div>
+        </div>
+      </nav>
+      <div class="header-actions">
+        <button class="lang-toggle">HR</button>
+        <div class="user-chip"><div class="user-avatar">MK</div>Marko K.</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Breadcrumbs -->
+  <div class="breadcrumbs no-print">
+    <a href="dashboard.html">Početna</a>
+    <span class="sep">›</span>
+    <span class="current">Dnevni plan</span>
+  </div>
+
+  <main class="page-content">
+
+    <!-- Page header -->
+    <div class="glass plan-header rise-in">
+      <h1>Dnevni plan</h1>
+      <div class="date-input-group">
+        <label>Datum</label>
+        <input class="date-native" type="date" id="plan-date" value="2026-05-21">
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="loadPlan()">Učitaj</button>
+      <button class="btn btn-ghost btn-sm" onclick="goToday()">Danas</button>
+      <button class="btn btn-ghost btn-sm" onclick="window.print()">🖨 Ispis A4</button>
+    </div>
+
+    <!-- Print header (visible only on print) -->
+    <div style="display:none" id="print-header">
+      <h1 style="font-size:22px;font-weight:800;margin-bottom:4px">Dnevni plan — CarRent Control Surface</h1>
+      <p style="font-size:14px;margin-bottom:16px">21. svibnja 2026. · Generirao: Marko K.</p>
+    </div>
+
+    <!-- Two-column layout -->
+    <div class="plan-cols rise-in">
+
+      <!-- Povrati -->
+      <div class="glass">
+        <div class="plan-col-header">
+          <div class="col-icon povrat">↙</div>
+          <h2>Povrati danas</h2>
+          <span class="count">3 vozila</span>
+        </div>
+        <div class="event-cards" id="returns-list">
+
+          <div class="ev-card return">
+            <div class="ev-card-top">
+              <div>
+                <div class="ev-vehicle">VW Golf</div>
+                <div class="ev-reg">ST-456-CD</div>
+              </div>
+              <div class="ev-time">12:00</div>
+            </div>
+            <div class="ev-customer">👤 Ana Marić · <a href="tel:+38591234567" style="color:var(--acc-2)">+385 91 234 567</a></div>
+            <div class="ev-meta">
+              <span class="ev-meta-tag">🏢 Split — centar</span>
+              <span class="ev-meta-tag">📅 18.05 – 21.05</span>
+              <span class="chip chip-active" style="font-size:11px">Active</span>
+            </div>
+            <div class="ev-actions">
+              <a href="rezervacije.html" class="btn btn-sm btn-secondary">Rezervacija #1041</a>
+              <a href="mailto:ana.maric@email.hr" class="btn btn-sm btn-ghost">Kontakt</a>
+            </div>
+          </div>
+
+          <div class="ev-card return">
+            <div class="ev-card-top">
+              <div>
+                <div class="ev-vehicle">Ford Focus</div>
+                <div class="ev-reg">ZD-654-IJ</div>
+              </div>
+              <div class="ev-time">16:30</div>
+            </div>
+            <div class="ev-customer">👤 Luka Šimić · <a href="tel:+38598765432" style="color:var(--acc-2)">+385 98 765 432</a></div>
+            <div class="ev-meta">
+              <span class="ev-meta-tag">🏢 Zagreb — aerodrom</span>
+              <span class="ev-meta-tag">📅 14.05 – 21.05</span>
+              <span class="chip chip-active" style="font-size:11px">Active</span>
+            </div>
+            <div class="ev-actions">
+              <a href="rezervacije.html" class="btn btn-sm btn-secondary">Rezervacija #1038</a>
+              <a href="mailto:luka.simic@email.hr" class="btn btn-sm btn-ghost">Kontakt</a>
+            </div>
+          </div>
+
+          <div class="ev-card return">
+            <div class="ev-card-top">
+              <div>
+                <div class="ev-vehicle">Opel Astra</div>
+                <div class="ev-reg">KK-111-KL</div>
+              </div>
+              <div class="ev-time">18:00</div>
+            </div>
+            <div class="ev-customer">👤 Petra Novak · <a href="tel:+38599123456" style="color:var(--acc-2)">+385 99 123 456</a></div>
+            <div class="ev-meta">
+              <span class="ev-meta-tag">🏢 Koprivnica</span>
+              <span class="ev-meta-tag">📅 19.05 – 21.05</span>
+              <span class="chip chip-confirmed" style="font-size:11px">Confirmed</span>
+            </div>
+            <div class="ev-actions">
+              <a href="rezervacije.html" class="btn btn-sm btn-secondary">Rezervacija #1039</a>
+              <a href="mailto:petra.novak@email.hr" class="btn btn-sm btn-ghost">Kontakt</a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Odlasci -->
+      <div class="glass">
+        <div class="plan-col-header">
+          <div class="col-icon odlaz">↗</div>
+          <h2>Odlasci danas</h2>
+          <span class="count">3 vozila</span>
+        </div>
+        <div class="event-cards" id="departures-list">
+
+          <div class="ev-card">
+            <div class="ev-card-top">
+              <div>
+                <div class="ev-vehicle">BMW 3</div>
+                <div class="ev-reg">ZG-123-AB</div>
+              </div>
+              <div class="ev-time">09:00</div>
+            </div>
+            <div class="ev-customer">👤 Ivan Horvat · <a href="tel:+38598111222" style="color:var(--acc-2)">+385 98 111 222</a></div>
+            <div class="ev-meta">
+              <span class="ev-meta-tag">🏢 Zagreb — centar</span>
+              <span class="ev-meta-tag">📅 21.05 – 28.05</span>
+              <span class="ev-meta-tag">🔌 GPS · CDW</span>
+              <span class="chip chip-confirmed" style="font-size:11px">Confirmed</span>
+            </div>
+            <div class="ev-actions">
+              <a href="rezervacije.html" class="btn btn-sm btn-secondary">Rezervacija #1042</a>
+              <a href="mailto:ivan.horvat@email.hr" class="btn btn-sm btn-ghost">Kontakt</a>
+            </div>
+          </div>
+
+          <div class="ev-card">
+            <div class="ev-card-top">
+              <div>
+                <div class="ev-vehicle">Audi A4</div>
+                <div class="ev-reg">OS-789-EF</div>
+              </div>
+              <div class="ev-time">11:30</div>
+            </div>
+            <div class="ev-customer">👤 Tomislav Kovač · <a href="tel:+38591777888" style="color:var(--acc-2)">+385 91 777 888</a></div>
+            <div class="ev-meta">
+              <span class="ev-meta-tag">✈ Osijek — aerodrom</span>
+              <span class="ev-meta-tag">📅 21.05 – 30.05</span>
+              <span class="chip chip-confirmed" style="font-size:11px">Confirmed</span>
+            </div>
+            <div class="ev-actions">
+              <a href="rezervacije.html" class="btn btn-sm btn-secondary">Rezervacija #1040</a>
+              <a href="mailto:tomislav.kovac@email.hr" class="btn btn-sm btn-ghost">Kontakt</a>
+            </div>
+          </div>
+
+          <div class="ev-card">
+            <div class="ev-card-top">
+              <div>
+                <div class="ev-vehicle">VW Passat</div>
+                <div class="ev-reg">RI-321-GH</div>
+              </div>
+              <div class="ev-time">14:00</div>
+            </div>
+            <div class="ev-customer">👤 Maja Perić · <a href="tel:+38595444555" style="color:var(--acc-2)">+385 95 444 555</a></div>
+            <div class="ev-meta">
+              <span class="ev-meta-tag">🏢 Rijeka — hotel partner</span>
+              <span class="ev-meta-tag">📅 21.05 – 24.05</span>
+              <span class="ev-meta-tag">🪑 Dječja sjedalica</span>
+              <span class="chip chip-draft" style="font-size:11px">Draft</span>
+            </div>
+            <div class="ev-actions">
+              <a href="rezervacije.html" class="btn btn-sm btn-secondary">Rezervacija #1044</a>
+              <a href="mailto:maja.peric@email.hr" class="btn btn-sm btn-ghost">Kontakt</a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer style="border-top:1px solid var(--line);padding:var(--space-md) var(--space-lg);display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted)" class="no-print">
+    <span>CarRent Control Surface · Dnevni plan</span>
+    <span>Ispis: A4 landscape preporučeno</span>
+  </footer>
+</div>
+
+<style>
+  @media print {
+    #print-header { display: block !important; }
+    .btn { display: none !important; }
+    .ev-actions { display: none !important; }
+    body { background: #fff; }
+  }
+</style>
+
+<script>
+  document.querySelectorAll('.nav-group-btn').forEach(btn => {
+    btn.addEventListener('click', () => btn.closest('.nav-group').classList.toggle('open'));
+  });
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.nav-group'))
+      document.querySelectorAll('.nav-group').forEach(g => g.classList.remove('open'));
+  });
+  function goToday() {
+    const d = new Date();
+    document.getElementById('plan-date').value = d.toISOString().split('T')[0];
+  }
+  function loadPlan() {
+    // Placeholder: real impl would fire GET /dnevni-plan?date=...
+    const d = document.getElementById('plan-date').value;
+    console.log('Load plan for', d);
+  }
+</script>
+</body>
+</html>

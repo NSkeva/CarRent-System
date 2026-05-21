@@ -1,0 +1,28 @@
+@model PartnerFormVm
+<form asp-action="@(Model.Id == 0 ? "Create" : "Edit")" method="post" class="crud-form">
+    <input type="hidden" asp-for="Id" />
+    <div class="field">
+        <label asp-for="CompanyName"></label>
+        <input asp-for="CompanyName" class="form-control" />
+        <span asp-validation-for="CompanyName" class="field-error"></span>
+    </div>
+    <div class="field">
+        <label asp-for="ContactPerson"></label>
+        <input asp-for="ContactPerson" class="form-control" />
+        <span asp-validation-for="ContactPerson" class="field-error"></span>
+    </div>
+    <div class="field">
+        <label asp-for="Phone"></label>
+        <input asp-for="Phone" class="form-control" />
+        <span asp-validation-for="Phone" class="field-error"></span>
+    </div>
+    <div class="field">
+        <label asp-for="Email"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="field-error"></span>
+    </div>
+    <div class="actions">
+        <button type="submit" class="btn-primary">Spremi</button>
+        <a asp-action="Index">Odustani</a>
+    </div>
+</form>

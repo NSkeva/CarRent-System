@@ -1,27 +1,42 @@
 @model IReadOnlyList<FleetCardVm>
+@{
+    ViewData["Title"] = "Vozni park";
+    ViewData["Breadcrumbs"] = BreadcrumbHelper.Build("Home", "Vozni park");
+    var activeCount = Model.Count(v => v.Vehicle.IsActive);
+}
 
-<section class="panel">
+<div class="section-heading rise-in">
     <h1>Vozni park</h1>
-    <p>Karticni prikaz vozila s pripremnim akcijama za buduce module (servisi, registracije, izmjene).</p>
-</section>
+    <span class="badge">@Model.Count vozila</span>
+</div>
+
+<div class="stats-strip rise-in">
+    <span class="stat-item"><strong>@activeCount</strong> aktivnih</span>
+    <span class="stat-item"><strong>@(Model.Count - activeCount)</strong> neaktivnih</span>
+</div>
 
 <section class="fleet-grid">
     @foreach (var item in Model)
     {
-        <article class="fleet-card">
-            <img src="@item.ImageUrl" alt="@item.Vehicle.Brand @item.Vehicle.Model" />
-            <div class="fleet-content">
-                <h3>@item.Vehicle.Brand @item.Vehicle.Model</h3>
-                <p><strong>Reg:</strong> @item.Vehicle.RegistrationNumber</p>
-                <p><strong>Poslovnica:</strong> @item.BranchName</p>
-                <p><strong>Cijena/dan:</strong> @item.Vehicle.DailyPrice EUR</p>
-                <div class="actions">
-                    <a asp-controller="Vehicle" asp-action="Details" asp-route-id="@item.Vehicle.Id">Detalji</a>
-                    <button type="button">Uredi</button>
-                    <button type="button">Izbrisi</button>
-                    <button type="button">Servisi</button>
-                    <button type="button">Registracije</button>
+        <article class="fleet-card rise-in">
+            <div class="fleet-card-img">
+                <img src="@item.ImageUrl" alt="@item.Vehicle.Brand @item.Vehicle.Model" loading="lazy" />
+                <span class="chip @(item.Vehicle.IsActive ? "chip-completed" : "chip-cancelled") status-badge">@(item.Vehicle.IsActive ? "Aktivno" : "Neaktivno")</span>
+            </div>
+            <div class="fleet-card-body">
+                <div class="fleet-card-title">@item.Vehicle.Brand @item.Vehicle.Model</div>
+                <div class="fleet-card-reg">@item.Vehicle.RegistrationNumber</div>
+                <div class="fleet-meta-row">
+                    <span class="fleet-meta-tag">🏢 @item.BranchName</span>
+                    <span class="fleet-meta-tag">@item.Vehicle.Type</span>
                 </div>
+                <div class="fleet-card-price">@item.Vehicle.DailyPrice.ToString("N0") <span>EUR/dan</span></div>
+            </div>
+            <div class="fleet-card-actions">
+                <a asp-controller="Vehicle" asp-action="Details" asp-route-id="@item.Vehicle.Id" class="action-btn">Detalji</a>
+                <a asp-controller="Vehicle" asp-action="Edit" asp-route-id="@item.Vehicle.Id" class="action-btn">Uredi</a>
+                <a asp-controller="Reservation" asp-action="Create" class="action-btn">Rezerviraj</a>
+                <a asp-controller="ServiceRecord" asp-action="Index" class="action-btn">Servisi</a>
             </div>
         </article>
     }

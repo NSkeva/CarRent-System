@@ -1,0 +1,53 @@
+@model ReservationFormVm
+<form asp-action="@(Model.Id == 0 ? "Create" : "Edit")" method="post" class="form-grid">
+    <div>
+        <div class="glass form-section" style="margin-bottom:var(--space-md)">
+            <div class="form-section-title">Sudionici</div>
+            <partial name="_AutocompletePartial" model='new AutocompleteFieldVm { InputId = "custSearch", HiddenName = "CustomerId", Label = "Kupac", SearchUrl = "/api/lookup/customers", SelectedId = Model.CustomerId, DisplayText = Model.CustomerDisplay }' />
+            <div style="margin-top:var(--space-md)">
+                <partial name="_AutocompletePartial" model='new AutocompleteFieldVm { InputId = "vehSearch", HiddenName = "VehicleId", Label = "Vozilo", SearchUrl = "/api/lookup/vehicles", SelectedId = Model.VehicleId, DisplayText = Model.VehicleDisplay }' />
+            </div>
+        </div>
+        <div class="glass form-section" style="margin-bottom:var(--space-md)">
+            <div class="form-section-title">Period i lokacije</div>
+            <partial name="_DateTimePartial" model='new DateTimeFieldVm { FieldName = "StartDate", Label = "Početak", Value = Model.StartDate }' />
+            <div style="margin-top:var(--space-md)">
+                <partial name="_DateTimePartial" model='new DateTimeFieldVm { FieldName = "EndDate", Label = "Završetak", Value = Model.EndDate }' />
+            </div>
+            <div class="field-row" style="margin-top:var(--space-md)">
+                <div class="field">
+                    <label asp-for="PickupLocation" class="field-label"></label>
+                    <select asp-for="PickupLocation" asp-items="Html.GetEnumSelectList<LocationType>()" class="field-select"></select>
+                </div>
+                <div class="field">
+                    <label asp-for="DropoffLocation" class="field-label"></label>
+                    <select asp-for="DropoffLocation" asp-items="Html.GetEnumSelectList<LocationType>()" class="field-select"></select>
+                </div>
+            </div>
+        </div>
+        <div class="glass form-section">
+            <div class="form-section-title">Status i cijena</div>
+            <div class="field-row">
+                <div class="field">
+                    <label asp-for="Status" class="field-label"></label>
+                    <select asp-for="Status" asp-items="Html.GetEnumSelectList<ReservationStatus>()" class="field-select"></select>
+                </div>
+                <div class="field">
+                    <label asp-for="BasePrice" class="field-label"></label>
+                    <input asp-for="BasePrice" class="field-input" />
+                    <span asp-validation-for="BasePrice" class="field-error"></span>
+                </div>
+            </div>
+            <span asp-validation-for="EndDate" class="field-error"></span>
+        </div>
+    </div>
+    <div class="glass form-section">
+        <div class="form-section-title">Sažetak</div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.6">Provjeri kupca, vozilo i datume prije spremanja. Validacija se izvršava na klijentu i serveru.</p>
+        <input type="hidden" asp-for="Id" />
+        <div style="margin-top:var(--space-lg);display:flex;flex-direction:column;gap:8px">
+            <button type="submit" class="btn btn-primary">Spremi rezervaciju</button>
+            <a asp-action="Index" class="btn btn-secondary">Odustani</a>
+        </div>
+    </div>
+</form>

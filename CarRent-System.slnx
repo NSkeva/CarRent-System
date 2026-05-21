@@ -1,6 +1,8 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/CarRent.Console/CarRent.Console.csproj" />
+    <Project Path="src/CarRent.Model/CarRent.Model.csproj" />
+    <Project Path="src/CarRent.DAL/CarRent.DAL.csproj" />
     <Project Path="src/CarRent.Web/CarRent.Web.csproj" />
   </Folder>
 </Solution>

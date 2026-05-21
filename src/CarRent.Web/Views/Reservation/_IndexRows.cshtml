@@ -1,0 +1,32 @@
+@model IReadOnlyList<Reservation>
+@foreach (var item in Model)
+{
+    <tr>
+        <td><span class="tbl-id">#@item.Id</span></td>
+        <td>
+            @if (item.Customer is not null)
+            {
+                <strong>@item.Customer.FirstName @item.Customer.LastName</strong>
+            }
+        </td>
+        <td>
+            @if (item.Vehicle is not null)
+            {
+                <span class="tbl-vehicle">@item.Vehicle.Brand @item.Vehicle.Model</span>
+                <span class="tbl-reg">@item.Vehicle.RegistrationNumber</span>
+            }
+        </td>
+        <td style="white-space:nowrap;color:var(--muted)">@item.StartDate.ToString("g")</td>
+        <td style="white-space:nowrap;color:var(--muted)">@item.EndDate.ToString("g")</td>
+        <td><partial name="_StatusChip" model="@(UiDisplayHelper.ReservationChipClass(item.Status), UiDisplayHelper.ReservationStatusLabel(item.Status))" /></td>
+        <td class="tbl-price">@item.BasePrice.ToString("N2") €</td>
+        <td class="actions">
+            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-ghost btn-sm">Detalji</a>
+            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-ghost btn-sm">Uredi</a>
+            <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="inline-form" onsubmit="return confirm('Obrisati rezervaciju?');">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-ghost btn-sm" style="color:var(--danger)">Obriši</button>
+            </form>
+        </td>
+    </tr>
+}

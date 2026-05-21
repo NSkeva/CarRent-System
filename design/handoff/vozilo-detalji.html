@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VW Golf VII · ZG-123-AB — CarRent Control Surface</title>
+<link rel="stylesheet" href="glass.css">
+<style>
+  /* Hero strip */
+  .vehicle-hero {
+    background: var(--glass);
+    backdrop-filter: var(--blur);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: var(--space-lg);
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    min-height: 220px;
+  }
+  .hero-visual {
+    background: linear-gradient(130deg, rgba(138,125,255,0.14) 0%, rgba(63,208,255,0.07) 50%, rgba(11,16,32,0) 100%);
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden; padding: var(--space-xl);
+  }
+  .hero-visual::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(138,125,255,0.1), transparent);
+  }
+  .car-svg { width: 100%; max-width: 380px; position: relative; z-index: 1; }
+  .hero-info {
+    padding: var(--space-xl);
+    border-left: 1px solid var(--line);
+    display: flex; flex-direction: column; justify-content: center; gap: 12px;
+  }
+  .hero-eyebrow {
+    font-size: 11px; font-weight: 700; color: var(--acc-2);
+    text-transform: uppercase; letter-spacing: 0.12em;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .hero-eyebrow::before { content:''; width:18px; height:2px; background:var(--acc-2); border-radius:1px; }
+  .hero-title { font-size: 26px; font-weight: 800; letter-spacing: -0.025em; line-height: 1.15; }
+  .hero-reg {
+    font-size: 18px; font-weight: 700; color: var(--acc-2);
+    letter-spacing: 0.1em; font-family: ui-monospace, 'JetBrains Mono', monospace;
+    display: inline-block;
+  }
+  .hero-stats {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px;
+  }
+  .hero-stat {
+    font-size: 12px; color: var(--muted);
+    background: rgba(255,255,255,0.05); border: 1px solid var(--line);
+    padding: 4px 10px; border-radius: 20px;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .hero-price {
+    font-size: 28px; font-weight: 800; color: var(--acc);
+    letter-spacing: -0.02em;
+  }
+  .hero-price span { font-size: 14px; font-weight: 400; color: var(--muted); }
+  .hero-actions { display: flex; gap: var(--space-sm); flex-wrap: wrap; }
+
+  /* Tabs */
+  .tabs-bar {
+    display: flex; gap: 2px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: var(--space-lg);
+  }
+  .tab-btn {
+    padding: 10px 20px; border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    font-size: 14px; font-weight: 600; color: var(--muted);
+    border: 1px solid transparent; border-bottom: 2px solid transparent;
+    margin-bottom: -1px; cursor: pointer; transition: all var(--transition);
+    background: transparent; font-family: inherit;
+  }
+  .tab-btn:hover { color: var(--txt); }
+  .tab-btn.active {
+    color: var(--acc);
+    border-color: var(--line) var(--line) var(--bg);
+    border-bottom-color: var(--acc);
+    background: rgba(138,125,255,0.07);
+  }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; animation: riseIn 300ms ease; }
+
+  /* Detail grid */
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-lg); }
+  .detail-section {
+    background: var(--glass); border: 1px solid var(--line);
+    border-radius: var(--radius-lg); padding: var(--space-lg);
+  }
+  .detail-section-title {
+    font-size: 12px; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    margin-bottom: var(--space-md); padding-bottom: 8px;
+    border-bottom: 1px solid var(--line);
+  }
+  .detail-row {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); gap: var(--space-md);
+  }
+  .detail-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .detail-key { font-size: 13px; color: var(--muted); flex-shrink: 0; min-width: 120px; }
+  .detail-val { font-size: 13px; font-weight: 600; text-align: right; }
+  .detail-val.mono { font-family: ui-monospace, monospace; color: var(--acc-2); letter-spacing: 0.04em; }
+
+  /* Service list */
+  .service-item {
+    display: flex; align-items: flex-start; gap: var(--space-md);
+    padding: var(--space-md); border-radius: var(--radius-md);
+    border: 1px solid var(--line); background: var(--glass);
+    transition: all var(--transition); margin-bottom: 8px;
+  }
+  .service-item:hover { border-color: var(--line-strong); }
+  .service-item:last-child { margin-bottom: 0; }
+  .service-icon {
+    width: 36px; height: 36px; border-radius: 9px; flex-shrink: 0;
+    background: rgba(93,255,176,0.12); border: 1px solid rgba(93,255,176,0.25);
+    display: flex; align-items: center; justify-content: center; font-size: 16px;
+  }
+  .service-body { flex: 1; min-width: 0; }
+  .service-title { font-size: 14px; font-weight: 600; }
+  .service-meta { font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .service-cost { font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; flex-shrink: 0; }
+
+  /* Alert badge for upcoming service */
+  .alert-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px;
+  }
+  .alert-warn { background: rgba(255,209,102,0.15); color: var(--warning); border: 1px solid rgba(255,209,102,0.3); }
+  .alert-ok   { background: rgba(93,255,176,0.12); color: var(--success); border: 1px solid rgba(93,255,176,0.25); }
+  .alert-danger { background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(255,107,127,0.3); }
+
+  @media (max-width: 980px) {
+    .vehicle-hero { grid-template-columns: 1fr; }
+    .hero-visual { min-height: 160px; }
+    .hero-info { border-left: none; border-top: 1px solid var(--line); }
+    .detail-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="page-shell">
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="site-logo" href="index.html">
+        <div class="logo-mark">🚗</div>
+        CarRent <span>Control Surface</span>
+      </a>
+      <nav class="nav-primary">
+        <div class="nav-group">
+          <button class="nav-group-btn">
+            Operativa
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown">
+            <a href="dashboard.html">🏠 Početna</a>
+            <a href="timeline.html">📅 Timeline</a>
+            <a href="dnevni-plan.html">📋 Dnevni plan</a>
+            <a href="vozni-park.html">🚗 Vozni park</a>
+          </div>
+        </div>
+        <div class="nav-group">
+          <button class="nav-group-btn active">
+            Podaci
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown">
+            <a href="rezervacije.html">🗓 Rezervacije</a>
+            <a href="vozilo-detalji.html" class="active">🚘 Vozila</a>
+            <a href="#">👤 Kupci</a>
+            <div class="nav-dropdown-divider"></div>
+            <a href="#">🔧 Servisi</a>
+            <a href="#">🏢 Poslovnice</a>
+            <a href="#">➕ Dodaci</a>
+            <a href="#">👥 Zaposlenici</a>
+            <a href="#">🤝 Partneri</a>
+          </div>
+        </div>
+      </nav>
+      <div class="header-actions">
+        <button class="lang-toggle">HR</button>
+        <div class="user-chip">
+          <div class="user-avatar">MK</div>
+          Marko K.
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="breadcrumbs">
+    <a href="index.html">Početna</a>
+    <span class="sep">›</span>
+    <a href="vozni-park.html">Vozila</a>
+    <span class="sep">›</span>
+    <span class="current">VW Golf VII · ZG-123-AB</span>
+  </div>
+
+  <main class="page-content">
+
+    <!-- Hero strip -->
+    <div class="vehicle-hero rise-in">
+      <div class="hero-visual">
+        <svg class="car-svg" viewBox="0 0 500 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Ground shadow -->
+          <ellipse cx="250" cy="165" rx="200" ry="8" fill="rgba(0,0,0,0.25)"/>
+          <!-- Car body -->
+          <path d="M55 130 L55 108 L125 65 L200 50 L295 50 L365 70 L430 108 L430 130 Z"
+            stroke="rgba(138,125,255,0.55)" stroke-width="2" fill="rgba(138,125,255,0.07)" stroke-linejoin="round"/>
+          <!-- Roof -->
+          <path d="M125 65 L160 35 L235 25 L300 25 L340 45 L365 70"
+            stroke="rgba(63,208,255,0.45)" stroke-width="2" fill="none" stroke-linejoin="round"/>
+          <!-- Window A -->
+          <path d="M132 65 L165 37 L225 29 L225 65 Z"
+            stroke="rgba(63,208,255,0.35)" stroke-width="1.5" fill="rgba(63,208,255,0.06)" stroke-linejoin="round"/>
+          <!-- Window B -->
+          <path d="M230 29 L298 29 L336 47 L335 65 L230 65 Z"
+            stroke="rgba(63,208,255,0.35)" stroke-width="1.5" fill="rgba(63,208,255,0.06)" stroke-linejoin="round"/>
+          <!-- Front headlight -->
+          <path d="M428 108 L430 108 L430 120 L415 120" stroke="rgba(255,209,102,0.6)" stroke-width="1.5" fill="none"/>
+          <!-- Rear light -->
+          <path d="M55 108 L55 120 L70 120" stroke="rgba(255,107,127,0.5)" stroke-width="1.5" fill="none"/>
+          <!-- Wheel front -->
+          <circle cx="155" cy="130" r="28" stroke="rgba(168,178,217,0.45)" stroke-width="2.5" fill="rgba(168,178,217,0.04)"/>
+          <circle cx="155" cy="130" r="14" stroke="rgba(138,125,255,0.4)" stroke-width="1.5" fill="rgba(138,125,255,0.06)"/>
+          <circle cx="155" cy="130" r="3" fill="rgba(138,125,255,0.5)"/>
+          <!-- Wheel rear -->
+          <circle cx="340" cy="130" r="28" stroke="rgba(168,178,217,0.45)" stroke-width="2.5" fill="rgba(168,178,217,0.04)"/>
+          <circle cx="340" cy="130" r="14" stroke="rgba(138,125,255,0.4)" stroke-width="1.5" fill="rgba(138,125,255,0.06)"/>
+          <circle cx="340" cy="130" r="3" fill="rgba(138,125,255,0.5)"/>
+          <!-- Door line -->
+          <line x1="240" y1="67" x2="240" y2="128" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+        </svg>
+      </div>
+      <div class="hero-info">
+        <div class="hero-eyebrow">Osobni automobil</div>
+        <div>
+          <div class="hero-title">VW Golf VII 1.6 TDI</div>
+          <div class="hero-reg" style="margin-top:4px">ZG-123-AB</div>
+        </div>
+        <div>
+          <span class="chip chip-active" style="font-size:12px">Aktivna rezervacija</span>
+        </div>
+        <div class="hero-stats">
+          <span class="hero-stat">📅 2019</span>
+          <span class="hero-stat">⛽ Dizel</span>
+          <span class="hero-stat">⚙️ DSG Automatik</span>
+          <span class="hero-stat">📍 Zagreb</span>
+          <span class="hero-stat">🏁 55.240 km</span>
+        </div>
+        <div class="hero-price">120,00 € <span>/ dan</span></div>
+        <div class="hero-actions">
+          <button class="btn btn-secondary btn-sm">✏️ Uredi vozilo</button>
+          <button class="btn btn-secondary btn-sm">🔧 Dodaj servis</button>
+          <a href="rezervacije-forma.html" class="btn btn-primary btn-sm">+ Nova rezervacija</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs-bar rise-in">
+      <button class="tab-btn active" data-tab="pregled">Pregled</button>
+      <button class="tab-btn" data-tab="rezervacije">Rezervacije <span style="font-size:11px;opacity:0.7">(8)</span></button>
+      <button class="tab-btn" data-tab="servisi">Servisi <span style="font-size:11px;opacity:0.7">(4)</span></button>
+    </div>
+
+    <!-- Tab: Pregled -->
+    <div class="tab-panel active" id="tab-pregled">
+      <div class="detail-grid">
+        <div class="detail-section">
+          <div class="detail-section-title">Tehnički podaci</div>
+          <div class="detail-row"><span class="detail-key">Marka</span><span class="detail-val">Volkswagen</span></div>
+          <div class="detail-row"><span class="detail-key">Model</span><span class="detail-val">Golf VII</span></div>
+          <div class="detail-row"><span class="detail-key">Varijanta</span><span class="detail-val">1.6 TDI Comfortline</span></div>
+          <div class="detail-row"><span class="detail-key">Godište</span><span class="detail-val">2019</span></div>
+          <div class="detail-row"><span class="detail-key">Motor</span><span class="detail-val">1.598 cc · 115 KS</span></div>
+          <div class="detail-row"><span class="detail-key">Gorivo</span><span class="detail-val">Dizel</span></div>
+          <div class="detail-row"><span class="detail-key">Mjenjač</span><span class="detail-val">7-stupanjski DSG</span></div>
+          <div class="detail-row"><span class="detail-key">Boja</span><span class="detail-val">Siva metalik</span></div>
+          <div class="detail-row"><span class="detail-key">Broj vrata</span><span class="detail-val">5</span></div>
+          <div class="detail-row"><span class="detail-key">Putnici max</span><span class="detail-val">5</span></div>
+          <div class="detail-row"><span class="detail-key">VIN</span><span class="detail-val mono" style="font-size:11px">WVWZZZ1KZXW123456</span></div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-section-title">Operativni podaci</div>
+          <div class="detail-row">
+            <span class="detail-key">Poslovnica</span>
+            <span class="detail-val">Zagreb – Savska 12</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-key">Status</span>
+            <span class="detail-val"><span class="chip chip-active" style="font-size:11px">Aktivna rez.</span></span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-key">Cijena/dan</span>
+            <span class="detail-val" style="color:var(--acc)">120,00 €</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-key">Registracija do</span>
+            <span class="detail-val">
+              31.08.2026.
+              <span class="alert-badge alert-warn" style="margin-left:6px;font-size:11px">za 3 mj.</span>
+            </span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-key">Kilometraža</span>
+            <span class="detail-val">55.240 km</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-key">Sljedeći servis</span>
+            <span class="detail-val">
+              01.09.2026.
+              <span class="alert-badge alert-ok" style="margin-left:6px;font-size:11px">za 3 mj.</span>
+            </span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-key">Kasko do</span>
+            <span class="detail-val">
+              30.06.2026.
+              <span class="alert-badge alert-warn" style="margin-left:6px;font-size:11px">uskoro</span>
+            </span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-key">Vlasnik polise</span>
+            <span class="detail-val">Triglav osig. d.d.</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-key">Zadnji servis</span>
+            <span class="detail-val">15.02.2026. · 52.400 km</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-key">U floti od</span>
+            <span class="detail-val">03.04.2020.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Rezervacije -->
+    <div class="tab-panel" id="tab-rezervacije">
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Kupac</th>
+              <th>Od</th>
+              <th>Do</th>
+              <th>Status</th>
+              <th>Ukupno</th>
+              <th>Akcije</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-family:ui-monospace,monospace;font-size:12px;color:var(--muted);font-weight:700">RZ-0056</td>
+              <td><strong>Petar Šimić</strong></td>
+              <td style="font-size:13px;color:var(--muted)">13.05.2026.</td>
+              <td style="font-size:13px;color:var(--muted)">19.05.2026.</td>
+              <td><span class="chip chip-active">Aktivna</span></td>
+              <td style="font-weight:700;font-variant-numeric:tabular-nums">980,00 €</td>
+              <td><a href="rezervacije.html" class="btn btn-ghost btn-sm">Detalji →</a></td>
+            </tr>
+            <tr>
+              <td style="font-family:ui-monospace,monospace;font-size:12px;color:var(--muted);font-weight:700">RZ-0041</td>
+              <td><strong>Ana Marić</strong></td>
+              <td style="font-size:13px;color:var(--muted)">01.05.2026.</td>
+              <td style="font-size:13px;color:var(--muted)">04.05.2026.</td>
+              <td><span class="chip chip-completed">Završena</span></td>
+              <td style="font-weight:700;font-variant-numeric:tabular-nums">480,00 €</td>
+              <td><a href="rezervacije.html" class="btn btn-ghost btn-sm">Detalji →</a></td>
+            </tr>
+            <tr>
+              <td style="font-family:ui-monospace,monospace;font-size:12px;color:var(--muted);font-weight:700">RZ-0029</td>
+              <td><strong>Hrvoje Blažević</strong></td>
+              <td style="font-size:13px;color:var(--muted)">08.04.2026.</td>
+              <td style="font-size:13px;color:var(--muted)">14.04.2026.</td>
+              <td><span class="chip chip-completed">Završena</span></td>
+              <td style="font-weight:700;font-variant-numeric:tabular-nums">840,00 €</td>
+              <td><a href="rezervacije.html" class="btn btn-ghost btn-sm">Detalji →</a></td>
+            </tr>
+            <tr>
+              <td style="font-family:ui-monospace,monospace;font-size:12px;color:var(--muted);font-weight:700">RZ-0018</td>
+              <td><strong>Ivana Šarić</strong></td>
+              <td style="font-size:13px;color:var(--muted)">14.03.2026.</td>
+              <td style="font-size:13px;color:var(--muted)">19.03.2026.</td>
+              <td><span class="chip chip-completed">Završena</span></td>
+              <td style="font-weight:700;font-variant-numeric:tabular-nums">600,00 €</td>
+              <td><a href="rezervacije.html" class="btn btn-ghost btn-sm">Detalji →</a></td>
+            </tr>
+            <tr>
+              <td style="font-family:ui-monospace,monospace;font-size:12px;color:var(--muted);font-weight:700">RZ-0009</td>
+              <td><strong>Domagoj Kralj</strong></td>
+              <td style="font-size:13px;color:var(--muted)">02.02.2026.</td>
+              <td style="font-size:13px;color:var(--muted)">07.02.2026.</td>
+              <td><span class="chip chip-completed">Završena</span></td>
+              <td style="font-weight:700;font-variant-numeric:tabular-nums">600,00 €</td>
+              <td><a href="rezervacije.html" class="btn btn-ghost btn-sm">Detalji →</a></td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="padding:12px var(--space-lg);border-top:1px solid var(--line);font-size:13px;color:var(--muted);display:flex;justify-content:space-between;align-items:center">
+          <span>Prikazano 5 od 8 rezervacija</span>
+          <a href="rezervacije.html" class="btn btn-ghost btn-sm">Sve rezervacije →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Servisi -->
+    <div class="tab-panel" id="tab-servisi">
+      <div style="background:var(--glass);border:1px solid var(--line);border-radius:var(--radius-lg);padding:var(--space-lg)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-md)">
+          <h2 style="font-size:16px;font-weight:700">Povijest servisa</h2>
+          <button class="btn btn-secondary btn-sm">+ Dodaj servis</button>
+        </div>
+
+        <div class="service-item">
+          <div class="service-icon">🔧</div>
+          <div class="service-body">
+            <div class="service-title">Redovni servis — ulje, filteri, kočnice</div>
+            <div class="service-meta">15.02.2026. · 52.400 km · Auto servis Horvat, Zagreb</div>
+            <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">
+              <span class="chip chip-completed" style="font-size:11px">Završen</span>
+              <span style="font-size:12px;color:var(--muted)">Sljedeći servis: 01.09.2026. / 62.000 km</span>
+            </div>
+          </div>
+          <div class="service-cost">320,00 €</div>
+        </div>
+
+        <div class="service-item">
+          <div class="service-icon" style="background:rgba(255,209,102,0.1);border-color:rgba(255,209,102,0.25)">🛞</div>
+          <div class="service-body">
+            <div class="service-title">Zamjena pneumatika — 4 ljetne gume</div>
+            <div class="service-meta">20.04.2025. · 48.200 km · Vulkanizerstvo Šimić, Zagreb</div>
+            <div style="margin-top:6px">
+              <span class="chip chip-completed" style="font-size:11px">Završen</span>
+            </div>
+          </div>
+          <div class="service-cost">480,00 €</div>
+        </div>
+
+        <div class="service-item">
+          <div class="service-icon" style="background:rgba(63,208,255,0.1);border-color:rgba(63,208,255,0.25)">🔩</div>
+          <div class="service-body">
+            <div class="service-title">Redovni servis — ulje, svjećice, air filter</div>
+            <div class="service-meta">10.09.2024. · 43.800 km · Auto servis Horvat, Zagreb</div>
+            <div style="margin-top:6px">
+              <span class="chip chip-completed" style="font-size:11px">Završen</span>
+            </div>
+          </div>
+          <div class="service-cost">295,00 €</div>
+        </div>
+
+        <div class="service-item">
+          <div class="service-icon" style="background:rgba(255,107,127,0.1);border-color:rgba(255,107,127,0.25)">💥</div>
+          <div class="service-body">
+            <div class="service-title">Popravak — zamjena prednjeg branika</div>
+            <div class="service-meta">03.03.2024. · 39.100 km · Ovlašteni VW servis, Zagreb</div>
+            <div style="margin-top:6px">
+              <span class="chip chip-completed" style="font-size:11px">Završen</span>
+              <span style="font-size:12px;color:var(--muted);margin-left:6px">Kasko prijava #KZ-2024-0312</span>
+            </div>
+          </div>
+          <div class="service-cost">1.240,00 €</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer style="border-top:1px solid var(--line);padding:var(--space-md) var(--space-lg);display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted);max-width:var(--page-max);margin:0 auto;width:100%">
+    <span>CarRent Control Surface</span>
+    <span>ASP.NET Core MVC · /vozila/1</span>
+  </footer>
+</div>
+
+<script>
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+(function() {
+  const hash = location.hash.replace('#tab-', '');
+  if (!hash) return;
+  const btn = document.querySelector('.tab-btn[data-tab="' + hash + '"]');
+  if (btn) btn.click();
+})();
+
+document.querySelectorAll('.nav-group-btn').forEach(btn => {
+  btn.addEventListener('click', () => btn.closest('.nav-group').classList.toggle('open'));
+});
+document.addEventListener('click', e => {
+  if (!e.target.closest('.nav-group'))
+    document.querySelectorAll('.nav-group').forEach(g => g.classList.remove('open'));
+});
+</script>
+</body>
+</html>

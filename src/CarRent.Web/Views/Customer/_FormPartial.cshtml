@@ -1,0 +1,11 @@
+@model CustomerFormVm
+<form asp-action="@(Model.Id == 0 ? "Create" : "Edit")" method="post" class="crud-form">
+    <input type="hidden" asp-for="Id" />
+    <div class="field"><label asp-for="FirstName"></label><input asp-for="FirstName" class="form-control" /><span asp-validation-for="FirstName" class="field-error"></span></div>
+    <div class="field"><label asp-for="LastName"></label><input asp-for="LastName" class="form-control" /><span asp-validation-for="LastName" class="field-error"></span></div>
+    <div class="field"><label asp-for="Email"></label><input asp-for="Email" class="form-control" /><span asp-validation-for="Email" class="field-error"></span></div>
+    <div class="field"><label asp-for="Phone"></label><input asp-for="Phone" class="form-control" /><span asp-validation-for="Phone" class="field-error"></span></div>
+    <partial name="_DateTimePartial" model='new DateTimeFieldVm { FieldName = "DateOfBirth", Label = "Datum rođenja", Value = Model.DateOfBirth }' />
+    <div class="field"><label asp-for="DriverLicenseNumber"></label><input asp-for="DriverLicenseNumber" class="form-control" /><span asp-validation-for="DriverLicenseNumber" class="field-error"></span></div>
+    <div class="actions"><button type="submit" class="btn-primary">Spremi</button><a asp-action="Index">Odustani</a></div>
+</form>

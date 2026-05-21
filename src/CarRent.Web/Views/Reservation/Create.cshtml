@@ -1,0 +1,5 @@
+@model ReservationFormVm
+@{ ViewData["Title"] = "Nova rezervacija"; ViewData["Breadcrumbs"] = BreadcrumbHelper.Build("Home", "Rezervacije", "Nova"); }
+<h1 style="font-size:22px;font-weight:800;margin-bottom:var(--space-md)">Nova rezervacija</h1>
+<partial name="_FormPartial" />
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

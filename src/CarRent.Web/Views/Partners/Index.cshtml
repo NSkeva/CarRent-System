@@ -1,35 +1,9 @@
 @model IReadOnlyList<Partner>
-
-<section class="panel">
-    <h1>Partneri</h1>
-    <p>Popis partnera i kontakt osoba s pripremom za kasnije edit/brisanje workflowe.</p>
-</section>
-
+@{ ViewData["Title"] = "Partneri"; ViewData["Breadcrumbs"] = BreadcrumbHelper.Build("Home", "Partneri"); }
+<partial name="_CrudIndexHeaderPartial" model='("Partneri", "Novi partner", Url.Action("SearchRows"), "partner-rows")' />
 <section class="panel">
     <table class="data-table">
-        <thead>
-        <tr>
-            <th>Tvrtka</th>
-            <th>Kontakt osoba</th>
-            <th>Kontakt broj</th>
-            <th>Email</th>
-            <th>Akcije</th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach (var partner in Model)
-        {
-            <tr>
-                <td>@partner.CompanyName</td>
-                <td>@partner.ContactPerson</td>
-                <td>@partner.Phone</td>
-                <td>@partner.Email</td>
-                <td>
-                    <button type="button">Edit</button>
-                    <button type="button">Delete</button>
-                </td>
-            </tr>
-        }
-        </tbody>
+        <thead><tr><th>Tvrtka</th><th>Kontakt</th><th>Telefon</th><th>Email</th><th></th></tr></thead>
+        <tbody id="partner-rows"><partial name="_IndexRows" model="Model" /></tbody>
     </table>
 </section>

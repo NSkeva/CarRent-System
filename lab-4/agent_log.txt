@@ -1,0 +1,4 @@
+# Lab 4 agent log (popunjava se Cursor hookovima iz .github/hooks/log_ai_lab4.sh)
+----- 2026-05-21 13:48:12 -----
+manual-lab4-export-check
+

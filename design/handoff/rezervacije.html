@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rezervacije — CarRent Control Surface</title>
+<link rel="stylesheet" href="glass.css">
+<style>
+  .filter-chips { display: flex; align-items: center; gap: var(--space-sm); flex-wrap: wrap; }
+  .filter-chip {
+    padding: 5px 14px; border-radius: 20px;
+    font-size: 13px; font-weight: 600;
+    border: 1px solid var(--line); background: var(--glass); color: var(--muted);
+    cursor: pointer; transition: all var(--transition); line-height: 1.4;
+  }
+  .filter-chip:hover { border-color: var(--acc); color: var(--acc); }
+  .filter-chip.active { background: rgba(138,125,255,0.15); border-color: var(--acc); color: var(--acc); }
+  .filter-chip .cnt { opacity: 0.7; font-size: 11px; margin-left: 3px; }
+
+  .tbl-id { font-family: ui-monospace, 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); font-weight: 700; }
+  .tbl-dates { font-size: 13px; color: var(--muted); white-space: nowrap; }
+  .tbl-price { font-weight: 700; font-size: 14px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .tbl-customer strong { font-size: 14px; display: block; }
+  .tbl-customer span { font-size: 12px; color: var(--muted); }
+  .tbl-vehicle { font-size: 14px; }
+  .tbl-vehicle .reg {
+    font-size: 11px; font-weight: 700; color: var(--acc-2); display: block; margin-top: 2px;
+    font-family: ui-monospace, monospace; letter-spacing: 0.08em;
+  }
+
+  .pagination {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px var(--space-lg);
+    border-top: 1px solid var(--line);
+    font-size: 13px; color: var(--muted);
+    flex-wrap: wrap; gap: var(--space-sm);
+  }
+  .page-btns { display: flex; gap: 4px; }
+  .page-btn {
+    width: 32px; height: 32px; border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600;
+    border: 1px solid var(--line); background: var(--glass); color: var(--muted);
+    cursor: pointer; transition: all var(--transition);
+  }
+  .page-btn:hover { color: var(--txt); border-color: var(--acc); }
+  .page-btn.active { background: rgba(138,125,255,0.15); border-color: var(--acc); color: var(--acc); }
+
+  @media (max-width: 980px) {
+    .data-table thead th:nth-child(4),
+    .data-table thead th:nth-child(5),
+    .data-table tbody td:nth-child(4),
+    .data-table tbody td:nth-child(5) { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="page-shell">
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="site-logo" href="index.html">
+        <div class="logo-mark">🚗</div>
+        CarRent <span>Control Surface</span>
+      </a>
+      <nav class="nav-primary">
+        <div class="nav-group">
+          <button class="nav-group-btn">
+            Operativa
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown">
+            <a href="dashboard.html">🏠 Početna</a>
+            <a href="timeline.html">📅 Timeline</a>
+            <a href="dnevni-plan.html">📋 Dnevni plan</a>
+            <a href="vozni-park.html">🚗 Vozni park</a>
+          </div>
+        </div>
+        <div class="nav-group">
+          <button class="nav-group-btn active">
+            Podaci
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown">
+            <a href="rezervacije.html" class="active">🗓 Rezervacije</a>
+            <a href="vozilo-detalji.html">🚘 Vozila</a>
+            <a href="#">👤 Kupci</a>
+            <div class="nav-dropdown-divider"></div>
+            <a href="#">🔧 Servisi</a>
+            <a href="#">🏢 Poslovnice</a>
+            <a href="#">➕ Dodaci</a>
+            <a href="#">👥 Zaposlenici</a>
+            <a href="#">🤝 Partneri</a>
+          </div>
+        </div>
+      </nav>
+      <div class="header-actions">
+        <button class="lang-toggle">HR</button>
+        <div class="user-chip">
+          <div class="user-avatar">MK</div>
+          Marko K.
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="breadcrumbs">
+    <a href="index.html">Početna</a>
+    <span class="sep">›</span>
+    <span class="current">Rezervacije</span>
+  </div>
+
+  <main class="page-content">
+
+    <div class="crud-toolbar rise-in" style="margin-bottom:var(--space-md)">
+      <h1 class="crud-toolbar-title">Rezervacije</h1>
+      <div class="search-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input id="search-input" class="search-input" type="search" placeholder="Pretraži kupca, vozilo, ID…">
+      </div>
+      <a href="rezervacije-forma.html" class="btn btn-primary">+ Nova rezervacija</a>
+    </div>
+
+    <div class="filter-chips rise-in" style="margin-bottom:var(--space-md)" id="filter-chips">
+      <button class="filter-chip active" data-f="all">Sve <span class="cnt">12</span></button>
+      <button class="filter-chip" data-f="draft">Nacrt <span class="cnt">2</span></button>
+      <button class="filter-chip" data-f="confirmed">Potvrđena <span class="cnt">3</span></button>
+      <button class="filter-chip" data-f="active">Aktivna <span class="cnt">4</span></button>
+      <button class="filter-chip" data-f="completed">Završena <span class="cnt">2</span></button>
+      <button class="filter-chip" data-f="planned">Planirana <span class="cnt">1</span></button>
+    </div>
+
+    <div class="table-wrap rise-in">
+      <table class="data-table" id="rez-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Kupac</th>
+            <th>Vozilo</th>
+            <th>Od</th>
+            <th>Do</th>
+            <th>Status</th>
+            <th>Poslovnica</th>
+            <th>Ukupno</th>
+            <th style="width:90px">Akcije</th>
+          </tr>
+        </thead>
+        <tbody id="rez-tbody"></tbody>
+      </table>
+
+      <div class="empty-state" id="empty-state" style="display:none">
+        <div style="font-size:48px;margin-bottom:var(--space-md);opacity:0.4">🔍</div>
+        <h3>Nema rezultata</h3>
+        <p>Pokušaj s drugačijim pojmom ili resetiraj filtere.</p>
+        <button class="btn btn-secondary" style="margin-top:var(--space-md)" onclick="resetFilters()">Resetiraj filtere</button>
+      </div>
+
+      <div class="pagination">
+        <span id="pg-info">Prikazano 1–12 od 12</span>
+        <div class="page-btns">
+          <button class="page-btn active">1</button>
+          <button class="page-btn">2</button>
+          <button class="page-btn">›</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer style="border-top:1px solid var(--line);padding:var(--space-md) var(--space-lg);display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted);max-width:var(--page-max);margin:0 auto;width:100%">
+    <span>CarRent Control Surface</span>
+    <span>ASP.NET Core MVC · /rezervacije</span>
+  </footer>
+</div>
+
+<!-- Delete modal -->
+<div class="modal-backdrop" id="del-modal" style="display:none">
+  <div class="modal">
+    <div class="modal-icon">🗑</div>
+    <h3>Obriši rezervaciju?</h3>
+    <p>Rezervacija <strong id="modal-id"></strong> za <strong id="modal-cust"></strong> bit će trajno obrisana. Ova radnja se ne može poništiti.</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Odustani</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">Obriši rezervaciju</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toasts"></div>
+
+<script>
+const RESERVATIONS = [
+  { id:'RZ-0073', customer:'Goran Penić',     phone:'+385 91 234 5678', vehicle:'Peugeot 308 1.5', reg:'SP-089-MN', from:'27.05.2026.', to:'31.05.2026.', status:'planned',   branch:'Sl. Brod', total:'560,00 €' },
+  { id:'RZ-0071', customer:'Luka Perić',       phone:'+385 98 765 4321', vehicle:'Škoda Octavia',   reg:'OS-789-EF', from:'25.05.2026.', to:'31.05.2026.', status:'draft',     branch:'Osijek',   total:'875,00 €' },
+  { id:'RZ-0067', customer:'Ante Stanković',   phone:'+385 91 876 5432', vehicle:'Ford Fiesta',     reg:'ZG-221-GH', from:'24.05.2026.', to:'29.05.2026.', status:'draft',     branch:'Zagreb',   total:'450,00 €' },
+  { id:'RZ-0065', customer:'Kristina Fumić',   phone:'+385 95 543 2109', vehicle:'Seat Ibiza',      reg:'ZG-712-OP', from:'18.05.2026.', to:'25.05.2026.', status:'confirmed', branch:'Zagreb',   total:'720,00 €' },
+  { id:'RZ-0063', customer:'Maja Vuković',     phone:'+385 99 321 0987', vehicle:'Toyota Yaris',    reg:'ST-456-CD', from:'22.05.2026.', to:'27.05.2026.', status:'confirmed', branch:'Split',    total:'625,00 €' },
+  { id:'RZ-0061', customer:'Filip Radić',      phone:'+385 91 109 8765', vehicle:'Opel Astra',      reg:'ZG-567-KL', from:'15.05.2026.', to:'21.05.2026.', status:'active',    branch:'Zagreb',   total:'840,00 €' },
+  { id:'RZ-0059', customer:'Sanja Marković',   phone:'+385 98 210 9876', vehicle:'Renault Clio',    reg:'RI-334-IJ', from:'20.05.2026.', to:'22.05.2026.', status:'confirmed', branch:'Rijeka',   total:'270,00 €' },
+  { id:'RZ-0056', customer:'Petar Šimić',      phone:'+385 95 432 1098', vehicle:'VW Golf VII',     reg:'ZG-123-AB', from:'13.05.2026.', to:'19.05.2026.', status:'active',    branch:'Zagreb',   total:'980,00 €' },
+  { id:'RZ-0053', customer:'Renata Jurić',     phone:'+385 91 987 6543', vehicle:'Ford Fiesta',     reg:'ZG-221-GH', from:'10.05.2026.', to:'14.05.2026.', status:'completed', branch:'Zagreb',   total:'360,00 €' },
+  { id:'RZ-0049', customer:'Mirela Bošković',  phone:'+385 99 654 3210', vehicle:'Peugeot 308',     reg:'SP-089-MN', from:'11.05.2026.', to:'17.05.2026.', status:'active',    branch:'Sl. Brod', total:'770,00 €' },
+  { id:'RZ-0046', customer:'Damir Novak',      phone:'+385 98 543 2109', vehicle:'Renault Clio',    reg:'RI-334-IJ', from:'08.05.2026.', to:'14.05.2026.', status:'active',    branch:'Rijeka',   total:'630,00 €' },
+  { id:'RZ-0044', customer:'Tomislav Kovač',   phone:'+385 91 765 4321', vehicle:'Škoda Octavia',   reg:'OS-789-EF', from:'05.05.2026.', to:'12.05.2026.', status:'completed', branch:'Osijek',   total:'1.120,00 €' }
+];
+
+const STATUS_MAP = {
+  draft:     { label:'Nacrt',      cls:'chip-draft'     },
+  confirmed: { label:'Potvrđena',  cls:'chip-confirmed' },
+  active:    { label:'Aktivna',    cls:'chip-active'    },
+  completed: { label:'Završena',   cls:'chip-completed' },
+  cancelled: { label:'Otkazana',   cls:'chip-cancelled' },
+  planned:   { label:'Planirana',  cls:'chip-planned'   }
+};
+
+let recs = [...RESERVATIONS];
+let currentFilter = 'all', currentSearch = '', pendingDel = null;
+
+function renderTable() {
+  const tbody = document.getElementById('rez-tbody');
+  tbody.innerHTML = '';
+  let count = 0;
+  recs.forEach(r => {
+    const mF = currentFilter === 'all' || r.status === currentFilter;
+    const q = currentSearch.toLowerCase();
+    const mS = !q || r.id.toLowerCase().includes(q) || r.customer.toLowerCase().includes(q) || r.vehicle.toLowerCase().includes(q) || r.reg.toLowerCase().includes(q) || r.branch.toLowerCase().includes(q);
+    if (!mF || !mS) return;
+    count++;
+    const { label, cls } = STATUS_MAP[r.status] || { label: r.status, cls: 'chip-draft' };
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="tbl-id">${r.id}</td>
+      <td class="tbl-customer"><strong>${r.customer}</strong><span>${r.phone}</span></td>
+      <td class="tbl-vehicle">${r.vehicle}<span class="reg">${r.reg}</span></td>
+      <td class="tbl-dates">${r.from}</td>
+      <td class="tbl-dates">${r.to}</td>
+      <td><span class="chip ${cls}">${label}</span></td>
+      <td style="font-size:13px;color:var(--muted)">${r.branch}</td>
+      <td class="tbl-price">${r.total}</td>
+      <td>
+        <div class="actions">
+          <a href="rezervacije-forma.html" class="btn btn-ghost btn-sm btn-icon" title="Uredi" style="font-size:15px">✏️</a>
+          <button class="btn btn-ghost btn-sm btn-icon" title="Obriši" style="color:var(--danger);font-size:15px"
+            onclick="openDel('${r.id}','${r.customer.replace(/'/g,"\\'")}')">🗑</button>
+        </div>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('empty-state').style.display = count===0 ? 'block' : 'none';
+  document.getElementById('pg-info').textContent = count > 0 ? `Prikazano 1–${count} od ${count}` : 'Nema rezultata';
+}
+
+document.getElementById('search-input').addEventListener('input', e => {
+  currentSearch = e.target.value; renderTable();
+});
+
+document.getElementById('filter-chips').addEventListener('click', e => {
+  const chip = e.target.closest('[data-f]'); if (!chip) return;
+  currentFilter = chip.dataset.f;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.toggle('active', c.dataset.f === currentFilter));
+  renderTable();
+});
+
+function openDel(id, cust) {
+  pendingDel = id;
+  document.getElementById('modal-id').textContent = id;
+  document.getElementById('modal-cust').textContent = cust;
+  document.getElementById('del-modal').style.display = 'flex';
+}
+function closeModal() { document.getElementById('del-modal').style.display='none'; pendingDel=null; }
+function confirmDelete() {
+  if (!pendingDel) return;
+  const idx = recs.findIndex(r => r.id === pendingDel);
+  if (idx>-1) recs.splice(idx,1);
+  closeModal(); renderTable();
+  toast('success','Rezervacija obrisana', pendingDel + ' je uspješno uklonjena.');
+}
+document.getElementById('del-modal').addEventListener('click', e => { if(e.target===e.currentTarget) closeModal(); });
+
+function toast(type, title, msg) {
+  const c = document.getElementById('toasts');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<div class="toast-icon">${type==='success'?'✓':'!'}</div><div class="toast-body"><div class="toast-title">${title}</div><div class="toast-msg">${msg}</div></div><button class="toast-close" onclick="this.parentElement.remove()">×</button>`;
+  c.appendChild(t);
+  setTimeout(()=>t.remove(), 4200);
+}
+
+function resetFilters() {
+  currentFilter='all'; currentSearch='';
+  document.getElementById('search-input').value='';
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.toggle('active',c.dataset.f==='all'));
+  renderTable();
+}
+
+renderTable();
+</script>
+<script>
+  document.querySelectorAll('.nav-group-btn').forEach(btn => {
+    btn.addEventListener('click', () => btn.closest('.nav-group').classList.toggle('open'));
+  });
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.nav-group'))
+      document.querySelectorAll('.nav-group').forEach(g => g.classList.remove('open'));
+  });
+</script>
+</body>
+</html>

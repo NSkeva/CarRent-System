@@ -1,21 +1,13 @@
 @model IReadOnlyList<Reservation>
-
-<section class="panel"><h1>Rezervacije</h1></section>
-<section class="panel">
+@{ ViewData["Title"] = "Rezervacije"; ViewData["Breadcrumbs"] = BreadcrumbHelper.Build("Home", "Rezervacije"); }
+<partial name="_CrudIndexHeaderPartial" model='("Rezervacije", "+ Nova rezervacija", Url.Action("SearchRows"), "reservation-rows")' />
+<div class="table-wrap rise-in">
     <table class="data-table">
-        <thead><tr><th>ID</th><th>Kupac</th><th>Vozilo</th><th>Period</th><th>Status</th><th></th></tr></thead>
-        <tbody>
-        @foreach (var item in Model)
-        {
+        <thead>
             <tr>
-                <td>@item.Id</td>
-                <td>@item.CustomerId</td>
-                <td>@item.VehicleId</td>
-                <td>@item.StartDate:yyyy-MM-dd -> @item.EndDate:yyyy-MM-dd</td>
-                <td>@item.Status</td>
-                <td><a asp-action="Details" asp-route-id="@item.Id">Detalji</a></td>
+                <th>ID</th><th>Kupac</th><th>Vozilo</th><th>Početak</th><th>Završetak</th><th>Status</th><th>Cijena</th><th></th>
             </tr>
-        }
-        </tbody>
+        </thead>
+        <tbody id="reservation-rows"><partial name="_IndexRows" model="Model" /></tbody>
     </table>
-</section>
+</div>

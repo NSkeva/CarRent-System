@@ -1,17 +1,12 @@
 @model IReadOnlyList<BranchOffice>
-
-<section class="panel"><h1>Poslovnice</h1></section>
-<section class="panel">
+@{
+    ViewData["Title"] = "Poslovnice";
+    ViewData["Breadcrumbs"] = BreadcrumbHelper.Build("Home", "Poslovnice");
+}
+<partial name="_CrudIndexHeaderPartial" model='("Poslovnice", "Nova poslovnica", Url.Action("SearchRows"), "branch-rows")' />
+<div class="table-wrap rise-in">
     <table class="data-table">
-        <thead><tr><th>Naziv</th><th>Tip lokacije</th><th>Adresa</th><th>Telefon</th><th></th></tr></thead>
-        <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.Name</td><td>@item.LocationType</td><td>@item.Address</td><td>@item.Phone</td>
-                <td><a asp-action="Details" asp-route-id="@item.Id">Detalji</a></td>
-            </tr>
-        }
-        </tbody>
+        <thead><tr><th>Naziv</th><th>Tip</th><th>Adresa</th><th>Telefon</th><th></th></tr></thead>
+        <tbody id="branch-rows"><partial name="_IndexRows" model="Model" /></tbody>
     </table>
-</section>
+</div>

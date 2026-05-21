@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard — CarRent Control Surface</title>
+<link rel="stylesheet" href="glass.css">
+<style>
+  .hero-panel {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: var(--space-lg);
+    background: linear-gradient(130deg, rgba(138,125,255,0.18) 0%, rgba(63,208,255,0.08) 100%);
+    margin-bottom: var(--space-lg);
+  }
+  .hero-eyebrow {
+    font-size: 11px; font-weight: 700; color: var(--acc-2);
+    text-transform: uppercase; letter-spacing: 0.12em;
+    display: flex; align-items: center; gap: 7px; margin-bottom: 10px;
+  }
+  .hero-eyebrow::before { content: ''; display: inline-block; width: 24px; height: 2px; background: var(--acc-2); border-radius: 1px; }
+  .hero-title { font-size: 32px; font-weight: 800; letter-spacing: -0.025em; line-height: 1.15; margin-bottom: 8px; }
+  .hero-subtitle { color: var(--muted); font-size: 15px; max-width: 460px; }
+  .hero-date { font-size: 13px; color: var(--muted); margin-top: 6px; font-weight: 500; }
+  .hero-actions { display: flex; flex-direction: column; align-items: flex-end; gap: var(--space-sm); flex-shrink: 0; }
+
+  .section-gap { margin-bottom: var(--space-lg); }
+
+  /* Activity chart */
+  .activity-panel { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); }
+  .sparkline-wrap { position: relative; height: 72px; display: flex; align-items: flex-end; gap: 3px; }
+  .spark-bar { flex: 1; border-radius: 3px 3px 0 0; min-height: 4px; transition: opacity 150ms; }
+  .spark-bar:hover { opacity: 0.7; }
+  .spark-bar.acc { background: linear-gradient(180deg, rgba(138,125,255,0.8), rgba(138,125,255,0.2)); }
+  .spark-bar.cyan { background: linear-gradient(180deg, rgba(63,208,255,0.8), rgba(63,208,255,0.2)); }
+  .chart-labels { display: flex; justify-content: space-between; margin-top: 6px; font-size: 10px; color: var(--muted); }
+
+  /* Events mini list */
+  .event-list { display: flex; flex-direction: column; gap: 8px; }
+  .event-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px; border-radius: var(--radius-md);
+    background: var(--glass); border: 1px solid var(--line);
+    transition: all var(--transition);
+  }
+  .event-row:hover { border-color: var(--line-strong); }
+  .event-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+  .event-icon.out { background: rgba(138,125,255,0.15); }
+  .event-icon.in  { background: rgba(63,208,255,0.12); }
+  .event-body { flex: 1; min-width: 0; }
+  .event-vehicle { font-size: 14px; font-weight: 600; }
+  .event-customer { font-size: 12px; color: var(--muted); }
+  .event-time { font-size: 13px; font-weight: 600; color: var(--muted); flex-shrink: 0; }
+  .event-link { font-size: 12px; color: var(--acc); flex-shrink: 0; }
+
+  @media (max-width: 980px) {
+    .hero-panel { flex-direction: column; align-items: flex-start; }
+    .hero-actions { align-items: flex-start; flex-direction: row; }
+    .activity-panel { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 640px) {
+    .hero-title { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+<div class="page-shell">
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="site-logo" href="index.html">
+        <div class="logo-mark">🚗</div>
+        CarRent <span>Control Surface</span>
+      </a>
+      <nav class="nav-primary">
+        <div class="nav-group">
+          <button class="nav-group-btn active">
+            Operativa
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown">
+            <a href="dashboard.html" class="active">🏠 Početna</a>
+            <a href="timeline.html">📅 Timeline</a>
+            <a href="dnevni-plan.html">📋 Dnevni plan</a>
+            <a href="vozni-park.html">🚗 Vozni park</a>
+          </div>
+        </div>
+        <div class="nav-group">
+          <button class="nav-group-btn">
+            Podaci
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown">
+            <a href="rezervacije.html">🗓 Rezervacije</a>
+            <a href="vozilo-detalji.html">🚘 Vozila</a>
+            <a href="#">👤 Kupci</a>
+            <div class="nav-dropdown-divider"></div>
+            <a href="#">🔧 Servisi</a>
+            <a href="#">🏢 Poslovnice</a>
+            <a href="#">➕ Dodaci</a>
+            <a href="#">👥 Zaposlenici</a>
+            <a href="#">🤝 Partneri</a>
+          </div>
+        </div>
+      </nav>
+      <div class="header-actions">
+        <button class="lang-toggle">HR</button>
+        <div class="user-chip">
+          <div class="user-avatar">MK</div>
+          Marko K.
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Breadcrumbs -->
+  <div class="breadcrumbs">
+    <span class="current">Početna</span>
+  </div>
+
+  <main class="page-content">
+
+    <!-- Hero -->
+    <div class="glass hero-panel rise-in">
+      <div>
+        <div class="hero-eyebrow">Fleet Pulse</div>
+        <h1 class="hero-title">Operativni pregled</h1>
+        <p class="hero-subtitle">Dnevni pregled stanja flote, aktivnih rezervacija i nadolazećih servisa.</p>
+        <div class="hero-date" id="hero-date">Učitavanje datuma…</div>
+      </div>
+      <div class="hero-actions">
+        <a href="rezervacije-forma.html" class="btn btn-primary">+ Nova rezervacija</a>
+        <a href="dnevni-plan.html" class="btn btn-secondary btn-sm">📋 Dnevni plan →</a>
+      </div>
+    </div>
+
+    <!-- KPI Grid -->
+    <div class="kpi-grid section-gap">
+      <div class="kpi-card rise-in">
+        <div class="kpi-icon">🚗</div>
+        <div class="kpi-value">48</div>
+        <div class="kpi-label">Ukupno vozila</div>
+        <div class="kpi-trend up">↑ 2 od prošlog tjedna</div>
+      </div>
+      <div class="kpi-card rise-in rise-in-1">
+        <div class="kpi-icon cyan">📅</div>
+        <div class="kpi-value" style="color:var(--acc-2)">23</div>
+        <div class="kpi-label">Aktivne rezervacije</div>
+        <div class="kpi-trend up">↑ 5 od jučer</div>
+      </div>
+      <div class="kpi-card rise-in rise-in-2">
+        <div class="kpi-icon green">🏢</div>
+        <div class="kpi-value" style="color:var(--success)">6</div>
+        <div class="kpi-label">Poslovnice</div>
+        <div class="kpi-trend" style="color:var(--muted)">Nema promjena</div>
+      </div>
+      <div class="kpi-card rise-in rise-in-3">
+        <div class="kpi-icon warn">🔧</div>
+        <div class="kpi-value" style="color:var(--warning)">4</div>
+        <div class="kpi-label">Servisi (30 dana)</div>
+        <div class="kpi-trend down">↓ 1 hitni</div>
+      </div>
+    </div>
+
+    <!-- Activity + Today's events -->
+    <div class="activity-panel section-gap">
+
+      <!-- Activity chart -->
+      <div class="glass">
+        <div class="section-heading" style="margin-bottom:var(--space-md)">
+          <h2 style="font-size:16px;font-weight:700">Aktivnost rezervacija</h2>
+          <span class="badge">zadnjih 14 dana</span>
+        </div>
+        <div style="display:flex;gap:var(--space-lg);margin-bottom:var(--space-md)">
+          <div>
+            <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Odlasci</div>
+            <div style="font-size:22px;font-weight:800;color:var(--acc)">89</div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Povrati</div>
+            <div style="font-size:22px;font-weight:800;color:var(--acc-2)">84</div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Prihod</div>
+            <div style="font-size:22px;font-weight:800;color:var(--success)">€ 6.240</div>
+          </div>
+        </div>
+        <div class="sparkline-wrap">
+          <div class="spark-bar acc" style="height:40%"></div>
+          <div class="spark-bar cyan" style="height:58%"></div>
+          <div class="spark-bar acc" style="height:44%"></div>
+          <div class="spark-bar cyan" style="height:78%"></div>
+          <div class="spark-bar acc" style="height:52%"></div>
+          <div class="spark-bar cyan" style="height:88%"></div>
+          <div class="spark-bar acc" style="height:68%"></div>
+          <div class="spark-bar cyan" style="height:100%"></div>
+          <div class="spark-bar acc" style="height:62%"></div>
+          <div class="spark-bar cyan" style="height:72%"></div>
+          <div class="spark-bar acc" style="height:48%"></div>
+          <div class="spark-bar cyan" style="height:82%"></div>
+          <div class="spark-bar acc" style="height:58%"></div>
+          <div class="spark-bar" style="height:94%;background:linear-gradient(180deg,var(--acc),var(--acc-2))"></div>
+        </div>
+        <div class="chart-labels">
+          <span>07.05</span><span>10.05</span><span>14.05</span><span>17.05</span><span>Danas</span>
+        </div>
+        <div style="display:flex;gap:var(--space-sm);margin-top:var(--space-md);font-size:12px;color:var(--muted)">
+          <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:rgba(138,125,255,0.7);display:inline-block"></span> Odlasci</span>
+          <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:rgba(63,208,255,0.7);display:inline-block"></span> Povrati</span>
+        </div>
+      </div>
+
+      <!-- Today's events -->
+      <div class="glass">
+        <div class="section-heading" style="margin-bottom:var(--space-md)">
+          <h2 style="font-size:16px;font-weight:700">Današnji događaji</h2>
+          <span class="badge">21. 05. 2026.</span>
+          <div class="actions"><a href="dnevni-plan.html" style="font-size:12px;color:var(--acc)">Svi →</a></div>
+        </div>
+        <div style="font-size:11px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">Odlasci (3)</div>
+        <div class="event-list" style="margin-bottom:var(--space-md)">
+          <div class="event-row">
+            <div class="event-icon out">↗</div>
+            <div class="event-body">
+              <div class="event-vehicle">BMW 3 · <span style="color:var(--acc-2);font-family:monospace;font-size:12px">ZG-123-AB</span></div>
+              <div class="event-customer">Ivan Horvat</div>
+            </div>
+            <div class="event-time">09:00</div>
+            <a class="event-link" href="dnevni-plan.html">→</a>
+          </div>
+          <div class="event-row">
+            <div class="event-icon out">↗</div>
+            <div class="event-body">
+              <div class="event-vehicle">Audi A4 · <span style="color:var(--acc-2);font-family:monospace;font-size:12px">OS-789-EF</span></div>
+              <div class="event-customer">Tomislav Kovač</div>
+            </div>
+            <div class="event-time">11:30</div>
+            <a class="event-link" href="dnevni-plan.html">→</a>
+          </div>
+          <div class="event-row">
+            <div class="event-icon out">↗</div>
+            <div class="event-body">
+              <div class="event-vehicle">VW Passat · <span style="color:var(--acc-2);font-family:monospace;font-size:12px">RI-321-GH</span></div>
+              <div class="event-customer">Maja Perić</div>
+            </div>
+            <div class="event-time">14:00</div>
+            <a class="event-link" href="dnevni-plan.html">→</a>
+          </div>
+        </div>
+        <div style="font-size:11px;font-weight:700;color:var(--acc-2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">Povrati (2)</div>
+        <div class="event-list">
+          <div class="event-row">
+            <div class="event-icon in">↙</div>
+            <div class="event-body">
+              <div class="event-vehicle">VW Golf · <span style="color:var(--acc-2);font-family:monospace;font-size:12px">ST-456-CD</span></div>
+              <div class="event-customer">Ana Marić</div>
+            </div>
+            <div class="event-time">12:00</div>
+            <a class="event-link" href="dnevni-plan.html">→</a>
+          </div>
+          <div class="event-row">
+            <div class="event-icon in">↙</div>
+            <div class="event-body">
+              <div class="event-vehicle">Ford Focus · <span style="color:var(--acc-2);font-family:monospace;font-size:12px">ZD-654-IJ</span></div>
+              <div class="event-customer">Luka Šimić</div>
+            </div>
+            <div class="event-time">16:30</div>
+            <a class="event-link" href="dnevni-plan.html">→</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="section-heading section-gap" style="margin-bottom:var(--space-md)">
+      <h2>Brzi pristup</h2>
+    </div>
+    <div class="quick-grid section-gap">
+      <a href="timeline.html" class="quick-card rise-in">
+        <div class="quick-card-icon">📅</div>
+        <h3>Timeline</h3>
+        <p>Mjesečni raspored flote. Vizualni pregled zauzetosti vozila po danima.</p>
+        <div class="quick-card-arrow">→</div>
+      </a>
+      <a href="dnevni-plan.html" class="quick-card rise-in rise-in-1">
+        <div class="quick-card-icon">📋</div>
+        <h3>Dnevni plan</h3>
+        <p>Svi odlasci i povrati za odabrani dan. Printable A4 format.</p>
+        <div class="quick-card-arrow">→</div>
+      </a>
+      <a href="vozni-park.html" class="quick-card rise-in rise-in-2">
+        <div class="quick-card-icon">🚗</div>
+        <h3>Vozni park</h3>
+        <p>Pregled svih vozila, filtriranje po poslovnici i tipu. Brze akcije.</p>
+        <div class="quick-card-arrow">→</div>
+      </a>
+      <a href="rezervacije.html" class="quick-card rise-in rise-in-3">
+        <div class="quick-card-icon">🗓</div>
+        <h3>Rezervacije</h3>
+        <p>Lista svih rezervacija, pretraga, filteri po statusu i brze akcije.</p>
+        <div class="quick-card-arrow">→</div>
+      </a>
+    </div>
+
+  </main>
+
+  <footer style="border-top:1px solid var(--line);padding:var(--space-md) var(--space-lg);display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted)">
+    <span>CarRent Control Surface · v1.0</span>
+    <span id="footer-time"></span>
+  </footer>
+</div>
+
+<script>
+  // Date display
+  const now = new Date();
+  const dani = ['nedjelja','ponedjeljak','utorak','srijeda','četvrtak','petak','subota'];
+  const mjeseci = ['siječnja','veljače','ožujka','travnja','svibnja','lipnja','srpnja','kolovoza','rujna','listopada','studenog','prosinca'];
+  document.getElementById('hero-date').textContent =
+    `${dani[now.getDay()]}, ${now.getDate()}. ${mjeseci[now.getMonth()]} ${now.getFullYear()}.`;
+  document.getElementById('footer-time').textContent =
+    now.toLocaleTimeString('hr-HR', { hour: '2-digit', minute: '2-digit' });
+
+  // Nav dropdowns
+  document.querySelectorAll('.nav-group-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const g = btn.closest('.nav-group');
+      g.classList.toggle('open');
+    });
+  });
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.nav-group'))
+      document.querySelectorAll('.nav-group').forEach(g => g.classList.remove('open'));
+  });
+</script>
+</body>
+</html>

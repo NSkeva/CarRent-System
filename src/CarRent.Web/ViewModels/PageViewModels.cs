@@ -1,5 +1,5 @@
-using CarRent.Console.Models.Entities;
-using CarRent.Console.Models.Enums;
+using CarRent.Model.Entities;
+using CarRent.Model.Enums;
 
 namespace CarRent.Web.ViewModels;
 
@@ -10,6 +10,8 @@ public sealed class HomeIndexVm
     public int Branches { get; init; }
     public int ServicesDueSoon { get; init; }
     public required IReadOnlyList<HomeQuickLinkVm> QuickLinks { get; init; }
+    public required IReadOnlyList<DailyReservationVm> TodayDepartures { get; init; }
+    public required IReadOnlyList<DailyReservationVm> TodayReturns { get; init; }
 }
 
 public sealed class HomeQuickLinkVm
@@ -36,6 +38,15 @@ public sealed class TimelineRowVm
 {
     public required Vehicle Vehicle { get; init; }
     public required IReadOnlyList<TimelineCellVm> Cells { get; init; }
+    public required IReadOnlyList<TimelineBarVm> Bars { get; init; }
+    public string? BranchName { get; init; }
+}
+
+public sealed class TimelineBarVm
+{
+    public required Reservation Reservation { get; init; }
+    public int StartDay { get; init; }
+    public int Span { get; init; }
 }
 
 public sealed class TimelineCellVm
@@ -63,15 +74,6 @@ public sealed class FleetCardVm
     public required Vehicle Vehicle { get; init; }
     public required string ImageUrl { get; init; }
     public required string BranchName { get; init; }
-}
-
-public sealed class Partner
-{
-    public int Id { get; init; }
-    public required string CompanyName { get; init; }
-    public required string ContactPerson { get; init; }
-    public required string Phone { get; init; }
-    public required string Email { get; init; }
 }
 
 public sealed class BreadcrumbHelper

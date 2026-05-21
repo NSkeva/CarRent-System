@@ -5,6 +5,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../CarRent.Console/CarRent.Console.csproj" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../CarRent.DAL/CarRent.DAL.csproj" />
+    <ProjectReference Include="../CarRent.Model/CarRent.Model.csproj" />
   </ItemGroup>
 </Project>

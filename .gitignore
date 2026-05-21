@@ -11,6 +11,10 @@ Thumbs.db
 .dotnet-home/
 .dotnet/
 .nuget/
+Data/
+*.db
+*.db-shm
+*.db-wal
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json

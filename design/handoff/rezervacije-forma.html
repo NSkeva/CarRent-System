@@ -1,0 +1,627 @@
+<!doctype html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nova rezervacija — CarRent Control Surface</title>
+<link rel="stylesheet" href="glass.css">
+<style>
+  .form-grid { display: grid; grid-template-columns: 1fr 340px; gap: var(--space-lg); align-items: start; }
+
+  .form-section {
+    background: var(--glass); backdrop-filter: var(--blur);
+    border: 1px solid var(--line); border-radius: var(--radius-lg); padding: var(--space-lg);
+  }
+  .form-section-title {
+    font-size: 13px; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    margin-bottom: var(--space-md); padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--line);
+  }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); }
+  .field-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-md); }
+  .field + .field { margin-top: var(--space-md); }
+
+  /* Autocomplete */
+  .autocomplete-wrap { position: relative; }
+  .autocomplete-dropdown {
+    position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 60;
+    background: var(--bg-soft); border: 1px solid var(--line-strong);
+    border-radius: var(--radius-md); box-shadow: var(--shadow-card);
+    max-height: 220px; overflow-y: auto; display: none;
+  }
+  .autocomplete-item {
+    padding: 10px 14px; cursor: pointer; font-size: 14px;
+    display: flex; align-items: center; justify-content: space-between;
+    transition: background var(--transition); gap: 10px;
+  }
+  .autocomplete-item:hover { background: var(--glass); }
+  .autocomplete-item .sub { font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .autocomplete-empty { padding: 14px; text-align: center; color: var(--muted); font-size: 13px; }
+
+  /* DateTime picker */
+  .dt-picker-wrap { position: relative; }
+  .dt-popover {
+    position: absolute; top: calc(100% + 4px); left: 0; z-index: 70;
+    background: var(--bg-soft); border: 1px solid var(--line-strong);
+    border-radius: var(--radius-lg); box-shadow: var(--shadow-card);
+    padding: var(--space-md); min-width: 268px; display: none;
+  }
+  .dt-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-md); }
+  .dt-header strong { font-size: 15px; font-weight: 600; }
+  .dt-nav {
+    background: var(--glass); border: 1px solid var(--line); border-radius: var(--radius-sm);
+    width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--muted); font-size: 16px; transition: all var(--transition);
+  }
+  .dt-nav:hover { color: var(--txt); background: var(--glass-hover); }
+  .dt-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }
+  .dt-weekday { font-size: 10px; font-weight: 600; color: var(--muted); padding: 4px 0; text-transform: uppercase; }
+  .dt-day {
+    font-size: 13px; padding: 5px 2px; border-radius: var(--radius-sm);
+    cursor: pointer; transition: all var(--transition);
+  }
+  .dt-day:hover { background: var(--glass-hover); }
+  .dt-day.today { color: var(--acc-2); font-weight: 700; }
+  .dt-day.selected { background: var(--acc); color: #fff; font-weight: 600; }
+  .dt-day.other { color: var(--muted); opacity: 0.35; }
+  .dt-time {
+    display: flex; align-items: center; gap: var(--space-sm);
+    margin-top: var(--space-md); padding-top: var(--space-md); border-top: 1px solid var(--line);
+  }
+  .dt-time label { font-size: 12px; color: var(--muted); font-weight: 600; }
+  .dt-time-input {
+    background: var(--glass); border: 1px solid var(--line); border-radius: var(--radius-sm);
+    color: var(--txt); padding: 5px 8px; width: 62px; font-size: 14px; text-align: center; outline: none;
+    font-family: inherit; transition: all var(--transition);
+  }
+  .dt-time-input:focus { border-color: var(--acc); }
+  .dt-footer { margin-top: var(--space-sm); display: flex; justify-content: flex-end; gap: var(--space-sm); }
+
+  /* Extras checkboxes */
+  .extras-list { display: flex; flex-direction: column; gap: 8px; }
+  .extra-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 12px; border-radius: var(--radius-md);
+    border: 1px solid var(--line); background: var(--glass);
+    cursor: pointer; transition: all var(--transition);
+    gap: 10px;
+  }
+  .extra-item:hover { border-color: var(--line-strong); }
+  .extra-item.checked { border-color: rgba(138,125,255,0.45); background: rgba(138,125,255,0.08); }
+  .extra-item input[type="checkbox"] { display: none; }
+  .extra-check {
+    width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid var(--line-strong);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; flex-shrink: 0; transition: all var(--transition);
+    color: transparent; background: transparent;
+  }
+  .extra-item.checked .extra-check { background: var(--acc); border-color: var(--acc); color: #fff; }
+  .extra-label { flex: 1; font-size: 14px; font-weight: 500; }
+  .extra-price { font-size: 13px; color: var(--muted); white-space: nowrap; }
+
+  /* Price summary */
+  .price-row {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 13px; padding: 4px 0;
+  }
+  .price-row .k { color: var(--muted); }
+  .price-row .v { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .price-total {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 18px; font-weight: 800; padding-top: var(--space-sm);
+    border-top: 1px solid var(--line); margin-top: var(--space-sm);
+    letter-spacing: -0.01em;
+  }
+  .price-total .label { font-size: 13px; font-weight: 600; color: var(--muted); }
+
+  .form-actions {
+    display: flex; gap: var(--space-sm); justify-content: flex-end;
+    padding-top: var(--space-md); border-top: 1px solid var(--line); margin-top: var(--space-md);
+  }
+
+  @media (max-width: 980px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .field-row { grid-template-columns: 1fr; }
+    .field-row-3 { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 640px) {
+    .field-row-3 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="page-shell">
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="site-logo" href="index.html">
+        <div class="logo-mark">🚗</div>
+        CarRent <span>Control Surface</span>
+      </a>
+      <nav class="nav-primary">
+        <div class="nav-group">
+          <button class="nav-group-btn">
+            Operativa
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown">
+            <a href="dashboard.html">🏠 Početna</a>
+            <a href="timeline.html">📅 Timeline</a>
+            <a href="dnevni-plan.html">📋 Dnevni plan</a>
+            <a href="vozni-park.html">🚗 Vozni park</a>
+          </div>
+        </div>
+        <div class="nav-group">
+          <button class="nav-group-btn active">
+            Podaci
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown">
+            <a href="rezervacije.html" class="active">🗓 Rezervacije</a>
+            <a href="vozilo-detalji.html">🚘 Vozila</a>
+            <a href="#">👤 Kupci</a>
+            <div class="nav-dropdown-divider"></div>
+            <a href="#">🔧 Servisi</a>
+            <a href="#">🏢 Poslovnice</a>
+            <a href="#">➕ Dodaci</a>
+            <a href="#">👥 Zaposlenici</a>
+            <a href="#">🤝 Partneri</a>
+          </div>
+        </div>
+      </nav>
+      <div class="header-actions">
+        <button class="lang-toggle">HR</button>
+        <div class="user-chip">
+          <div class="user-avatar">MK</div>
+          Marko K.
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="breadcrumbs">
+    <a href="index.html">Početna</a>
+    <span class="sep">›</span>
+    <a href="rezervacije.html">Rezervacije</a>
+    <span class="sep">›</span>
+    <span class="current">Nova rezervacija</span>
+  </div>
+
+  <main class="page-content">
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-lg)" class="rise-in">
+      <div>
+        <h1 style="font-size:22px;font-weight:800;letter-spacing:-0.02em">Nova rezervacija</h1>
+        <p style="font-size:13px;color:var(--muted);margin-top:3px">Ispuni sve obavezne podatke za kreiranje rezervacije.</p>
+      </div>
+      <a href="rezervacije.html" class="btn btn-secondary btn-sm">← Odustani</a>
+    </div>
+
+    <div class="form-grid">
+
+      <!-- Left: main form -->
+      <div style="display:flex;flex-direction:column;gap:var(--space-md)">
+
+        <!-- Kupac + Vozilo -->
+        <div class="form-section rise-in">
+          <div class="form-section-title">Kupac i vozilo</div>
+          <div class="field-row">
+            <div class="field">
+              <label class="field-label">Kupac <span class="req">*</span></label>
+              <div class="autocomplete-wrap" id="kupac-wrap">
+                <input id="kupac-input" class="field-input" type="text" placeholder="Pretraži kupca…" autocomplete="off">
+                <div class="autocomplete-dropdown" id="kupac-dd"></div>
+              </div>
+              <span class="field-msg error" id="kupac-err" style="display:none">Odabir kupca je obavezan.</span>
+            </div>
+            <div class="field">
+              <label class="field-label">Vozilo <span class="req">*</span></label>
+              <div class="autocomplete-wrap" id="vozilo-wrap">
+                <input id="vozilo-input" class="field-input" type="text" placeholder="Pretraži vozilo…" autocomplete="off">
+                <div class="autocomplete-dropdown" id="vozilo-dd"></div>
+              </div>
+              <span class="field-msg error" id="vozilo-err" style="display:none">Odabir vozila je obavezan.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Datumi + poslovnice -->
+        <div class="form-section rise-in rise-in-1">
+          <div class="form-section-title">Termini i poslovnice</div>
+          <div class="field-row">
+            <div class="field">
+              <label class="field-label">Datum preuzimanja <span class="req">*</span></label>
+              <div class="dt-picker-wrap" id="od-wrap">
+                <input id="od-input" class="field-input" type="text" placeholder="DD.MM.GGGG. HH:MM" autocomplete="off" readonly style="cursor:pointer">
+                <div class="dt-popover" id="od-popover"></div>
+              </div>
+              <span class="field-msg error" id="od-err" style="display:none">Datum preuzimanja je obavezan.</span>
+            </div>
+            <div class="field">
+              <label class="field-label">Datum povrata <span class="req">*</span></label>
+              <div class="dt-picker-wrap" id="do-wrap">
+                <input id="do-input" class="field-input" type="text" placeholder="DD.MM.GGGG. HH:MM" autocomplete="off" readonly style="cursor:pointer">
+                <div class="dt-popover" id="do-popover"></div>
+              </div>
+              <span class="field-msg error" id="do-err" style="display:none">Datum povrata mora biti nakon preuzimanja.</span>
+            </div>
+          </div>
+          <div class="field-row" style="margin-top:var(--space-md)">
+            <div class="field">
+              <label class="field-label">Poslovnica preuzimanja</label>
+              <select class="field-select" id="pb-od">
+                <option value="">Odaberi poslovnicu…</option>
+                <option selected>Zagreb – Savska 12</option>
+                <option>Split – Domovinskog rata 8</option>
+                <option>Osijek – Europska avenija 4</option>
+                <option>Rijeka – Korzo 22</option>
+                <option>Slavonski Brod – Trg Ivane Brlić-Mažuranić 1</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="field-label">Poslovnica povrata</label>
+              <select class="field-select" id="pb-do">
+                <option value="">Ista kao preuzimanje</option>
+                <option>Zagreb – Savska 12</option>
+                <option>Split – Domovinskog rata 8</option>
+                <option>Osijek – Europska avenija 4</option>
+                <option>Rijeka – Korzo 22</option>
+                <option>Slavonski Brod – Trg Ivane Brlić-Mažuranić 1</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Napomene + status -->
+        <div class="form-section rise-in rise-in-2">
+          <div class="form-section-title">Dodatne informacije</div>
+          <div class="field-row">
+            <div class="field" style="grid-column:1/-1">
+              <label class="field-label">Napomene</label>
+              <textarea class="field-textarea" id="napomene" rows="3" placeholder="Posebni zahtjevi, napomene za operatera…"></textarea>
+            </div>
+          </div>
+          <div class="field-row" style="margin-top:var(--space-md)">
+            <div class="field">
+              <label class="field-label">Status rezervacije</label>
+              <select class="field-select" id="status-sel">
+                <option value="draft">Nacrt</option>
+                <option value="confirmed" selected>Potvrđena</option>
+                <option value="planned">Planirana</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="field-label">Broj putovnice / OIB</label>
+              <input class="field-input" type="text" placeholder="npr. AA1234567 ili 12345678901">
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right: extras + summary -->
+      <div style="display:flex;flex-direction:column;gap:var(--space-md)">
+
+        <!-- Dodaci -->
+        <div class="form-section rise-in">
+          <div class="form-section-title">Dodaci</div>
+          <div class="extras-list" id="extras-list">
+            <label class="extra-item" data-price="8">
+              <input type="checkbox" class="extra-cb" value="8">
+              <div class="extra-check">✓</div>
+              <span class="extra-label">GPS navigacija</span>
+              <span class="extra-price">+8 €/dan</span>
+            </label>
+            <label class="extra-item" data-price="6">
+              <input type="checkbox" class="extra-cb" value="6">
+              <div class="extra-check">✓</div>
+              <span class="extra-label">Dječje sjedalo</span>
+              <span class="extra-price">+6 €/dan</span>
+            </label>
+            <label class="extra-item" data-price="15">
+              <input type="checkbox" class="extra-cb" value="15">
+              <div class="extra-check">✓</div>
+              <span class="extra-label">Kasko osiguranje</span>
+              <span class="extra-price">+15 €/dan</span>
+            </label>
+            <label class="extra-item" data-price="5">
+              <input type="checkbox" class="extra-cb" value="5">
+              <div class="extra-check">✓</div>
+              <span class="extra-label">Zimske gume</span>
+              <span class="extra-price">+5 €/dan</span>
+            </label>
+            <label class="extra-item" data-price="7">
+              <input type="checkbox" class="extra-cb" value="7">
+              <div class="extra-check">✓</div>
+              <span class="extra-label">WiFi hotspot</span>
+              <span class="extra-price">+7 €/dan</span>
+            </label>
+            <label class="extra-item" data-price="10">
+              <input type="checkbox" class="extra-cb" value="10">
+              <div class="extra-check">✓</div>
+              <span class="extra-label">Drugi vozač</span>
+              <span class="extra-price">+10 €/dan</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Price summary -->
+        <div class="form-section rise-in rise-in-1">
+          <div class="form-section-title">Sažetak cijene</div>
+          <div class="price-row">
+            <span class="k">Vozilo</span>
+            <span class="v" id="sum-vehicle">— €/dan</span>
+          </div>
+          <div class="price-row">
+            <span class="k">Trajanje</span>
+            <span class="v" id="sum-days">— dana</span>
+          </div>
+          <div class="price-row">
+            <span class="k">Osnovna cijena</span>
+            <span class="v" id="sum-base">—</span>
+          </div>
+          <div class="price-row">
+            <span class="k">Dodaci</span>
+            <span class="v" id="sum-extras">0,00 €</span>
+          </div>
+          <div class="price-total">
+            <span class="label">Ukupno</span>
+            <span id="sum-total">—</span>
+          </div>
+          <div class="form-actions">
+            <a href="rezervacije.html" class="btn btn-secondary">Odustani</a>
+            <button class="btn btn-primary" id="submit-btn" onclick="submitForm()">Spremi rezervaciju</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <footer style="border-top:1px solid var(--line);padding:var(--space-md) var(--space-lg);display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted);max-width:var(--page-max);margin:0 auto;width:100%">
+    <span>CarRent Control Surface</span>
+    <span>ASP.NET Core MVC · /rezervacije/nova</span>
+  </footer>
+</div>
+
+<div class="toast-container" id="toasts"></div>
+
+<script>
+// ── Data ─────────────────────────────────────────────
+const CUSTOMERS = [
+  { value:'c1', label:'Ivan Horvat',      sub:'+385 91 234 5678' },
+  { value:'c2', label:'Ana Marić',        sub:'+385 98 654 3210' },
+  { value:'c3', label:'Petar Šimić',      sub:'+385 95 321 7654' },
+  { value:'c4', label:'Tomislav Kovač',   sub:'+385 99 876 5432' },
+  { value:'c5', label:'Maja Vuković',     sub:'+385 91 543 2109' },
+  { value:'c6', label:'Sanja Marković',   sub:'+385 98 210 9876' },
+  { value:'c7', label:'Damir Novak',      sub:'+385 95 432 1098' },
+  { value:'c8', label:'Renata Jurić',     sub:'+385 91 987 6543' },
+  { value:'c9', label:'Kristina Fumić',   sub:'+385 99 654 3210' },
+  { value:'c10',label:'Filip Radić',      sub:'+385 98 321 0987' }
+];
+
+const VEHICLES_DATA = [
+  { value:'v1', label:'VW Golf VII 1.6 TDI',      sub:'ZG-123-AB · Zagreb',       price:120 },
+  { value:'v2', label:'Toyota Yaris 1.5 HSD',     sub:'ST-456-CD · Split',        price:95  },
+  { value:'v3', label:'Škoda Octavia 2.0 TDI',    sub:'OS-789-EF · Osijek',       price:140 },
+  { value:'v4', label:'Ford Fiesta 1.0 EcoBoost', sub:'ZG-221-GH · Zagreb',       price:85  },
+  { value:'v5', label:'Renault Clio 1.5 dCi',     sub:'RI-334-IJ · Rijeka',       price:90  },
+  { value:'v6', label:'Opel Astra 1.6 CDTI',      sub:'ZG-567-KL · Zagreb',       price:115 },
+  { value:'v7', label:'Peugeot 308 1.5 BlueHDi',  sub:'SP-089-MN · Sl. Brod',    price:110 },
+  { value:'v8', label:'Seat Ibiza 1.0 TSI',        sub:'ZG-712-OP · Zagreb',       price:88  }
+];
+
+// ── Autocomplete ─────────────────────────────────────
+function makeAutocomplete(inputId, ddId, data, onSelect) {
+  const input = document.getElementById(inputId);
+  const dd = document.getElementById(ddId);
+  let selectedVal = null;
+
+  function show(items) {
+    if (!items.length) {
+      dd.innerHTML = '<div class="autocomplete-empty">Nema rezultata</div>';
+    } else {
+      dd.innerHTML = items.map(it =>
+        `<div class="autocomplete-item" data-v="${it.value}" data-l="${it.label.replace(/"/g,'&quot;')}">
+           <span>${it.label}</span>
+           <span class="sub">${it.sub||''}</span>
+         </div>`
+      ).join('');
+      dd.querySelectorAll('.autocomplete-item').forEach(el => {
+        el.addEventListener('click', () => {
+          input.value = el.dataset.l;
+          selectedVal = el.dataset.v;
+          onSelect && onSelect(el.dataset.v, el.dataset.l);
+          dd.style.display = 'none';
+          input.classList.remove('field-error');
+        });
+      });
+    }
+    dd.style.display = 'block';
+  }
+
+  function filter(q) {
+    if (!q) return data.slice(0, 6);
+    const lq = q.toLowerCase();
+    return data.filter(d => d.label.toLowerCase().includes(lq) || (d.sub&&d.sub.toLowerCase().includes(lq)));
+  }
+
+  input.addEventListener('focus', () => show(filter(input.value)));
+  input.addEventListener('input', () => { selectedVal=null; show(filter(input.value)); });
+  document.addEventListener('click', e => { if(!input.closest('.autocomplete-wrap').contains(e.target)) dd.style.display='none'; });
+  return { getVal: () => selectedVal };
+}
+
+// ── DateTime Picker ──────────────────────────────────
+const MONTHS_HR = ['Siječanj','Veljača','Ožujak','Travanj','Svibanj','Lipanj','Srpanj','Kolovoz','Rujan','Listopad','Studeni','Prosinac'];
+const WDAYS = ['Pon','Uto','Sri','Čet','Pet','Sub','Ned'];
+
+function makePicker(inputId, popoverId, onConfirm) {
+  const input = document.getElementById(inputId);
+  const pop = document.getElementById(popoverId);
+  let selDate = null, h = '10', m = '00';
+  let cy = 2026, cm = 4;
+
+  function renderCal() {
+    const dim = new Date(cy, cm+1, 0).getDate();
+    const fd = new Date(cy, cm, 1).getDay(); // 0=Sun
+    const off = fd===0 ? 6 : fd-1;
+    const now = new Date();
+
+    let cal = `<div class="dt-header">
+      <button class="dt-nav" id="${inputId}-prev">‹</button>
+      <strong>${MONTHS_HR[cm]} ${cy}</strong>
+      <button class="dt-nav" id="${inputId}-next">›</button>
+    </div><div class="dt-grid">`;
+
+    WDAYS.forEach(d => cal += `<div class="dt-weekday">${d}</div>`);
+    for(let i=0;i<off;i++) cal += '<div></div>';
+    for(let d=1;d<=dim;d++) {
+      const isSel = selDate && selDate.d===d && selDate.m===cm && selDate.y===cy;
+      const isTd = now.getFullYear()===cy && now.getMonth()===cm && now.getDate()===d;
+      cal += `<div class="dt-day${isSel?' selected':''}${isTd?' today':''}" data-d="${d}">${d}</div>`;
+    }
+    cal += `</div>
+    <div class="dt-time">
+      <label>Sat</label>
+      <input class="dt-time-input" type="number" id="${inputId}-h" min="0" max="23" value="${h}">
+      <span style="color:var(--muted)">:</span>
+      <label>Min</label>
+      <input class="dt-time-input" type="number" id="${inputId}-m" min="0" max="59" value="${m}">
+    </div>
+    <div class="dt-footer">
+      <button class="btn btn-ghost btn-sm" id="${inputId}-cancel">Odustani</button>
+      <button class="btn btn-primary btn-sm" id="${inputId}-confirm">Potvrdi</button>
+    </div>`;
+
+    pop.innerHTML = cal;
+
+    pop.querySelectorAll('.dt-day[data-d]').forEach(el => {
+      el.addEventListener('click', () => {
+        selDate = { d:+el.dataset.d, m:cm, y:cy };
+        renderCal();
+      });
+    });
+    document.getElementById(`${inputId}-prev`).addEventListener('click', e => { e.stopPropagation(); cm--; if(cm<0){cm=11;cy--;} renderCal(); });
+    document.getElementById(`${inputId}-next`).addEventListener('click', e => { e.stopPropagation(); cm++; if(cm>11){cm=0;cy++;} renderCal(); });
+    document.getElementById(`${inputId}-h`).addEventListener('change', e => { h=String(+e.target.value).padStart(2,'0'); });
+    document.getElementById(`${inputId}-m`).addEventListener('change', e => { m=String(+e.target.value).padStart(2,'0'); });
+    document.getElementById(`${inputId}-cancel`).addEventListener('click', () => { pop.style.display='none'; });
+    document.getElementById(`${inputId}-confirm`).addEventListener('click', () => {
+      if(!selDate) return;
+      const val=`${String(selDate.d).padStart(2,'0')}.${String(selDate.m+1).padStart(2,'0')}.${selDate.y}. ${h}:${m}`;
+      input.value=val; input.classList.remove('field-error');
+      onConfirm && onConfirm(val, selDate);
+      pop.style.display='none';
+      recalc();
+    });
+  }
+
+  input.addEventListener('click', () => { renderCal(); pop.style.display='block'; });
+  document.addEventListener('click', e => {
+    if(!input.closest('.dt-picker-wrap').contains(e.target)) pop.style.display='none';
+  });
+  return { getDate: () => selDate };
+}
+
+// ── Price calc ───────────────────────────────────────
+let selVehiclePrice = 0;
+let odDate = null, doDate = null;
+
+const kupacAC = makeAutocomplete('kupac-input','kupac-dd', CUSTOMERS);
+const voziloAC = makeAutocomplete('vozilo-input','vozilo-dd', VEHICLES_DATA, (val, label) => {
+  const v = VEHICLES_DATA.find(x=>x.value===val);
+  if(v){ selVehiclePrice=v.price; recalc(); }
+});
+const odPicker = makePicker('od-input','od-popover', (val, d) => { odDate=d; recalc(); });
+const doPicker = makePicker('do-input','do-popover', (val, d) => { doDate=d; recalc(); });
+
+function diffDays(d1, d2) {
+  const a = new Date(d1.y, d1.m, d1.d);
+  const b = new Date(d2.y, d2.m, d2.d);
+  return Math.max(0, Math.round((b-a)/(1000*60*60*24)));
+}
+
+function recalc() {
+  const v = document.getElementById('sum-vehicle');
+  const da = document.getElementById('sum-days');
+  const ba = document.getElementById('sum-base');
+  const ex = document.getElementById('sum-extras');
+  const to = document.getElementById('sum-total');
+
+  const days = odDate && doDate ? diffDays(odDate, doDate) : 0;
+  const base = selVehiclePrice * days;
+  const extrasPerDay = Array.from(document.querySelectorAll('.extra-cb:checked')).reduce((s,c)=>s+parseInt(c.value),0);
+  const extrasTotal = extrasPerDay * days;
+  const total = base + extrasTotal;
+
+  v.textContent  = selVehiclePrice ? `${selVehiclePrice} €/dan` : '— €/dan';
+  da.textContent = days ? `${days} ${days===1?'dan':'dana'}` : '—';
+  ba.textContent = base ? `${base.toLocaleString('hr-HR',{minimumFractionDigits:2})} €` : '—';
+  ex.textContent = extrasTotal ? `${extrasTotal.toLocaleString('hr-HR',{minimumFractionDigits:2})} €` : '0,00 €';
+  to.textContent = total ? `${total.toLocaleString('hr-HR',{minimumFractionDigits:2})} €` : '—';
+}
+
+// Extras toggle
+document.querySelectorAll('.extra-item').forEach(item => {
+  item.addEventListener('click', e => {
+    if(e.target.tagName==='INPUT') return;
+    const cb = item.querySelector('input');
+    cb.checked = !cb.checked;
+    item.classList.toggle('checked', cb.checked);
+    recalc();
+  });
+  const cb = item.querySelector('input');
+  cb.addEventListener('change', () => { item.classList.toggle('checked', cb.checked); recalc(); });
+});
+
+// ── Validation + Submit ──────────────────────────────
+function submitForm() {
+  let valid = true;
+
+  function setErr(inputId, errId, show) {
+    const inp = document.getElementById(inputId);
+    const err = document.getElementById(errId);
+    if(show){ inp.classList.add('field-error'); err.style.display='flex'; }
+    else { inp.classList.remove('field-error'); err.style.display='none'; }
+    if(show) valid=false;
+  }
+
+  setErr('kupac-input','kupac-err', !document.getElementById('kupac-input').value.trim());
+  setErr('vozilo-input','vozilo-err', !document.getElementById('vozilo-input').value.trim());
+  setErr('od-input','od-err', !document.getElementById('od-input').value.trim());
+
+  const doVal = document.getElementById('do-input').value.trim();
+  const odVal = document.getElementById('od-input').value.trim();
+  const badDo = !doVal || (odDate && doDate && diffDays(odDate,doDate)<=0);
+  setErr('do-input','do-err', badDo);
+
+  if(valid) {
+    toast('success','Rezervacija kreirana','Nova rezervacija je uspješno pohranjena.');
+    setTimeout(()=> window.location.href='rezervacije.html', 1400);
+  }
+}
+
+function toast(type, title, msg) {
+  const c = document.getElementById('toasts');
+  const t = document.createElement('div');
+  t.className=`toast ${type}`;
+  t.innerHTML=`<div class="toast-icon">${type==='success'?'✓':'!'}</div><div class="toast-body"><div class="toast-title">${title}</div><div class="toast-msg">${msg}</div></div><button class="toast-close" onclick="this.parentElement.remove()">×</button>`;
+  c.appendChild(t);
+  setTimeout(()=>t.remove(),4200);
+}
+</script>
+<script>
+  document.querySelectorAll('.nav-group-btn').forEach(btn => {
+    btn.addEventListener('click', () => btn.closest('.nav-group').classList.toggle('open'));
+  });
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.nav-group'))
+      document.querySelectorAll('.nav-group').forEach(g => g.classList.remove('open'));
+  });
+</script>
+</body>
+</html>

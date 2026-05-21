@@ -1,0 +1,26 @@
+@{
+    var raw = ViewData["Breadcrumbs"] as string;
+    if (string.IsNullOrWhiteSpace(raw)) return;
+    var parts = raw.Split(" / ", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+}
+<div class="breadcrumbs">
+    @for (var i = 0; i < parts.Length; i++)
+    {
+        if (i > 0)
+        {
+            <span class="sep">›</span>
+        }
+        if (i == 0)
+        {
+            <a asp-controller="Home" asp-action="Index">Početna</a>
+        }
+        else if (i == parts.Length - 1)
+        {
+            <span class="current">@parts[i]</span>
+        }
+        else
+        {
+            <span>@parts[i]</span>
+        }
+    }
+</div>

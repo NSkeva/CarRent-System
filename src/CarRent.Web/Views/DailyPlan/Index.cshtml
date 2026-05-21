@@ -1,56 +1,73 @@
 @model DailyPlanVm
 @{
+    ViewData["Title"] = "Dnevni plan";
+    ViewData["Breadcrumbs"] = BreadcrumbHelper.Build("Home", "Dnevni plan");
     var dayInputValue = $"{Model.Day:yyyy-MM-dd}";
 }
 
-<section class="panel daily-header">
+<div class="plan-header no-print">
     <h1>Dnevni plan</h1>
-    <form method="get" class="toolbar">
-        <input type="date" name="day" value="@dayInputValue" />
-        <button type="submit">Ucitaj dan</button>
-        <button type="button" onclick="window.print()">Print A4</button>
+    <form method="get" class="date-input-group" style="display:flex;align-items:center;gap:8px">
+        <label for="day">Datum</label>
+        <input type="date" id="day" name="day" value="@dayInputValue" class="field-input" style="width:auto" />
+        <button type="submit" class="btn btn-secondary btn-sm">Učitaj</button>
+        <button type="button" class="btn btn-ghost btn-sm" onclick="window.print()">🖨 Ispis A4</button>
     </form>
-</section>
+</div>
 
-<section class="two-column">
-    <article class="panel">
-        <h2>Vozila koja se vracaju danas</h2>
+<div class="plan-cols">
+    <div class="glass">
+        <div class="plan-col-header">
+            <div class="col-icon povrat">↙</div>
+            <h2>Povrati</h2>
+            <span class="count">@Model.Returns.Count</span>
+        </div>
         @if (!Model.Returns.Any())
         {
-            <p>Nema povrata za odabrani dan.</p>
+            <div class="empty-state"><p>Nema povrata za odabrani dan.</p></div>
         }
-        else
+        @foreach (var item in Model.Returns)
         {
-            <ul class="event-list">
-                @foreach (var item in Model.Returns)
-                {
-                    <li>
-                        <strong>@item.Vehicle.Brand @item.Vehicle.Model (@item.Vehicle.RegistrationNumber)</strong>
-                        <span>Kupac: @item.Customer.FirstName @item.Customer.LastName</span>
-                        <span>Rezervacija #@item.Reservation.Id</span>
-                    </li>
-                }
-            </ul>
+            <div class="ev-card return">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start">
+                    <div>
+                        <div class="ev-vehicle">@item.Vehicle.Brand @item.Vehicle.Model</div>
+                        <div class="ev-reg">@item.Vehicle.RegistrationNumber</div>
+                    </div>
+                    <div class="ev-time">@item.Reservation.EndDate.ToString("HH:mm")</div>
+                </div>
+                <div style="font-size:13px;color:var(--muted);margin:6px 0">@item.Customer.FirstName @item.Customer.LastName</div>
+                <div class="day-card-actions">
+                    <a asp-controller="Reservation" asp-action="Details" asp-route-id="@item.Reservation.Id" class="btn btn-secondary btn-sm">Detalji</a>
+                </div>
+            </div>
         }
-    </article>
-    <article class="panel">
-        <h2>Vozila koja odlaze danas</h2>
+    </div>
+    <div class="glass">
+        <div class="plan-col-header">
+            <div class="col-icon odlaz">↗</div>
+            <h2>Odlasci</h2>
+            <span class="count">@Model.Departures.Count</span>
+        </div>
         @if (!Model.Departures.Any())
         {
-            <p>Nema odlazaka za odabrani dan.</p>
+            <div class="empty-state"><p>Nema odlazaka za odabrani dan.</p></div>
         }
-        else
+        @foreach (var item in Model.Departures)
         {
-            <ul class="event-list">
-                @foreach (var item in Model.Departures)
-                {
-                    <li>
-                        <strong>@item.Vehicle.Brand @item.Vehicle.Model (@item.Vehicle.RegistrationNumber)</strong>
-                        <span>Kupac: @item.Customer.FirstName @item.Customer.LastName</span>
-                        <span>Rezervacija #@item.Reservation.Id</span>
-                    </li>
-                }
-            </ul>
+            <div class="ev-card">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start">
+                    <div>
+                        <div class="ev-vehicle">@item.Vehicle.Brand @item.Vehicle.Model</div>
+                        <div class="ev-reg">@item.Vehicle.RegistrationNumber</div>
+                    </div>
+                    <div class="ev-time">@item.Reservation.StartDate.ToString("HH:mm")</div>
+                </div>
+                <div style="font-size:13px;color:var(--muted);margin:6px 0">@item.Customer.FirstName @item.Customer.LastName</div>
+                <div class="day-card-actions">
+                    <a asp-controller="Reservation" asp-action="Details" asp-route-id="@item.Reservation.Id" class="btn btn-secondary btn-sm">Detalji</a>
+                </div>
+            </div>
         }
-    </article>
-</section>
+    </div>
+</div>

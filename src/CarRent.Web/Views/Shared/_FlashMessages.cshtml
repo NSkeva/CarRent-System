@@ -1,0 +1,16 @@
+@if (TempData["Error"] is string err)
+{
+    <div class="flash-banner" style="max-width:var(--page-max);margin:0 auto;padding:0 var(--space-lg) var(--space-md);">@err</div>
+}
+@if (TempData["Success"] is string ok)
+{
+    <div class="toast-container" style="pointer-events:all;">
+        <div class="toast success">
+            <div class="toast-icon">✓</div>
+            <div class="toast-body">
+                <div class="toast-title">Uspjeh</div>
+                <div class="toast-msg">@ok</div>
+            </div>
+        </div>
+    </div>
+}

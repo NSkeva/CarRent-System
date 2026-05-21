@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Component Library — CarRent Control Surface</title>
+<link rel="stylesheet" href="glass.css">
+<style>
+  .lib-section { margin-bottom: var(--space-xl); }
+  .lib-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: var(--space-md); display: flex; align-items: center; gap: 8px; }
+  .lib-label::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+  .swatch-row { display: flex; flex-wrap: wrap; gap: var(--space-sm); }
+  .swatch { width: 80px; text-align: center; }
+  .swatch-color { height: 48px; border-radius: var(--radius-md); border: 1px solid var(--line); margin-bottom: 6px; }
+  .swatch-name { font-size: 11px; color: var(--muted); }
+  .row { display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--space-md); }
+  .col { display: flex; flex-direction: column; gap: var(--space-sm); }
+  .form-2col { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); }
+  .checkbox-list { display: flex; flex-direction: column; gap: 10px; }
+  .checkbox-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--glass); border: 1px solid var(--line); border-radius: var(--radius-md); cursor: pointer; transition: all var(--transition); }
+  .checkbox-item:hover { border-color: var(--acc); }
+  .checkbox-item input[type="checkbox"] { accent-color: var(--acc); width: 16px; height: 16px; cursor: pointer; }
+  .checkbox-item label { cursor: pointer; flex: 1; }
+  .checkbox-item .price { font-size: 13px; color: var(--muted); }
+
+  /* Mini sparkline */
+  .sparkline-wrap { position: relative; height: 64px; display: flex; align-items: flex-end; gap: 3px; padding: 0 2px; }
+  .spark-bar { flex: 1; border-radius: 3px 3px 0 0; background: linear-gradient(180deg, rgba(138,125,255,0.7), rgba(63,208,255,0.4)); min-height: 4px; transition: opacity var(--transition); }
+  .spark-bar:hover { opacity: 0.75; }
+
+  /* Skeleton loaders */
+  .skeleton { background: linear-gradient(90deg, var(--glass) 25%, rgba(255,255,255,0.12) 50%, var(--glass) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: var(--radius-sm); }
+  @keyframes shimmer { from { background-position: -200% 0; } to { background-position: 200% 0; } }
+</style>
+</head>
+<body>
+<div class="page-shell">
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="site-logo" href="index.html">
+        <div class="logo-mark">🚗</div>
+        CarRent <span>Control Surface</span>
+      </a>
+      <nav class="nav-primary">
+        <div class="nav-group">
+          <button class="nav-group-btn">
+            Operativa
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown">
+            <a href="dashboard.html">🏠 Početna</a>
+            <a href="timeline.html">📅 Timeline</a>
+            <a href="dnevni-plan.html">📋 Dnevni plan</a>
+            <a href="vozni-park.html">🚗 Vozni park</a>
+          </div>
+        </div>
+        <div class="nav-group">
+          <button class="nav-group-btn">
+            Podaci
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown">
+            <a href="rezervacije.html">🗓 Rezervacije</a>
+            <a href="vozilo-detalji.html">🚘 Vozila</a>
+            <a href="#">👤 Kupci</a>
+            <div class="nav-dropdown-divider"></div>
+            <a href="#">🔧 Servisi</a>
+            <a href="#">🏢 Poslovnice</a>
+            <a href="#">➕ Dodaci</a>
+            <a href="#">👥 Zaposlenici</a>
+            <a href="#">🤝 Partneri</a>
+          </div>
+        </div>
+        <a href="component-library.html" class="nav-group-btn active" style="color:var(--acc-2)">Component Library</a>
+      </nav>
+      <div class="header-actions">
+        <button class="lang-toggle">HR</button>
+        <div class="user-chip">
+          <div class="user-avatar">MK</div>
+          Marko K.
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Breadcrumbs -->
+  <div class="breadcrumbs">
+    <a href="index.html">Početna</a>
+    <span class="sep">›</span>
+    <span class="current">Component Library</span>
+  </div>
+
+  <main class="page-content">
+    <div class="glass" style="margin-bottom:var(--space-lg)">
+      <h1 style="font-size:28px;font-weight:800;letter-spacing:-0.02em;margin-bottom:6px">Component Library</h1>
+      <p style="color:var(--muted);font-size:14px">CarRent Control Surface · Dark glassmorphism · Inter · #8A7DFF + #3FD0FF</p>
+    </div>
+
+    <!-- ── Colours ── -->
+    <div class="lib-section">
+      <div class="lib-label">Colour tokens</div>
+      <div class="swatch-row">
+        <div class="swatch"><div class="swatch-color" style="background:#0B1020"></div><div class="swatch-name">--bg<br>#0B1020</div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#151D33"></div><div class="swatch-name">--bg-soft<br>#151D33</div></div>
+        <div class="swatch"><div class="swatch-color" style="background:rgba(255,255,255,0.07)"></div><div class="swatch-name">--glass<br>rgba 7%</div></div>
+        <div class="swatch"><div class="swatch-color" style="background:rgba(255,255,255,0.12)"></div><div class="swatch-name">--line-str<br>rgba 12%</div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#EDF2FF"></div><div class="swatch-name">--txt<br>#EDF2FF</div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#A8B2D9"></div><div class="swatch-name">--muted<br>#A8B2D9</div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#8A7DFF"></div><div class="swatch-name">--acc<br>#8A7DFF</div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#3FD0FF"></div><div class="swatch-name">--acc-2<br>#3FD0FF</div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#5DFFB0"></div><div class="swatch-name">--success<br>#5DFFB0</div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#FFD166"></div><div class="swatch-name">--warning<br>#FFD166</div></div>
+        <div class="swatch"><div class="swatch-color" style="background:#FF6B7F"></div><div class="swatch-name">--danger<br>#FF6B7F</div></div>
+      </div>
+    </div>
+
+    <!-- ── Buttons ── -->
+    <div class="lib-section">
+      <div class="lib-label">Buttons</div>
+      <div class="row" style="flex-wrap:wrap;gap:var(--space-md)">
+        <div class="col">
+          <div class="lib-label" style="font-size:10px;margin-bottom:4px">Size: default</div>
+          <div class="row">
+            <button class="btn btn-primary">+ Nova rezervacija</button>
+            <button class="btn btn-secondary">Filtriraj</button>
+            <button class="btn btn-ghost">Odustani</button>
+            <button class="btn btn-danger">🗑 Obriši</button>
+          </div>
+          <div class="lib-label" style="font-size:10px;margin-bottom:4px;margin-top:8px">Size: sm</div>
+          <div class="row">
+            <button class="btn btn-primary btn-sm">✏ Uredi</button>
+            <button class="btn btn-secondary btn-sm">👁 Detalji</button>
+            <button class="btn btn-ghost btn-sm">Servisi</button>
+            <button class="btn btn-danger btn-sm">🗑</button>
+          </div>
+          <div class="lib-label" style="font-size:10px;margin-bottom:4px;margin-top:8px">States</div>
+          <div class="row">
+            <button class="btn btn-primary" disabled>Spremi (disabled)</button>
+            <button class="btn-link">Zaboravljeno? Klikni ovdje</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Status Chips ── -->
+    <div class="lib-section">
+      <div class="lib-label">Status chips — Rezervacije &amp; Servisi</div>
+      <div class="row">
+        <span class="chip chip-draft">Draft</span>
+        <span class="chip chip-confirmed">Confirmed</span>
+        <span class="chip chip-active">Active</span>
+        <span class="chip chip-completed">Completed</span>
+        <span class="chip chip-cancelled">Cancelled</span>
+        <span class="chip chip-planned">Planned</span>
+        <span class="chip chip-inprogress">In Progress</span>
+      </div>
+    </div>
+
+    <!-- ── Glass Panel ── -->
+    <div class="lib-section">
+      <div class="lib-label">Glass Panel</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-md)">
+        <div class="glass">
+          <strong>Standard glass panel</strong>
+          <p style="color:var(--muted);font-size:13px;margin-top:6px">backdrop-filter blur(16px) · border rgba(255,255,255,0.12) · border-radius 16px · padding 24px</p>
+        </div>
+        <div class="glass glass-sm" style="background:linear-gradient(130deg,rgba(138,125,255,0.15),rgba(63,208,255,0.08))">
+          <strong>Accent tint panel</strong>
+          <p style="color:var(--muted);font-size:13px;margin-top:6px">Used for KPI highlights, hero sections, onboarding.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── KPI Cards ── -->
+    <div class="lib-section">
+      <div class="lib-label">KPI Cards</div>
+      <div class="kpi-grid">
+        <div class="kpi-card rise-in">
+          <div class="kpi-icon">🚗</div>
+          <div class="kpi-value">48</div>
+          <div class="kpi-label">Ukupno vozila</div>
+          <div class="kpi-trend up">↑ 3 od prošlog tjedna</div>
+        </div>
+        <div class="kpi-card rise-in rise-in-1">
+          <div class="kpi-icon cyan">📅</div>
+          <div class="kpi-value" style="color:var(--acc-2)">23</div>
+          <div class="kpi-label">Aktivne rezervacije</div>
+          <div class="kpi-trend up">↑ 5 od jučer</div>
+        </div>
+        <div class="kpi-card rise-in rise-in-2">
+          <div class="kpi-icon green">🏢</div>
+          <div class="kpi-value" style="color:var(--success)">6</div>
+          <div class="kpi-label">Poslovnice</div>
+          <div class="kpi-trend" style="color:var(--muted)">Nema promjena</div>
+        </div>
+        <div class="kpi-card rise-in rise-in-3">
+          <div class="kpi-icon warn">🔧</div>
+          <div class="kpi-value" style="color:var(--warning)">4</div>
+          <div class="kpi-label">Servisi (30 dana)</div>
+          <div class="kpi-trend down">↑ 2 nova unosa</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Data Table ── -->
+    <div class="lib-section">
+      <div class="lib-label">Data Table + CRUD Toolbar</div>
+      <div class="glass glass-flush">
+        <div class="crud-toolbar" style="padding:var(--space-md)">
+          <h2 class="crud-toolbar-title">Rezervacije</h2>
+          <div class="search-box">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input class="search-input" type="text" placeholder="Pretraži rezervacije…">
+          </div>
+          <button class="btn btn-primary btn-sm">+ Nova rezervacija</button>
+        </div>
+        <div class="table-wrap" style="border-radius:0;border:none;border-top:1px solid var(--line)">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>#ID</th>
+                <th>Kupac</th>
+                <th>Vozilo</th>
+                <th>Početak</th>
+                <th>Završetak</th>
+                <th>Status</th>
+                <th>Cijena</th>
+                <th>Akcije</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="color:var(--muted);font-family:monospace">#1042</td>
+                <td>Ivan Horvat</td>
+                <td><span style="color:var(--acc-2);font-family:monospace;font-size:12px;font-weight:700">ZG-123-AB</span> BMW 3</td>
+                <td>21.05.2026.</td>
+                <td>28.05.2026.</td>
+                <td><span class="chip chip-active">Active</span></td>
+                <td style="font-weight:600">€ 490,00</td>
+                <td><div class="actions">
+                  <button class="btn btn-sm btn-secondary btn-icon" title="Detalji">👁</button>
+                  <button class="btn btn-sm btn-ghost btn-icon" title="Uredi">✏</button>
+                  <button class="btn btn-sm btn-danger btn-icon" title="Obriši">🗑</button>
+                </div></td>
+              </tr>
+              <tr>
+                <td style="color:var(--muted);font-family:monospace">#1041</td>
+                <td>Ana Marić</td>
+                <td><span style="color:var(--acc-2);font-family:monospace;font-size:12px;font-weight:700">ST-456-CD</span> VW Golf</td>
+                <td>18.05.2026.</td>
+                <td>21.05.2026.</td>
+                <td><span class="chip chip-completed">Completed</span></td>
+                <td style="font-weight:600">€ 210,00</td>
+                <td><div class="actions">
+                  <button class="btn btn-sm btn-secondary btn-icon" title="Detalji">👁</button>
+                  <button class="btn btn-sm btn-ghost btn-icon" title="Uredi">✏</button>
+                  <button class="btn btn-sm btn-danger btn-icon" title="Obriši">🗑</button>
+                </div></td>
+              </tr>
+              <tr>
+                <td style="color:var(--muted);font-family:monospace">#1040</td>
+                <td>Tomislav Kovač</td>
+                <td><span style="color:var(--acc-2);font-family:monospace;font-size:12px;font-weight:700">OS-789-EF</span> Audi A4</td>
+                <td>25.05.2026.</td>
+                <td>30.05.2026.</td>
+                <td><span class="chip chip-confirmed">Confirmed</span></td>
+                <td style="font-weight:600">€ 375,00</td>
+                <td><div class="actions">
+                  <button class="btn btn-sm btn-secondary btn-icon" title="Detalji">👁</button>
+                  <button class="btn btn-sm btn-ghost btn-icon" title="Uredi">✏</button>
+                  <button class="btn btn-sm btn-danger btn-icon" title="Obriši">🗑</button>
+                </div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Form Fields ── -->
+    <div class="lib-section">
+      <div class="lib-label">Form Fields + Validation States</div>
+      <div class="glass">
+        <div class="form-2col" style="gap:var(--space-lg)">
+          <!-- Normal -->
+          <div class="field">
+            <label class="field-label">Kupac <span class="req">*</span></label>
+            <div class="autocomplete-wrap">
+              <input class="field-input" type="text" value="Ivan Horvat" placeholder="Pretraži kupca…">
+              <div class="autocomplete-dropdown">
+                <div class="autocomplete-item">Ivan Horvat <span class="sub">ivan.horvat@email.hr</span></div>
+                <div class="autocomplete-item focused">Ivana Horvat <span class="sub">ivana.h@firma.hr</span></div>
+                <div class="autocomplete-item">Ivanka Horvat <span class="sub">+385 91 234 5678</span></div>
+              </div>
+            </div>
+            <span class="field-help">Počni tipkati za pretragu kupaca</span>
+          </div>
+
+          <!-- Datetime picker -->
+          <div class="field">
+            <label class="field-label">Datum početka <span class="req">*</span></label>
+            <div class="dt-picker-wrap">
+              <input class="field-input" type="text" value="21.05.2026. 09:00" readonly style="cursor:pointer">
+              <div class="dt-popover">
+                <div class="dt-header">
+                  <button class="dt-nav">‹</button>
+                  <strong>Svibanj 2026.</strong>
+                  <button class="dt-nav">›</button>
+                </div>
+                <div class="dt-grid">
+                  <div class="dt-weekday">Po</div><div class="dt-weekday">Ut</div><div class="dt-weekday">Sr</div>
+                  <div class="dt-weekday">Če</div><div class="dt-weekday">Pe</div><div class="dt-weekday">Su</div><div class="dt-weekday">Ne</div>
+                  <div class="dt-day other-month">28</div><div class="dt-day other-month">29</div><div class="dt-day other-month">30</div>
+                  <div class="dt-day other-month">1</div><div class="dt-day">2</div><div class="dt-day">3</div><div class="dt-day">4</div>
+                  <div class="dt-day">5</div><div class="dt-day">6</div><div class="dt-day">7</div>
+                  <div class="dt-day">8</div><div class="dt-day">9</div><div class="dt-day">10</div><div class="dt-day">11</div>
+                  <div class="dt-day">12</div><div class="dt-day">13</div><div class="dt-day">14</div>
+                  <div class="dt-day">15</div><div class="dt-day">16</div><div class="dt-day">17</div><div class="dt-day">18</div>
+                  <div class="dt-day">19</div><div class="dt-day">20</div><div class="dt-day selected today">21</div>
+                  <div class="dt-day">22</div><div class="dt-day">23</div><div class="dt-day">24</div><div class="dt-day">25</div>
+                  <div class="dt-day">26</div><div class="dt-day">27</div><div class="dt-day">28</div>
+                  <div class="dt-day">29</div><div class="dt-day">30</div><div class="dt-day">31</div>
+                </div>
+                <div class="dt-time">
+                  <label>Sat</label>
+                  <input type="text" value="09">
+                  <span style="color:var(--muted)">:</span>
+                  <label>Min</label>
+                  <input type="text" value="00">
+                </div>
+                <div class="dt-footer">
+                  <button class="btn btn-ghost btn-sm">Poništi</button>
+                  <button class="btn btn-primary btn-sm">Potvrdi</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Error state -->
+          <div class="field">
+            <label class="field-label">Email <span class="req">*</span></label>
+            <input class="field-input field-error" type="email" value="nije-validan-email">
+            <span class="field-msg error">⚠ Unesite ispravnu email adresu</span>
+          </div>
+
+          <!-- Success state -->
+          <div class="field">
+            <label class="field-label">Registracija vozila <span class="req">*</span></label>
+            <input class="field-input field-success" type="text" value="ZG-123-AB">
+            <span class="field-msg success">✓ Vozilo dostupno u odabranom periodu</span>
+          </div>
+
+          <!-- Select -->
+          <div class="field">
+            <label class="field-label">Status</label>
+            <select class="field-select">
+              <option>Confirmed</option>
+              <option selected>Active</option>
+              <option>Completed</option>
+              <option>Cancelled</option>
+            </select>
+          </div>
+
+          <!-- Textarea -->
+          <div class="field">
+            <label class="field-label">Napomena</label>
+            <textarea class="field-textarea" placeholder="Opcionalna napomena za vozača ili dispečera…"></textarea>
+          </div>
+        </div>
+
+        <!-- Addon checkboxes -->
+        <div style="margin-top:var(--space-lg)">
+          <div class="field-label" style="margin-bottom:var(--space-sm)">Dodaci na rezervaciji</div>
+          <div class="checkbox-list">
+            <label class="checkbox-item">
+              <input type="checkbox" checked>
+              <div><label>GPS navigacija</label><div style="font-size:12px;color:var(--muted)">Uređaj, karta CRO/EU</div></div>
+              <span class="price">€ 8/dan</span>
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox">
+              <div><label>Dječja sjedalica</label><div style="font-size:12px;color:var(--muted)">Gr. 1–3, homologacija ECE R44</div></div>
+              <span class="price">€ 6/dan</span>
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" checked>
+              <div><label>Dodatno osiguranje</label><div style="font-size:12px;color:var(--muted)">CDW bez franšize</div></div>
+              <span class="price">€ 15/dan</span>
+            </label>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;gap:var(--space-sm);margin-top:var(--space-lg);padding-top:var(--space-md);border-top:1px solid var(--line)">
+          <button class="btn btn-ghost">Odustani</button>
+          <button class="btn btn-primary">Spremi rezervaciju</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Toast ── -->
+    <div class="lib-section">
+      <div class="lib-label">Toast Notifications</div>
+      <div style="position:relative;height:180px;background:var(--glass);border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden">
+        <div style="position:absolute;top:var(--space-md);right:var(--space-md);display:flex;flex-direction:column;gap:var(--space-sm)">
+          <div class="toast success">
+            <div class="toast-icon">✓</div>
+            <div class="toast-body">
+              <div class="toast-title">Rezervacija spremljena</div>
+              <div class="toast-msg">Rezervacija #1043 uspješno kreirana.</div>
+            </div>
+            <span class="toast-close">×</span>
+          </div>
+          <div class="toast error">
+            <div class="toast-icon">!</div>
+            <div class="toast-body">
+              <div class="toast-title">Greška pri brisanju</div>
+              <div class="toast-msg">Poslovnica ima aktivna vozila — brisanje blokirano.</div>
+            </div>
+            <span class="toast-close">×</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Modal ── -->
+    <div class="lib-section">
+      <div class="lib-label">Delete Confirmation Modal</div>
+      <div style="position:relative;height:280px;background:var(--glass);border:1px solid var(--line);border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center">
+        <div style="position:absolute;inset:0;background:rgba(0,0,0,0.5);border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center">
+          <div class="modal" style="position:relative">
+            <div class="modal-icon">🗑</div>
+            <h3>Obriši rezervaciju #1042</h3>
+            <p>Ova akcija je nepovratna. Rezervacija će biti trajno uklonjena iz sustava zajedno s vezanim dodacima.</p>
+            <div class="modal-actions">
+              <button class="btn btn-ghost">Odustani</button>
+              <button class="btn btn-danger">Potvrdi brisanje</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Empty State ── -->
+    <div class="lib-section">
+      <div class="lib-label">Empty State</div>
+      <div class="glass">
+        <div class="empty-state">
+          <div class="empty-icon" style="font-size:56px;opacity:0.3">📋</div>
+          <h3>Nema rezervacija</h3>
+          <p>Za odabrani datum i filter nema pronađenih rezervacija.<br>Provjerite kriterije pretrage ili dodajte novu rezervaciju.</p>
+          <button class="btn btn-primary">+ Nova rezervacija</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Skeleton ── -->
+    <div class="lib-section">
+      <div class="lib-label">Skeleton Loaders</div>
+      <div class="kpi-grid" style="margin-bottom:var(--space-md)">
+        <div class="kpi-card">
+          <div class="skeleton" style="width:38px;height:38px;border-radius:var(--radius-md)"></div>
+          <div class="skeleton" style="height:32px;width:60%;border-radius:var(--radius-sm)"></div>
+          <div class="skeleton" style="height:14px;width:80%;border-radius:var(--radius-sm)"></div>
+        </div>
+        <div class="kpi-card">
+          <div class="skeleton" style="width:38px;height:38px;border-radius:var(--radius-md)"></div>
+          <div class="skeleton" style="height:32px;width:50%;border-radius:var(--radius-sm)"></div>
+          <div class="skeleton" style="height:14px;width:70%;border-radius:var(--radius-sm)"></div>
+        </div>
+        <div class="kpi-card">
+          <div class="skeleton" style="width:38px;height:38px;border-radius:var(--radius-md)"></div>
+          <div class="skeleton" style="height:32px;width:40%;border-radius:var(--radius-sm)"></div>
+          <div class="skeleton" style="height:14px;width:65%;border-radius:var(--radius-sm)"></div>
+        </div>
+        <div class="kpi-card">
+          <div class="skeleton" style="width:38px;height:38px;border-radius:var(--radius-md)"></div>
+          <div class="skeleton" style="height:32px;width:55%;border-radius:var(--radius-sm)"></div>
+          <div class="skeleton" style="height:14px;width:75%;border-radius:var(--radius-sm)"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Activity Sparkline ── -->
+    <div class="lib-section">
+      <div class="lib-label">Mini Activity Sparkline</div>
+      <div class="glass" style="max-width:360px">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em">Aktivnost — zadnjih 14 dana</div>
+        <div class="sparkline-wrap">
+          <div class="spark-bar" style="height:40%"></div>
+          <div class="spark-bar" style="height:60%"></div>
+          <div class="spark-bar" style="height:45%"></div>
+          <div class="spark-bar" style="height:80%"></div>
+          <div class="spark-bar" style="height:55%"></div>
+          <div class="spark-bar" style="height:90%"></div>
+          <div class="spark-bar" style="height:70%"></div>
+          <div class="spark-bar" style="height:100%"></div>
+          <div class="spark-bar" style="height:65%"></div>
+          <div class="spark-bar" style="height:75%"></div>
+          <div class="spark-bar" style="height:50%"></div>
+          <div class="spark-bar" style="height:85%"></div>
+          <div class="spark-bar" style="height:60%"></div>
+          <div class="spark-bar" style="height:95%;background:linear-gradient(180deg,var(--acc),var(--acc-2))"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer style="border-top:1px solid var(--line);padding:var(--space-md) var(--space-lg);display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted);max-width:var(--page-max);margin:0 auto;width:100%">
+    <span>CarRent Control Surface · Component Library v1.0</span>
+    <span>Inter · Dark Glassmorphism</span>
+  </footer>
+</div>
+
+<script>
+  // Nav dropdown toggle
+  document.querySelectorAll('.nav-group-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const group = btn.closest('.nav-group');
+      if (!group) return;
+      group.classList.toggle('open');
+      btn.classList.toggle('active');
+    });
+  });
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.nav-group')) {
+      document.querySelectorAll('.nav-group').forEach(g => g.classList.remove('open'));
+    }
+  });
+  // Toast close
+  document.querySelectorAll('.toast-close').forEach(btn => {
+    btn.addEventListener('click', () => btn.closest('.toast').remove());
+  });
+</script>
+</body>
+</html>

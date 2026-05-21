@@ -1,36 +1,79 @@
+@{
+    var operativaActive = new[] { "Home", "Timeline", "DailyPlan", "Fleet" }.Contains(ViewContext.RouteData.Values["controller"]?.ToString());
+    var podaciActive = !operativaActive && ViewContext.RouteData.Values["controller"]?.ToString() is not "Home";
+}
 <!DOCTYPE html>
 <html lang="hr">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - CarRent Lab2</title>
-    <link rel="stylesheet" href="~/css/site.css" />
+    <title>@ViewData["Title"] - CarRent Control Surface</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
-    <header class="top-shell">
-        <div class="brand">CarRent Control Surface</div>
-        <nav class="top-nav">
-            <a asp-controller="Home" asp-action="Index">Home</a>
-            <a asp-controller="Timeline" asp-action="Index">Timeline</a>
-            <a asp-controller="DailyPlan" asp-action="Index">Dnevni plan</a>
-            <a asp-controller="Fleet" asp-action="Index">Vozni park</a>
-            <a asp-controller="Partners" asp-action="Index">Partneri</a>
-            <a asp-controller="BranchOffice" asp-action="Index">Poslovnice</a>
-            <a asp-controller="Vehicle" asp-action="Index">Vozila</a>
-            <a asp-controller="Customer" asp-action="Index">Kupci</a>
-            <a asp-controller="Reservation" asp-action="Index">Rezervacije</a>
-            <a asp-controller="Addon" asp-action="Index">Dodaci</a>
-            <a asp-controller="ServiceRecord" asp-action="Index">Servisi</a>
-            <a asp-controller="Employee" asp-action="Index">Zaposlenici</a>
-        </nav>
+<div class="page-shell">
+    <header class="site-header no-print">
+        <div class="header-inner">
+            <a class="site-logo" asp-controller="Home" asp-action="Index">
+                <div class="logo-mark">🚗</div>
+                CarRent <span>Control Surface</span>
+            </a>
+            <nav class="nav-primary">
+                <div class="nav-group @(operativaActive ? "open" : "")">
+                    <button type="button" class="nav-group-btn @(operativaActive ? "active" : "")">
+                        Operativa
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                    </button>
+                    <div class="nav-dropdown">
+                        <a asp-controller="Home" asp-action="Index">🏠 Početna</a>
+                        <a asp-controller="Timeline" asp-action="Index">📅 Timeline</a>
+                        <a asp-controller="DailyPlan" asp-action="Index">📋 Dnevni plan</a>
+                        <a asp-controller="Fleet" asp-action="Index">🚗 Vozni park</a>
+                    </div>
+                </div>
+                <div class="nav-group @(podaciActive ? "open" : "")">
+                    <button type="button" class="nav-group-btn @(podaciActive ? "active" : "")">
+                        Podaci
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                    </button>
+                    <div class="nav-dropdown">
+                        <a asp-controller="Reservation" asp-action="Index">🗓 Rezervacije</a>
+                        <a asp-controller="Vehicle" asp-action="Index">🚘 Vozila</a>
+                        <a asp-controller="Customer" asp-action="Index">👤 Kupci</a>
+                        <div class="nav-dropdown-divider"></div>
+                        <a asp-controller="ServiceRecord" asp-action="Index">🔧 Servisi</a>
+                        <a asp-controller="BranchOffice" asp-action="Index">🏢 Poslovnice</a>
+                        <a asp-controller="Addon" asp-action="Index">➕ Dodaci</a>
+                        <a asp-controller="Employee" asp-action="Index">👥 Zaposlenici</a>
+                        <a asp-controller="Partners" asp-action="Index">🤝 Partneri</a>
+                    </div>
+                </div>
+            </nav>
+            <div class="header-actions">
+                <button type="button" class="lang-toggle" title="Jezik">HR</button>
+                <div class="user-chip">
+                    <div class="user-avatar">OP</div>
+                    Operater
+                </div>
+            </div>
+        </div>
     </header>
 
-    <main class="page-shell">
-        @if (ViewData["Breadcrumbs"] is string breadcrumbs && !string.IsNullOrWhiteSpace(breadcrumbs))
-        {
-            <div class="breadcrumbs">@breadcrumbs</div>
-        }
+    <partial name="_Breadcrumbs" />
+    <partial name="_FlashMessages" />
+
+    <main class="page-content">
         @RenderBody()
     </main>
+
+    <footer class="site-footer no-print">
+        <span>CarRent Control Surface</span>
+        <span>ASP.NET Core MVC</span>
+    </footer>
+</div>
+
+<partial name="_ValidationScriptsPartial" />
+<script src="~/js/site.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

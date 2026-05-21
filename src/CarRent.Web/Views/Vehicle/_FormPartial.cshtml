@@ -1,0 +1,14 @@
+@model VehicleFormVm
+<form asp-action="@(Model.Id == 0 ? "Create" : "Edit")" method="post" class="crud-form">
+    <input type="hidden" asp-for="Id" />
+    <div class="field"><label asp-for="RegistrationNumber"></label><input asp-for="RegistrationNumber" class="form-control" /><span asp-validation-for="RegistrationNumber" class="field-error"></span></div>
+    <div class="field"><label asp-for="Brand"></label><input asp-for="Brand" class="form-control" /><span asp-validation-for="Brand" class="field-error"></span></div>
+    <div class="field"><label asp-for="Model"></label><input asp-for="Model" class="form-control" /><span asp-validation-for="Model" class="field-error"></span></div>
+    <div class="field"><label asp-for="Year"></label><input asp-for="Year" class="form-control" /></div>
+    <div class="field"><label asp-for="Type"></label><select asp-for="Type" asp-items="Html.GetEnumSelectList<VehicleType>()" class="form-control"></select></div>
+    <div class="field"><label asp-for="MileageKm"></label><input asp-for="MileageKm" class="form-control" /></div>
+    <div class="field"><label asp-for="DailyPrice"></label><input asp-for="DailyPrice" class="form-control" /></div>
+    <div class="field"><label asp-for="IsActive"></label><input asp-for="IsActive" type="checkbox" /></div>
+    <partial name="_AutocompletePartial" model='new AutocompleteFieldVm { InputId = "branchSearch", HiddenName = "BranchOfficeId", Label = "Poslovnica", SearchUrl = "/api/lookup/branches", SelectedId = Model.BranchOfficeId, DisplayText = Model.BranchOfficeDisplay }' />
+    <div class="actions"><button type="submit" class="btn-primary">Spremi</button><a asp-action="Index">Odustani</a></div>
+</form>

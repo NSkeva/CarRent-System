@@ -1,13 +1,103 @@
 @model Vehicle
+@{
+    ViewData["Title"] = $"{Model.Brand} {Model.Model}";
+    ViewData["Breadcrumbs"] = BreadcrumbHelper.Build("Home", "Vozila", Model.RegistrationNumber);
+    var branchName = Model.BranchOffice?.Name ?? "—";
+}
 
-<section class="panel detail-card">
-    <h1>@Model.Brand @Model.Model</h1>
-    <p><strong>Registracija:</strong> @Model.RegistrationNumber</p>
-    <p><strong>Tip:</strong> @Model.Type</p>
-    <p><strong>Godina:</strong> @Model.Year</p>
-    <p><strong>Kilometraza:</strong> @Model.MileageKm km</p>
-    <p><strong>Cijena/dan:</strong> @Model.DailyPrice EUR</p>
-    <p><strong>Status:</strong> @(Model.IsActive ? "Aktivno" : "Neaktivno")</p>
-    <p><strong>Servisni zapisi:</strong> @Model.ServiceRecords.Count</p>
-    <a asp-action="Index">Natrag na listu</a>
-</section>
+<div class="vehicle-hero rise-in">
+    <div class="hero-visual">
+        <div style="font-size:80px;opacity:0.5">🚗</div>
+    </div>
+    <div class="hero-info">
+        <div class="hero-eyebrow">Vozilo</div>
+        <h1 class="hero-title" style="font-size:26px">@Model.Brand @Model.Model</h1>
+        <div class="hero-reg">@Model.RegistrationNumber</div>
+        <div class="hero-stats" style="display:flex;flex-wrap:wrap;gap:6px">
+            <span class="chip @(Model.IsActive ? "chip-completed" : "chip-cancelled")">@(Model.IsActive ? "Aktivno" : "Neaktivno")</span>
+            <span style="font-size:12px;color:var(--muted);padding:4px 10px;border:1px solid var(--line);border-radius:20px">@Model.Type · @Model.Year</span>
+            <span style="font-size:12px;color:var(--muted);padding:4px 10px;border:1px solid var(--line);border-radius:20px">🏢 @branchName</span>
+        </div>
+        <div class="hero-price">@Model.DailyPrice.ToString("N0") <span style="font-size:14px;font-weight:400;color:var(--muted)">EUR/dan</span></div>
+        <div class="hero-actions" style="display:flex;gap:8px;flex-wrap:wrap">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary btn-sm">Uredi</a>
+            <a asp-controller="Reservation" asp-action="Create" class="btn btn-secondary btn-sm">Nova rezervacija</a>
+            <a asp-controller="ServiceRecord" asp-action="Create" class="btn btn-ghost btn-sm">Novi servis</a>
+            <a asp-action="Index" class="btn btn-ghost btn-sm">← Lista</a>
+        </div>
+    </div>
+</div>
+
+<div class="tabs-bar" role="tablist">
+    <button type="button" class="tab-btn active" data-tab="pregled">Pregled</button>
+    <button type="button" class="tab-btn" data-tab="rezervacije">Rezervacije (@Model.Reservations.Count)</button>
+    <button type="button" class="tab-btn" data-tab="servisi">Servisi (@Model.ServiceRecords.Count)</button>
+</div>
+
+<div id="pregled" class="tab-panel active">
+    <div class="detail-grid">
+        <div class="glass">
+            <div class="form-section-title">Osnovno</div>
+            <div class="detail-row"><span>Registracija</span><span>@Model.RegistrationNumber</span></div>
+            <div class="detail-row"><span>Kilometraža</span><span>@Model.MileageKm km</span></div>
+            <div class="detail-row"><span>Poslovnica</span><span>@branchName</span></div>
+        </div>
+        <div class="glass">
+            <div class="form-section-title">Cijena i status</div>
+            <div class="detail-row"><span>Cijena / dan</span><span>@Model.DailyPrice EUR</span></div>
+            <div class="detail-row"><span>Godina</span><span>@Model.Year</span></div>
+            <div class="detail-row"><span>Tip</span><span>@Model.Type</span></div>
+        </div>
+    </div>
+</div>
+
+<div id="rezervacije" class="tab-panel">
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead><tr><th>ID</th><th>Kupac</th><th>Period</th><th>Status</th></tr></thead>
+            <tbody>
+            @foreach (var r in Model.Reservations.OrderByDescending(x => x.StartDate))
+            {
+                <tr>
+                    <td><a asp-controller="Reservation" asp-action="Details" asp-route-id="@r.Id">#@r.Id</a></td>
+                    <td>@(r.Customer is null ? "—" : $"{r.Customer.FirstName} {r.Customer.LastName}")</td>
+                    <td>@r.StartDate.ToString("g") – @r.EndDate.ToString("g")</td>
+                    <td><partial name="_StatusChip" model="@(UiDisplayHelper.ReservationChipClass(r.Status), UiDisplayHelper.ReservationStatusLabel(r.Status))" /></td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="servisi" class="tab-panel">
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead><tr><th>Datum</th><th>Status</th><th>Opis</th><th>Trošak</th></tr></thead>
+            <tbody>
+            @foreach (var s in Model.ServiceRecords.OrderByDescending(x => x.ServiceDate))
+            {
+                <tr>
+                    <td>@s.ServiceDate.ToString("g")</td>
+                    <td><partial name="_StatusChip" model="@(UiDisplayHelper.ServiceChipClass(s.Status), s.Status.ToString())" /></td>
+                    <td>@s.Description</td>
+                    <td>@s.Cost.ToString("N2") €</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab)?.classList.add('active');
+  });
+});
+</script>
+}

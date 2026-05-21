@@ -1,58 +1,100 @@
 @model TimelineVm
 @{
+    ViewData["Title"] = "Timeline";
+    ViewData["Breadcrumbs"] = BreadcrumbHelper.Build("Home", "Timeline");
     var monthInputValue = $"{Model.Month:yyyy-MM}-01";
+    var today = DateOnly.FromDateTime(DateTime.UtcNow);
+    var dayNames = new[] { "Ned", "Pon", "Uto", "Sri", "Čet", "Pet", "Sub" };
 }
 
-<section class="panel">
-    <h1>Timeline</h1>
-    <form method="get" class="toolbar">
-        <input type="text" name="q" value="@Model.SearchText" placeholder="Search vozilo / registracija" />
-        <select name="reservationStatus">
-            <option value="">Svi eventi</option>
-            @foreach (var item in Model.ReservationStatuses)
-            {
-                <option value="@item" selected="@(Model.ReservationStatus == item.ToString())">@item</option>
-            }
-        </select>
-        <select name="vehicleType">
-            <option value="">Svi tipovi vozila</option>
-            @foreach (var item in Model.VehicleTypes)
-            {
-                <option value="@item" selected="@(Model.VehicleType == item.ToString())">@item</option>
-            }
-        </select>
-        <input type="date" name="month" value="@monthInputValue" />
-        <button type="submit">Primijeni</button>
+<div class="tl-toolbar rise-in">
+    <div>
+        <h1 style="font-size:22px;font-weight:800">Raspored flote</h1>
+        <p style="font-size:13px;color:var(--muted);margin-top:2px">Pregled rezervacija po vozilu i danu</p>
+    </div>
+    <form method="get" class="tl-month-nav" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <input type="hidden" name="q" value="@Model.SearchText" />
+        <input type="hidden" name="vehicleType" value="@Model.VehicleType" />
+        <input type="hidden" name="reservationStatus" value="@Model.ReservationStatus" />
+        <input type="month" name="month" value="@($"{Model.Month:yyyy-MM}")" class="field-input" style="width:auto" onchange="this.form.submit()" />
+        <button type="submit" class="btn btn-secondary btn-sm">Primijeni</button>
     </form>
-</section>
+    <div class="tl-legend">
+        <div class="tl-legend-item"><div class="tl-legend-dot" style="background:rgba(63,208,255,0.55)"></div>Potvrđena</div>
+        <div class="tl-legend-item"><div class="tl-legend-dot" style="background:rgba(138,125,255,0.65)"></div>Aktivna</div>
+        <div class="tl-legend-item"><div class="tl-legend-dot" style="background:rgba(93,255,176,0.5)"></div>Završena</div>
+        <div class="tl-legend-item"><div class="tl-legend-dot" style="background:rgba(168,178,217,0.3)"></div>Nacrt</div>
+    </div>
+    <a asp-controller="Reservation" asp-action="Create" class="btn btn-primary btn-sm" style="margin-left:auto">+ Nova rezervacija</a>
+</div>
 
-<section class="panel timeline-wrap">
-    <table class="timeline-table">
-        <thead>
-        <tr>
-            <th>Vozilo</th>
-            @foreach (var day in Model.Days)
-            {
-                <th>@day.Day</th>
-            }
-        </tr>
-        </thead>
-        <tbody>
-        @foreach (var row in Model.Rows)
+<form method="get" class="glass glass-sm rise-in" style="margin-bottom:var(--space-md);display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+    <input type="hidden" name="month" value="@monthInputValue" />
+    <input type="text" name="q" value="@Model.SearchText" class="field-input" placeholder="Pretraga vozila…" style="max-width:220px" />
+    <select name="vehicleType" class="field-select" style="width:auto">
+        <option value="">Svi tipovi</option>
+        @foreach (var t in Model.VehicleTypes)
         {
-            <tr>
-                <td class="resource-title">@row.Vehicle.Brand @row.Vehicle.Model<br /><small>@row.Vehicle.RegistrationNumber</small></td>
-                @foreach (var cell in row.Cells)
-                {
-                    <td>
-                        @foreach (var res in cell.Reservations)
-                        {
-                            <span class="chip">@res.Status</span>
-                        }
-                    </td>
-                }
-            </tr>
+            <option value="@t" selected="@(Model.VehicleType == t.ToString())">@t</option>
         }
-        </tbody>
-    </table>
-</section>
+    </select>
+    <select name="reservationStatus" class="field-select" style="width:auto">
+        <option value="">Svi statusi</option>
+        @foreach (var s in Model.ReservationStatuses)
+        {
+            <option value="@s" selected="@(Model.ReservationStatus == s.ToString())">@UiDisplayHelper.ReservationStatusLabel(s)</option>
+        }
+    </select>
+    <button type="submit" class="btn btn-secondary btn-sm">Filtriraj</button>
+</form>
+
+<div class="timeline-outer rise-in">
+    <div class="timeline-scroll">
+        <div class="tl-inner">
+            <div class="tl-header">
+                <div class="tl-side-col">Vozilo</div>
+                <div class="tl-days">
+                    @foreach (var day in Model.Days)
+                    {
+                        var dow = (int)day.DayOfWeek;
+                        var isWeekend = dow == 0 || dow == 6;
+                        var isToday = day == today;
+                        <div class="tl-day-header @(isWeekend ? "weekend" : "") @(isToday ? "today" : "")">
+                            <span class="dn">@day.Day.ToString("00")</span>@dayNames[dow]
+                        </div>
+                    }
+                </div>
+            </div>
+            @foreach (var row in Model.Rows)
+            {
+                var dayCount = Model.Days.Count;
+                <div class="tl-row">
+                    <div class="tl-row-side">
+                        <div class="tl-veh-name">@row.Vehicle.Brand @row.Vehicle.Model</div>
+                        <div class="tl-veh-reg">@row.Vehicle.RegistrationNumber</div>
+                        @if (!string.IsNullOrEmpty(row.BranchName))
+                        {
+                            <div class="tl-veh-branch">@row.BranchName</div>
+                        }
+                    </div>
+                    <div class="tl-track" style="min-width:@(dayCount * 44)px">
+                        <div class="tl-cells-bg">
+                            @foreach (var day in Model.Days)
+                            {
+                                var dow = (int)day.DayOfWeek;
+                                <div class="tl-cell @(dow == 0 || dow == 6 ? "weekend" : "") @(day == today ? "today" : "")"></div>
+                            }
+                        </div>
+                        @foreach (var bar in row.Bars)
+                        {
+                            var css = UiDisplayHelper.ReservationTimelineClass(bar.Reservation.Status);
+                            var label = bar.Reservation.Customer is null ? $"#{bar.Reservation.Id}" : $"{bar.Reservation.Customer.FirstName} {bar.Reservation.Customer.LastName}";
+                            <a asp-controller="Reservation" asp-action="Details" asp-route-id="@bar.Reservation.Id"
+                               class="tl-res @css" style="--s:@bar.StartDay;--n:@bar.Span" title="@label">@label</a>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

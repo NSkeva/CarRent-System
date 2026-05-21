@@ -1,0 +1,15 @@
+@model IReadOnlyList<ServiceRecord>
+@foreach (var item in Model)
+{
+    <tr>
+        <td>#@item.Id</td>
+        <td>@item.ServiceDate.ToString("g")</td>
+        <td>@item.Status</td>
+        <td>@item.Description</td>
+        <td class="row-actions">
+            <a asp-action="Details" asp-route-id="@item.Id">Detalji</a>
+            <a asp-action="Edit" asp-route-id="@item.Id">Uredi</a>
+            <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="inline-form">@Html.AntiForgeryToken()<button type="submit" class="link-btn">Obriši</button></form>
+        </td>
+    </tr>
+}

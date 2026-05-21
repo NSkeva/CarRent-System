@@ -1,0 +1,9 @@
+@model DateTimeFieldVm
+<div class="field datetime-field" data-datetime-picker>
+    <label>@Model.Label</label>
+    <input type="text" class="form-control" data-datetime-display autocomplete="off"
+           placeholder="dd.mm.yyyy hh:mm" />
+    <input type="hidden" name="@Model.FieldName" data-datetime-hidden
+           value="@(Model.Value?.ToString("o"))" />
+    <div data-datetime-calendar class="dt-calendar"></div>
+</div>

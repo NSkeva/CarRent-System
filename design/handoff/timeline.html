@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Timeline — CarRent Control Surface</title>
+<link rel="stylesheet" href="glass.css">
+<style>
+  .tl-toolbar {
+    display: flex; align-items: center; gap: var(--space-md);
+    margin-bottom: var(--space-md); flex-wrap: wrap;
+  }
+  .tl-month-nav { display: flex; align-items: center; gap: var(--space-sm); }
+  .tl-month-title {
+    font-size: 17px; font-weight: 700; min-width: 148px; text-align: center; letter-spacing: -0.01em;
+  }
+  .tl-legend {
+    display: flex; align-items: center; gap: var(--space-md); flex-wrap: wrap;
+  }
+  .tl-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+  .tl-legend-dot { width: 12px; height: 8px; border-radius: 3px; }
+
+  .timeline-outer {
+    background: var(--glass); border: 1px solid var(--line);
+    border-radius: var(--radius-lg); overflow: hidden;
+  }
+  .timeline-scroll {
+    overflow-x: auto; overflow-y: auto; max-height: calc(100vh - 270px);
+  }
+  .tl-inner { min-width: max-content; }
+
+  .tl-header {
+    display: flex; position: sticky; top: 0; z-index: 10;
+    background: rgba(11,16,32,0.94); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line-strong);
+  }
+  .tl-side-col {
+    width: 190px; min-width: 190px; padding: 10px 14px;
+    display: flex; flex-direction: column; justify-content: center;
+    font-size: 11px; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    position: sticky; left: 0; z-index: 11;
+    background: rgba(11,16,32,0.96);
+    border-right: 1px solid var(--line-strong);
+  }
+  .tl-days { display: flex; }
+  .tl-day-header {
+    width: 44px; min-width: 44px; text-align: center;
+    padding: 5px 2px; font-size: 11px; color: var(--muted);
+    border-right: 1px solid rgba(255,255,255,0.04);
+  }
+  .tl-day-header .dn { font-size: 14px; font-weight: 700; color: var(--txt); display: block; line-height: 1.2; }
+  .tl-day-header.weekend { background: rgba(255,255,255,0.025); }
+  .tl-day-header.today { background: rgba(63,208,255,0.07); }
+  .tl-day-header.today .dn { color: var(--acc-2); }
+
+  .tl-row {
+    display: flex; align-items: stretch;
+    border-bottom: 1px solid rgba(255,255,255,0.05); min-height: 60px;
+  }
+  .tl-row:last-child { border-bottom: none; }
+  .tl-row-side {
+    width: 190px; min-width: 190px; padding: 10px 14px;
+    display: flex; flex-direction: column; justify-content: center; gap: 3px;
+    position: sticky; left: 0; z-index: 5;
+    background: rgba(11,16,32,0.92); border-right: 1px solid var(--line-strong);
+    transition: background 150ms;
+  }
+  .tl-row:hover .tl-row-side { background: rgba(15,22,42,0.98); }
+  .tl-veh-name { font-size: 13px; font-weight: 700; line-height: 1.2; }
+  .tl-veh-reg {
+    font-size: 11px; font-weight: 700; color: var(--acc-2);
+    letter-spacing: 0.08em; font-family: ui-monospace, 'JetBrains Mono', monospace;
+  }
+  .tl-veh-branch { font-size: 11px; color: var(--muted); }
+
+  .tl-track {
+    position: relative; flex: 1;
+    display: flex; align-items: center;
+    min-width: calc(31 * 44px); height: 60px;
+  }
+  .tl-cells-bg { position: absolute; inset: 0; display: flex; }
+  .tl-cell {
+    width: 44px; min-width: 44px; height: 100%;
+    border-right: 1px solid rgba(255,255,255,0.04);
+  }
+  .tl-cell.weekend { background: rgba(255,255,255,0.02); }
+  .tl-cell.today { background: rgba(63,208,255,0.06); border-right-color: rgba(63,208,255,0.2); }
+
+  .tl-res {
+    position: absolute;
+    height: 30px; border-radius: var(--radius-sm);
+    padding: 0 10px;
+    display: flex; align-items: center;
+    font-size: 11px; font-weight: 600;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    cursor: pointer; transition: all 150ms;
+    top: 50%; transform: translateY(-50%);
+    left: calc(var(--s) * 44px + 2px);
+    width: calc(var(--n) * 44px - 4px);
+    z-index: 2; border: 1px solid transparent;
+  }
+  .tl-res:hover { z-index: 6; transform: translateY(-50%) scaleY(1.12); box-shadow: 0 4px 16px rgba(0,0,0,0.35); }
+  .tl-res.confirmed { background: rgba(63,208,255,0.17);  color: var(--acc-2);   border-color: rgba(63,208,255,0.35); }
+  .tl-res.active    { background: rgba(138,125,255,0.2);  color: var(--acc);     border-color: rgba(138,125,255,0.4); }
+  .tl-res.completed { background: rgba(93,255,176,0.13);  color: var(--success); border-color: rgba(93,255,176,0.28); }
+  .tl-res.draft     { background: rgba(168,178,217,0.09); color: var(--muted);   border-color: var(--line); }
+  .tl-res.planned   { background: rgba(255,209,102,0.13); color: var(--warning); border-color: rgba(255,209,102,0.3); }
+
+  .today-line {
+    position: absolute; top: 0; bottom: 0; z-index: 3;
+    width: 2px; background: var(--acc-2); opacity: 0.55; pointer-events: none;
+  }
+
+  @media (max-width: 980px) { .tl-legend { display: none; } }
+</style>
+</head>
+<body>
+<div class="page-shell">
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="site-logo" href="index.html">
+        <div class="logo-mark">🚗</div>
+        CarRent <span>Control Surface</span>
+      </a>
+      <nav class="nav-primary">
+        <div class="nav-group">
+          <button class="nav-group-btn active">
+            Operativa
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown">
+            <a href="dashboard.html">🏠 Početna</a>
+            <a href="timeline.html" class="active">📅 Timeline</a>
+            <a href="dnevni-plan.html">📋 Dnevni plan</a>
+            <a href="vozni-park.html">🚗 Vozni park</a>
+          </div>
+        </div>
+        <div class="nav-group">
+          <button class="nav-group-btn">
+            Podaci
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown">
+            <a href="rezervacije.html">🗓 Rezervacije</a>
+            <a href="vozilo-detalji.html">🚘 Vozila</a>
+            <a href="#">👤 Kupci</a>
+            <div class="nav-dropdown-divider"></div>
+            <a href="#">🔧 Servisi</a>
+            <a href="#">🏢 Poslovnice</a>
+            <a href="#">➕ Dodaci</a>
+            <a href="#">👥 Zaposlenici</a>
+            <a href="#">🤝 Partneri</a>
+          </div>
+        </div>
+      </nav>
+      <div class="header-actions">
+        <button class="lang-toggle">HR</button>
+        <div class="user-chip">
+          <div class="user-avatar">MK</div>
+          Marko K.
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="breadcrumbs">
+    <a href="index.html">Početna</a>
+    <span class="sep">›</span>
+    <span class="current">Timeline</span>
+  </div>
+
+  <main class="page-content">
+
+    <div class="tl-toolbar rise-in">
+      <div>
+        <h1 style="font-size:22px;font-weight:800;letter-spacing:-0.02em">Raspored flote</h1>
+        <p style="font-size:13px;color:var(--muted);margin-top:2px">Pregled rezervacija po vozilu i danu</p>
+      </div>
+      <div class="tl-month-nav">
+        <button class="btn btn-secondary btn-sm btn-icon" id="btn-prev" title="Prethodni mjesec">&#8592;</button>
+        <span class="tl-month-title" id="month-title">Svibanj 2026</span>
+        <button class="btn btn-secondary btn-sm btn-icon" id="btn-next" title="Sljedeći mjesec">&#8594;</button>
+      </div>
+      <div class="tl-legend">
+        <div class="tl-legend-item"><div class="tl-legend-dot" style="background:rgba(63,208,255,0.55)"></div>Potvrđena</div>
+        <div class="tl-legend-item"><div class="tl-legend-dot" style="background:rgba(138,125,255,0.65)"></div>Aktivna</div>
+        <div class="tl-legend-item"><div class="tl-legend-dot" style="background:rgba(93,255,176,0.5)"></div>Završena</div>
+        <div class="tl-legend-item"><div class="tl-legend-dot" style="background:rgba(255,209,102,0.5)"></div>Planirana</div>
+        <div class="tl-legend-item"><div class="tl-legend-dot" style="background:rgba(168,178,217,0.3)"></div>Nacrt</div>
+      </div>
+      <a href="rezervacije-forma.html" class="btn btn-primary btn-sm" style="margin-left:auto">+ Nova rezervacija</a>
+    </div>
+
+    <div class="timeline-outer rise-in">
+      <div class="timeline-scroll">
+        <div class="tl-inner">
+          <div class="tl-header">
+            <div class="tl-side-col">Vozilo</div>
+            <div class="tl-days" id="tl-days-header"></div>
+          </div>
+          <div id="tl-body"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer style="border-top:1px solid var(--line);padding:var(--space-md) var(--space-lg);display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted);max-width:var(--page-max);margin:0 auto;width:100%">
+    <span>CarRent Control Surface</span>
+    <span>ASP.NET Core MVC · /raspored</span>
+  </footer>
+</div>
+
+<script>
+const MONTHS_HR = ['Siječanj','Veljača','Ožujak','Travanj','Svibanj','Lipanj','Srpanj','Kolovoz','Rujan','Listopad','Studeni','Prosinac'];
+const DAYS_HR_SHORT = ['Ned','Pon','Uto','Sri','Čet','Pet','Sub'];
+
+let currentYear = 2026, currentMonth = 4;
+
+const VEHICLES = [
+  { name: 'VW Golf VII 1.6 TDI', reg: 'ZG-123-AB', branch: 'Zagreb', res: [
+    { id:'RZ-0041', customer:'Ana Marić',       start:0,  span:4, status:'confirmed' },
+    { id:'RZ-0056', customer:'Petar Šimić',      start:12, span:7, status:'active'    }
+  ]},
+  { name: 'Toyota Yaris 1.5 HSD', reg: 'ST-456-CD', branch: 'Split', res: [
+    { id:'RZ-0038', customer:'Ivan Horvat',      start:2,  span:5, status:'completed' },
+    { id:'RZ-0063', customer:'Maja Vuković',     start:21, span:6, status:'confirmed' }
+  ]},
+  { name: 'Škoda Octavia 2.0 TDI', reg: 'OS-789-EF', branch: 'Osijek', res: [
+    { id:'RZ-0044', customer:'Tomislav Kovač',   start:4,  span:8, status:'active'    },
+    { id:'RZ-0071', customer:'Luka Perić',       start:24, span:7, status:'draft'     }
+  ]},
+  { name: 'Ford Fiesta 1.0 EcoBoost', reg: 'ZG-221-GH', branch: 'Zagreb', res: [
+    { id:'RZ-0037', customer:'Nina Blažević',    start:0,  span:3, status:'completed' },
+    { id:'RZ-0053', customer:'Renata Jurić',     start:9,  span:5, status:'completed' },
+    { id:'RZ-0067', customer:'Ante Stanković',   start:23, span:6, status:'draft'     }
+  ]},
+  { name: 'Renault Clio 1.5 dCi', reg: 'RI-334-IJ', branch: 'Rijeka', res: [
+    { id:'RZ-0046', customer:'Damir Novak',      start:7,  span:7, status:'active'    },
+    { id:'RZ-0059', customer:'Sanja Marković',   start:19, span:3, status:'confirmed' }
+  ]},
+  { name: 'Opel Astra 1.6 CDTI', reg: 'ZG-567-KL', branch: 'Zagreb', res: [
+    { id:'RZ-0040', customer:'Katarina Đurić',   start:1,  span:5, status:'completed' },
+    { id:'RZ-0061', customer:'Filip Radić',      start:14, span:7, status:'active'    }
+  ]},
+  { name: 'Peugeot 308 1.5 BlueHDi', reg: 'SP-089-MN', branch: 'Sl. Brod', res: [
+    { id:'RZ-0049', customer:'Mirela Bošković',  start:10, span:7, status:'confirmed' },
+    { id:'RZ-0073', customer:'Goran Penić',      start:26, span:5, status:'planned'   }
+  ]},
+  { name: 'Seat Ibiza 1.0 TSI', reg: 'ZG-712-OP', branch: 'Zagreb', res: [
+    { id:'RZ-0042', customer:'Vedran Cindrić',   start:3,  span:6, status:'active'    },
+    { id:'RZ-0065', customer:'Kristina Fumić',   start:17, span:8, status:'confirmed' }
+  ]}
+];
+
+function getDays(y, m) { return new Date(y, m + 1, 0).getDate(); }
+function isWe(y, m, d) { const w = new Date(y,m,d).getDay(); return w===0||w===6; }
+function isToday(y, m, d) {
+  const n = new Date();
+  return n.getFullYear()===y && n.getMonth()===m && n.getDate()===d;
+}
+
+function render() {
+  const days = getDays(currentYear, currentMonth);
+  document.getElementById('month-title').textContent = MONTHS_HR[currentMonth] + ' ' + currentYear;
+
+  // Header days
+  const hdr = document.getElementById('tl-days-header');
+  hdr.innerHTML = '';
+  for (let d = 1; d <= days; d++) {
+    const dow = new Date(currentYear, currentMonth, d).getDay();
+    const div = document.createElement('div');
+    div.className = 'tl-day-header' + (isWe(currentYear,currentMonth,d) ? ' weekend':'') + (isToday(currentYear,currentMonth,d) ? ' today':'');
+    div.innerHTML = `<span class="dn">${d<10?'0'+d:d}</span>${DAYS_HR_SHORT[dow]}`;
+    hdr.appendChild(div);
+  }
+
+  // Body rows
+  const body = document.getElementById('tl-body');
+  body.innerHTML = '';
+
+  VEHICLES.forEach(v => {
+    const row = document.createElement('div');
+    row.className = 'tl-row';
+
+    const side = document.createElement('div');
+    side.className = 'tl-row-side';
+    side.innerHTML = `<div class="tl-veh-name">${v.name}</div><div class="tl-veh-reg">${v.reg}</div><div class="tl-veh-branch">${v.branch}</div>`;
+
+    const track = document.createElement('div');
+    track.className = 'tl-track';
+    track.style.minWidth = (days * 44) + 'px';
+
+    // BG cells
+    const bg = document.createElement('div');
+    bg.className = 'tl-cells-bg';
+    for (let d = 1; d <= days; d++) {
+      const c = document.createElement('div');
+      c.className = 'tl-cell' + (isWe(currentYear,currentMonth,d)?' weekend':'') + (isToday(currentYear,currentMonth,d)?' today':'');
+      bg.appendChild(c);
+    }
+    track.appendChild(bg);
+
+    // Today marker
+    const now = new Date();
+    if (now.getFullYear()===currentYear && now.getMonth()===currentMonth) {
+      const line = document.createElement('div');
+      line.className = 'today-line';
+      line.style.left = ((now.getDate()-1) * 44 + 22) + 'px';
+      track.appendChild(line);
+    }
+
+    // Reservation bars
+    v.res.forEach(r => {
+      if (r.start >= days) return;
+      const span = Math.min(r.span, days - r.start);
+      const bar = document.createElement('div');
+      bar.className = 'tl-res ' + r.status;
+      bar.style.setProperty('--s', r.start);
+      bar.style.setProperty('--n', span);
+      bar.title = `${r.id} · ${r.customer}`;
+      bar.textContent = `${r.id} · ${r.customer}`;
+      bar.addEventListener('click', () => { window.location.href='rezervacije.html'; });
+      track.appendChild(bar);
+    });
+
+    row.appendChild(side);
+    row.appendChild(track);
+    body.appendChild(row);
+  });
+}
+
+document.getElementById('btn-prev').addEventListener('click', () => {
+  currentMonth--; if(currentMonth<0){currentMonth=11;currentYear--;} render();
+});
+document.getElementById('btn-next').addEventListener('click', () => {
+  currentMonth++; if(currentMonth>11){currentMonth=0;currentYear++;} render();
+});
+render();
+</script>
+<script>
+  document.querySelectorAll('.nav-group-btn').forEach(btn => {
+    btn.addEventListener('click', () => btn.closest('.nav-group').classList.toggle('open'));
+  });
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.nav-group'))
+      document.querySelectorAll('.nav-group').forEach(g => g.classList.remove('open'));
+  });
+</script>
+</body>
+</html>
