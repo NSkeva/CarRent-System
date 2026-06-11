@@ -1,0 +1,56 @@
+@page
+@model CarRent.Web.Areas.Identity.Pages.Account.ManageUsersModel
+@{
+    ViewData["Title"] = "Korisnici na čekanju";
+}
+
+<section class="panel">
+    <h1>Korisnici na čekanju</h1>
+    <p class="muted">Korisnici registrirani putem Googlea (ili ručno bez uloge) čekaju dodjelu uloge.</p>
+
+    @if (Model.PendingUsers.Count == 0)
+    {
+        <p>Nema korisnika koji čekaju odobrenje.</p>
+    }
+    else
+    {
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>OIB</th>
+                    <th>JMBG</th>
+                    <th>Dodjela uloge</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model.PendingUsers)
+                {
+                    <tr>
+                        <td>@user.Email</td>
+                        <td>@user.Oib</td>
+                        <td>@user.Jmbg</td>
+                        <td>
+                            <form method="post" asp-page-handler="AssignRole" class="inline-assign-form">
+                                <input type="hidden" name="AssignInput.UserId" value="@user.Id" />
+                                <select name="AssignInput.RoleName" class="form-control">
+                                    @foreach (var role in Model.AvailableRoles)
+                                    {
+                                        <option value="@role">@role</option>
+                                    }
+                                </select>
+                                <button type="submit" class="btn btn-primary btn-sm">Odobri</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    <p class="auth-links" style="margin-top:1rem;">
+        <a asp-area="Identity" asp-page="/Account/Register">Kreiraj korisnika ručno</a>
+        ·
+        <a asp-controller="Home" asp-action="Index">Početna</a>
+    </p>
+</section>

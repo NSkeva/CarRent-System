@@ -5,5 +5,7 @@
     <p><strong>Pozicija:</strong> @Model.JobTitle</p>
     <p><strong>Poslovnica ID:</strong> @Model.BranchOfficeId</p>
     <p><strong>Zaposlen od:</strong> @Model.HiredAt:yyyy-MM-dd</p>
-    <a asp-action="Index">Natrag na listu</a>
+    <div class="panel-actions">
+        <a asp-action="Index" class="btn btn-secondary btn-sm">← Natrag na listu</a>
+    </div>
 </section>

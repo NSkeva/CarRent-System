@@ -64,6 +64,7 @@ public sealed class VehicleRepository(CarRentDbContext db)
         => await db.Vehicles
             .Include(v => v.ServiceRecords)
             .Include(v => v.Reservations).ThenInclude(r => r.Customer)
+            .Include(v => v.Attachments)
             .Include(v => v.BranchOffice)
             .AsNoTracking()
             .FirstOrDefaultAsync(v => v.Id == id);
@@ -120,6 +121,30 @@ public sealed class ReservationRepository(CarRentDbContext db)
         => await db.Reservations.Include(r => r.Addons).Include(r => r.Customer).Include(r => r.Vehicle).AsNoTracking().FirstOrDefaultAsync(r => r.Id == id);
 
     public async Task<Reservation?> GetTrackedAsync(int id) => await db.Reservations.FindAsync(id);
+
+    public async Task<Reservation?> FindSchedulingConflictAsync(
+        int vehicleId,
+        DateTime start,
+        DateTime end,
+        int excludeReservationId = 0)
+    {
+        var existing = await db.Reservations
+            .AsNoTracking()
+            .Where(r => r.VehicleId == vehicleId)
+            .Where(r => r.Status != ReservationStatus.Cancelled && r.Status != ReservationStatus.Completed)
+            .ToListAsync();
+
+        var candidate = new Reservation
+        {
+            Id = excludeReservationId,
+            VehicleId = vehicleId,
+            StartDate = start,
+            EndDate = end
+        };
+
+        return ReservationAvailabilityHelper.FindConflict(candidate, existing);
+    }
+
     public async Task AddAsync(Reservation entity) { entity.CreatedAt = DateTime.UtcNow; db.Reservations.Add(entity); await db.SaveChangesAsync(); }
     public async Task UpdateAsync(Reservation entity) { db.Reservations.Update(entity); await db.SaveChangesAsync(); }
     public async Task DeleteAsync(int id) { var e = await db.Reservations.FindAsync(id); if (e is null) return; db.Reservations.Remove(e); await db.SaveChangesAsync(); }
@@ -214,13 +239,16 @@ public sealed class DashboardRepository(CarRentDbContext db)
 {
     public async Task<HomeIndexVm> BuildHomeVmAsync()
     {
+        var today = DateOnly.FromDateTime(DateTime.Today);
         var activeReservations = await db.Reservations.CountAsync(r =>
-            r.Status == ReservationStatus.Active || r.Status == ReservationStatus.Confirmed);
+            r.Status == ReservationStatus.Active
+            || (r.Status == ReservationStatus.Confirmed
+                && r.StartDate.Date <= today.ToDateTime(TimeOnly.MinValue)
+                && r.EndDate.Date >= today.ToDateTime(TimeOnly.MinValue)));
         var servicesSoon = await db.ServiceRecords.CountAsync(s =>
             s.NextRecommendedServiceDate != null &&
-            s.NextRecommendedServiceDate.Value.Date <= DateTime.UtcNow.Date.AddDays(30));
+            s.NextRecommendedServiceDate.Value.Date <= DateTime.Today.AddDays(30));
 
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
         var daily = await BuildDailyPlanVmAsync(today);
 
         return new HomeIndexVm
@@ -275,7 +303,7 @@ public sealed class DashboardRepository(CarRentDbContext db)
             {
                 Vehicle = v,
                 BranchName = v.BranchOffice?.Name,
-                Bars = TimelineLayoutHelper.BuildBars(vehicleReservations, month),
+                Bars = TimelineLayoutHelper.BuildBars(v, vehicleReservations, month),
                 Cells = days.Select(day => new TimelineCellVm
                 {
                     Day = day,
@@ -334,7 +362,7 @@ public sealed class DashboardRepository(CarRentDbContext db)
         {
             Vehicle = v,
             BranchName = branches.GetValueOrDefault(v.BranchOfficeId, "Nepoznato"),
-            ImageUrl = $"https://picsum.photos/seed/carrent-{v.Id}/420/240"
+            ImageUrl = VehicleImageHelper.GetDisplayUrl(v)
         }).ToList();
     }
 }

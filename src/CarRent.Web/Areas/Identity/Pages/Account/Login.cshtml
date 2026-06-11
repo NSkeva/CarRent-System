@@ -1,0 +1,59 @@
+@page
+@model CarRent.Web.Areas.Identity.Pages.Account.LoginModel
+@{
+    ViewData["Title"] = "Prijava";
+}
+
+<section class="panel auth-panel rise-in">
+    <div class="auth-header">
+        <h1>Prijava</h1>
+        <p class="auth-subtitle">Interna platforma za upravljanje flotom</p>
+    </div>
+
+    <form method="post" class="auth-form">
+        <div asp-validation-summary="ModelOnly" class="field-error"></div>
+
+        <div class="auth-field">
+            <label asp-for="Input.Email"></label>
+            <input asp-for="Input.Email" class="form-control" autocomplete="username" placeholder="ime@poslovnica.hr" />
+            <span asp-validation-for="Input.Email" class="field-error"></span>
+        </div>
+
+        <div class="auth-field">
+            <label asp-for="Input.Password"></label>
+            <input asp-for="Input.Password" class="form-control" autocomplete="current-password" placeholder="••••••••" />
+            <span asp-validation-for="Input.Password" class="field-error"></span>
+        </div>
+
+        <label class="remember-toggle">
+            <input asp-for="Input.RememberMe" class="remember-input" />
+            <span class="remember-switch" aria-hidden="true"></span>
+            <span class="remember-label">@Html.DisplayNameFor(m => m.Input.RememberMe)</span>
+        </label>
+
+        <button type="submit" class="btn btn-primary auth-submit">Prijava</button>
+    </form>
+
+    @if (Model.ExternalLogins.Count > 0)
+    {
+        <div class="auth-divider"><span>ili</span></div>
+        <form asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="auth-external">
+            @foreach (var provider in Model.ExternalLogins)
+            {
+                <button type="submit" name="provider" value="@provider.Name" class="btn btn-secondary auth-google-btn">
+                    <span class="auth-google-icon" aria-hidden="true">G</span>
+                    Prijava putem @provider.DisplayName
+                </button>
+            }
+        </form>
+    }
+
+    <p class="auth-footnote">
+        Račune ručno kreira administrator. Google registracija je moguća,
+        ali pristup podacima tek nakon dodjele uloge.
+    </p>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

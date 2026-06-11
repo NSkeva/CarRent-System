@@ -33,6 +33,10 @@ public static class UiDisplayHelper
         _ => "chip-planned"
     };
 
+    public static string RegistrationTimelineClass() => "registration";
+
+    public static string RegistrationChipClass() => "chip-registration";
+
     public static string ReservationStatusLabel(ReservationStatus status) => status switch
     {
         ReservationStatus.Draft => "Nacrt",

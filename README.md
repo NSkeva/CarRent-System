@@ -12,6 +12,8 @@ Projekt za kolegij Programiranje web aplikacija u ASP.NET.
 - `lab2/` - Lab 2 upute, report i log artefakti
 - `lab-3/` - Lab 3 upute, semantic model, sitemap, report
 - `lab-4/` - Lab 4 upute, CRUD/JS report i logovi
+- `lab-5/` - Lab 5 upute, API/Auth/Upload report i logovi
+- `tests/CarRent.Web.IntegrationTests/` - Lab 5 integracijski testovi API-ja
 - `design/` - END GOAL plan dizajna (Open Design handoff)
 - `.cursor/skills/` - project skillovi (EF, list page, edit form)
 - `.github/hooks/` - skripte za transcript/agent logging workflow
@@ -168,6 +170,56 @@ Korisne rute za test:
 
 - `/BranchOffice`, `/Vehicle`, `/Customer`, `/Reservation`, `/Addon`, `/ServiceRecord`, `/Employee`, `/partneri`
 - API lookup: `/api/lookup/customers?q=ana`
+
+## Lab 5 (API + Auth + Upload + Testovi)
+
+Lab 5 dodaje:
+
+- REST API s DTO klasama za sve entitete (`/api/...`)
+- ASP.NET Core Identity (`AppUser` s OIB/JMBG, role `Admin`/`Manager`)
+- Google OAuth login (user-secrets)
+- Dropzone upload dokumenata na Vehicle Edit
+- integracijske testove (`dotnet test tests/CarRent.Web.IntegrationTests/`)
+
+Dokumentacija: `lab-5/LAB5-Report.md`, upute: `lab-5/Lab5.md`.
+
+### Seed korisnici
+
+- `admin@carrent.local` / `Admin123!` (Admin)
+- `manager@carrent.local` / `Manager123!` (Manager)
+
+### API primjeri
+
+```bash
+curl http://localhost:5000/api/vehicle
+curl http://localhost:5000/api/customer/1
+curl "http://localhost:5000/api/reservation?q=ana"
+```
+
+## AI log workflow (Lab 5)
+
+Export Lab 5 dijela Cursor transkripta:
+
+```bash
+bash .github/hooks/export_cursor_transcript_lab5.sh
+```
+
+Auto watch:
+
+```bash
+bash .github/hooks/start_transcript_watch_lab5.sh
+bash .github/hooks/stop_transcript_watch_lab5.sh
+```
+
+Hook skripta:
+
+```bash
+bash .github/hooks/log_ai_lab5.sh
+```
+
+Hook konfiguracija: `.github/hooks.lab5.json`
+
+Izlaz: `lab-5/ai_conversation.jsonl`, `lab-5/agent_log.txt`
 
 ## AI log workflow (Lab 1)
 

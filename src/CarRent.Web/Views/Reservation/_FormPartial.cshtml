@@ -1,5 +1,9 @@
 @model ReservationFormVm
+@{
+    var returnUrl = ViewData["ReturnUrl"] as string;
+}
 <form asp-action="@(Model.Id == 0 ? "Create" : "Edit")" method="post" class="form-grid">
+    <partial name="_FormReturnUrlPartial" />
     <div>
         <div class="glass form-section" style="margin-bottom:var(--space-md)">
             <div class="form-section-title">Sudionici</div>
@@ -47,7 +51,14 @@
         <input type="hidden" asp-for="Id" />
         <div style="margin-top:var(--space-lg);display:flex;flex-direction:column;gap:8px">
             <button type="submit" class="btn btn-primary">Spremi rezervaciju</button>
-            <a asp-action="Index" class="btn btn-secondary">Odustani</a>
+            @if (!string.IsNullOrEmpty(returnUrl))
+            {
+                <a href="@returnUrl" class="btn btn-secondary">Odustani</a>
+            }
+            else
+            {
+                <a asp-action="Index" class="btn btn-secondary">Odustani</a>
+            }
         </div>
     </div>
 </form>

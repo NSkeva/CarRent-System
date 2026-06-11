@@ -1,0 +1,62 @@
+@model IReadOnlyList<FleetNotificationOutbox>
+@{
+    ViewData["Title"] = "Pripremljene obavijesti";
+}
+
+<section class="panel rise-in">
+    <div class="tab-toolbar">
+        <div>
+            <h1 style="font-size:22px;font-weight:800;margin:0">Pripremljene obavijesti</h1>
+            <p style="font-size:13px;color:var(--muted);margin:6px 0 0">
+                Email i push kanali su u pripremi — poruke se zapisuju u outbox bez stvarnog slanja.
+            </p>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <p class="tab-empty">Nema pripremljenih obavijesti.</p>
+    }
+    else
+    {
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Vrijeme</th>
+                        <th>Kanal</th>
+                        <th>Tip</th>
+                        <th>Primatelj</th>
+                        <th>Naslov</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.CreatedAt.ToLocalTime().ToString("g")</td>
+                        <td><span class="chip chip-planned">@item.Channel</span></td>
+                        <td>@item.NotificationType</td>
+                        <td>@(string.IsNullOrWhiteSpace(item.Recipient) ? "—" : item.Recipient)</td>
+                        <td>
+                            <strong>@item.Subject</strong>
+                            <div style="font-size:12px;color:var(--muted);margin-top:4px">@item.Body</div>
+                        </td>
+                        <td>
+                            @if (item.SentAt is null)
+                            {
+                                <span class="chip chip-draft">Pripremljeno</span>
+                            }
+                            else
+                            {
+                                <span class="chip chip-completed">Poslano</span>
+                            }
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>

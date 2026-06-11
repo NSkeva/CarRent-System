@@ -6,5 +6,8 @@
     <div class="field"><label asp-for="JobTitle"></label><input asp-for="JobTitle" class="form-control" /><span asp-validation-for="JobTitle" class="field-error"></span></div>
     <partial name="_AutocompletePartial" model='new AutocompleteFieldVm { InputId = "empBranch", HiddenName = "BranchOfficeId", Label = "Poslovnica", SearchUrl = "/api/lookup/branches", SelectedId = Model.BranchOfficeId, DisplayText = Model.BranchOfficeDisplay }' />
     <partial name="_DateTimePartial" model='new DateTimeFieldVm { FieldName = "HiredAt", Label = "Datum zaposlenja", Value = Model.HiredAt }' />
-    <div class="actions"><button type="submit" class="btn-primary">Spremi</button><a asp-action="Index">Odustani</a></div>
+    <div class="actions">
+        <button type="submit" class="btn btn-primary">Spremi</button>
+        <a asp-action="Index" class="btn btn-secondary">Odustani</a>
+    </div>
 </form>

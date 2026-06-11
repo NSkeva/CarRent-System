@@ -1,0 +1,21 @@
+@page
+@model CarRent.Web.Areas.Identity.Pages.Account.PendingAccessModel
+@{
+    ViewData["Title"] = "Čekanje odobrenja";
+    Layout = "/Views/Shared/_Layout.cshtml";
+}
+
+<section class="panel auth-panel pending-access-panel">
+    <div class="pending-icon">⏳</div>
+    <h1>Račun čeka odobrenje</h1>
+    <p>
+        Prijavljeni ste kao <strong>@Model.Email</strong>, ali administrator vam još nije dodijelio ulogu.
+    </p>
+    <p class="muted">
+        Platforma sadrži interne poslovne podatke — pristup je moguć tek nakon što administrator dodijeli ulogu
+        (<em>Manager</em> ili <em>Admin</em>). Kontaktirajte administratora sustava.
+    </p>
+    <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="/Identity/Account/Login" method="post">
+        <button type="submit" class="btn-secondary">Odjava</button>
+    </form>
+</section>

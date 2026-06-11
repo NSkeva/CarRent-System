@@ -7,5 +7,8 @@
     <div class="field"><label asp-for="Phone"></label><input asp-for="Phone" class="form-control" /><span asp-validation-for="Phone" class="field-error"></span></div>
     <partial name="_DateTimePartial" model='new DateTimeFieldVm { FieldName = "DateOfBirth", Label = "Datum rođenja", Value = Model.DateOfBirth }' />
     <div class="field"><label asp-for="DriverLicenseNumber"></label><input asp-for="DriverLicenseNumber" class="form-control" /><span asp-validation-for="DriverLicenseNumber" class="field-error"></span></div>
-    <div class="actions"><button type="submit" class="btn-primary">Spremi</button><a asp-action="Index">Odustani</a></div>
+    <div class="actions">
+        <button type="submit" class="btn btn-primary">Spremi</button>
+        <a asp-action="Index" class="btn btn-secondary">Odustani</a>
+    </div>
 </form>

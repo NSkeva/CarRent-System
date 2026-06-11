@@ -19,6 +19,7 @@ public static class EntityMappers
     {
         Id = e.Id, RegistrationNumber = e.RegistrationNumber, Brand = e.Brand, Model = e.Model, Year = e.Year,
         Type = e.Type, MileageKm = e.MileageKm, IsActive = e.IsActive, DailyPrice = e.DailyPrice,
+        RegistrationDueDate = e.RegistrationDueDate,
         BranchOfficeId = e.BranchOfficeId, BranchOfficeDisplay = branchName ?? string.Empty
     };
 
@@ -26,6 +27,7 @@ public static class EntityMappers
     {
         e.RegistrationNumber = f.RegistrationNumber; e.Brand = f.Brand; e.Model = f.Model; e.Year = f.Year;
         e.Type = f.Type; e.MileageKm = f.MileageKm; e.IsActive = f.IsActive; e.DailyPrice = f.DailyPrice;
+        e.RegistrationDueDate = f.RegistrationDueDate;
         e.BranchOfficeId = f.BranchOfficeId;
     }
 

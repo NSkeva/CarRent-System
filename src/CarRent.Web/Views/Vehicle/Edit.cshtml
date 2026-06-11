@@ -1,3 +1,13 @@
 @model VehicleFormVm
-<section class="panel"><h1>Uredi vozilo</h1><partial name="_FormPartial" /></section>
-@section Scripts { <partial name="_ValidationScriptsPartial" /> }
+<section class="panel vehicle-edit-layout">
+    <h1>Uredi vozilo</h1>
+    <div class="vehicle-edit-form">
+        <partial name="_MainImagePanel" model="Model.Id" />
+        <partial name="_FormPartial" />
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <partial name="_MainImageScripts" model="Model.Id" />
+}

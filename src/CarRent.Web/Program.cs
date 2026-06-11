@@ -1,17 +1,28 @@
 using System.Globalization;
 using CarRent.DAL;
+using CarRent.Model.Entities;
+using CarRent.Web.Middleware;
 using CarRent.Web.Repositories;
+using CarRent.Web.Services;
+using CarRent.Web.Services.Notifications;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
 
 var provider = builder.Configuration["DatabaseProvider"] ?? "Sqlite";
 var useSqlServer = provider.Equals("SqlServer", StringComparison.OrdinalIgnoreCase);
 
-// SQLite: datoteka u src/CarRent.Web/Data/ — ne ovisi o tome iz kojeg foldera zoves dotnet run
 static string ResolveSqlitePath(WebApplicationBuilder b)
 {
     var fileName = b.Environment.IsDevelopment() ? "carrent.dev.db" : "carrent.db";
@@ -32,6 +43,31 @@ builder.Services.AddDbContext<CarRentDbContext>(options =>
         options.UseSqlite(connectionString, opt => opt.MigrationsAssembly("CarRent.DAL"));
 });
 
+builder.Services
+    .AddDefaultIdentity<AppUser>(options =>
+    {
+        options.SignIn.RequireConfirmedAccount = false;
+        options.Password.RequireDigit = true;
+        options.Password.RequireLowercase = true;
+        options.Password.RequireUppercase = true;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequiredLength = 8;
+    })
+    .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<CarRentDbContext>();
+
+var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
+var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(googleClientSecret))
+{
+    builder.Services.AddAuthentication()
+        .AddGoogle(options =>
+        {
+            options.ClientId = googleClientId;
+            options.ClientSecret = googleClientSecret;
+        });
+}
+
 builder.Services.AddScoped<BranchOfficeRepository>();
 builder.Services.AddScoped<VehicleRepository>();
 builder.Services.AddScoped<CustomerRepository>();
@@ -41,11 +77,19 @@ builder.Services.AddScoped<ServiceRecordRepository>();
 builder.Services.AddScoped<EmployeeRepository>();
 builder.Services.AddScoped<PartnerRepository>();
 builder.Services.AddScoped<DashboardRepository>();
+builder.Services.Configure<FleetLifecycleOptions>(
+    builder.Configuration.GetSection(FleetLifecycleOptions.SectionName));
+builder.Services.Configure<FleetNotificationOptions>(
+    builder.Configuration.GetSection(FleetNotificationOptions.SectionName));
+builder.Services.AddScoped<IFleetNotificationSender, PreparedFleetNotificationSender>();
+builder.Services.AddScoped<FleetNotificationService>();
+builder.Services.AddScoped<FleetLifecycleService>();
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
+if (!app.Environment.IsEnvironment("Testing"))
 {
+    using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<CarRentDbContext>();
     var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("CarRent.DbStartup");
     db.Database.Migrate();
@@ -53,6 +97,10 @@ using (var scope = app.Services.CreateScope())
         "Baza spremna ({Provider}). Migracije primijenjene. Put: {Database}",
         useSqlServer ? "SQL Server" : "SQLite",
         useSqlServer ? connectionString : ResolveSqlitePath(builder));
+    await IdentitySeedData.SeedAsync(scope.ServiceProvider);
+
+    var lifecycle = scope.ServiceProvider.GetRequiredService<FleetLifecycleService>();
+    await lifecycle.SyncAsync();
 }
 
 if (!app.Environment.IsDevelopment())
@@ -69,12 +117,18 @@ app.UseRequestLocalization(new RequestLocalizationOptions
     SupportedUICultures = supportedCultures
 });
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+    app.UseHttpsRedirection();
+
 app.UseStaticFiles();
 app.UseRouting();
+app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<PendingRoleMiddleware>();
+app.UseMiddleware<FleetLifecycleMiddleware>();
 
 app.MapControllers();
+app.MapRazorPages();
 
 app.MapControllerRoute("fleet_short", "vozni-park", new { controller = "Fleet", action = "Index" });
 app.MapControllerRoute("daily_plan_short", "dnevni-plan", new { controller = "DailyPlan", action = "Index" });
@@ -86,3 +140,5 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+
+public partial class Program;

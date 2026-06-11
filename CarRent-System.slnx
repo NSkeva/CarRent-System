@@ -5,4 +5,7 @@
     <Project Path="src/CarRent.DAL/CarRent.DAL.csproj" />
     <Project Path="src/CarRent.Web/CarRent.Web.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/CarRent.Web.IntegrationTests/CarRent.Web.IntegrationTests.csproj" />
+  </Folder>
 </Solution>

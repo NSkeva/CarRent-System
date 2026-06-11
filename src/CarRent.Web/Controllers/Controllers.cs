@@ -1,6 +1,7 @@
 using CarRent.Web.Repositories;
 using CarRent.Web.Services;
 using CarRent.Web.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CarRent.Web.Controllers;
@@ -54,24 +55,25 @@ public sealed class FleetController(DashboardRepository dashboardRepository) : C
 [Route("partneri")]
 public sealed class PartnersController(PartnerRepository repository) : Controller
 {
-    [HttpGet("")]
+    [HttpGet(""), Authorize(Roles = "Admin")]
     public async Task<IActionResult> Index()
     {
         ViewData["Title"] = "Partneri";
         return View(await repository.GetAllAsync());
     }
 
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> SearchRows(string? q)
         => PartialView("_IndexRows", await repository.GetAllAsync(q));
 
-    [Route("novi")]
+    [Route("novi"), Authorize(Roles = "Admin,Manager")]
     public IActionResult Create()
     {
         ViewData["Title"] = "Novi partner";
         return View(new PartnerFormVm());
     }
 
-    [HttpPost, Route("novi"), ValidateAntiForgeryToken]
+    [HttpPost, Route("novi"), ValidateAntiForgeryToken, Authorize(Roles = "Admin,Manager")]
     public async Task<IActionResult> Create(PartnerFormVm model)
     {
         if (!ModelState.IsValid) return View(model);
@@ -79,7 +81,7 @@ public sealed class PartnersController(PartnerRepository repository) : Controlle
         return RedirectToAction(nameof(Index));
     }
 
-    [Route("uredi/{id:int}")]
+    [Route("uredi/{id:int}"), Authorize(Roles = "Admin,Manager")]
     public async Task<IActionResult> Edit(int id)
     {
         var entity = await repository.GetByIdAsync(id);
@@ -88,7 +90,7 @@ public sealed class PartnersController(PartnerRepository repository) : Controlle
         return View(EntityMappers.ToForm(entity));
     }
 
-    [HttpPost, Route("uredi/{id:int}"), ValidateAntiForgeryToken]
+    [HttpPost, Route("uredi/{id:int}"), ValidateAntiForgeryToken, Authorize(Roles = "Admin,Manager")]
     public async Task<IActionResult> Edit(int id, PartnerFormVm model)
     {
         if (id != model.Id) return BadRequest();
@@ -100,7 +102,7 @@ public sealed class PartnersController(PartnerRepository repository) : Controlle
         return RedirectToAction(nameof(Index));
     }
 
-    [HttpPost, Route("obrisi/{id:int}"), ValidateAntiForgeryToken]
+    [HttpPost, Route("obrisi/{id:int}"), ValidateAntiForgeryToken, Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(int id)
     {
         await repository.DeleteAsync(id);

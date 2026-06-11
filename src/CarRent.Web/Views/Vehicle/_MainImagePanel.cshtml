@@ -1,0 +1,27 @@
+@model int
+@{
+    var imageUrl = ViewData["MainImageUrl"] as string ?? "";
+    var hasCustom = ViewData["HasCustomMainImage"] as bool? ?? false;
+}
+
+<div class="vehicle-main-image-panel glass" data-vehicle-id="@Model">
+    <div class="form-section-title">Glavna slika vozila</div>
+    <div class="vehicle-main-image-preview">
+        <img id="vehicleMainImagePreview" src="@imageUrl" alt="Glavna slika vozila" />
+    </div>
+    <p class="vehicle-main-image-hint">JPG, PNG ili WEBP · max 5 MB · prikazuje se u voznom parku i detaljima</p>
+    <div class="vehicle-main-image-actions">
+        <label class="btn btn-secondary btn-sm vehicle-main-image-upload-btn">
+            <span id="mainImageUploadLabel">@(hasCustom ? "Promijeni sliku" : "Učitaj sliku")</span>
+            <input type="file" id="mainImageInput" accept="image/jpeg,image/png,image/webp" hidden />
+        </label>
+        @if (hasCustom)
+        {
+            <button type="button" class="btn btn-ghost btn-sm btn-danger-text" id="btnRemoveMainImage">Ukloni sliku</button>
+        }
+        else
+        {
+            <button type="button" class="btn btn-ghost btn-sm btn-danger-text" id="btnRemoveMainImage" hidden>Ukloni sliku</button>
+        }
+    </div>
+</div>

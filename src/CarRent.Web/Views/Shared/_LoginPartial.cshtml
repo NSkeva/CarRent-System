@@ -1,0 +1,26 @@
+@using CarRent.Model.Entities
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<AppUser> SignInManager
+@inject UserManager<AppUser> UserManager
+
+@if (SignInManager.IsSignedIn(User))
+{
+    var displayName = User.Identity?.Name ?? "Korisnik";
+    var initials = string.Concat(displayName.Split('@', ' ', '.').Where(s => s.Length > 0).Take(2).Select(s => char.ToUpperInvariant(s[0])));
+    <div class="user-chip">
+        <div class="user-avatar">@initials</div>
+        <span>@displayName</span>
+        @if (User.IsInRole("Admin"))
+        {
+            <a class="btn btn-secondary btn-sm" asp-area="Identity" asp-page="/Account/Register">Novi korisnik</a>
+            <a class="btn btn-secondary btn-sm" asp-area="Identity" asp-page="/Account/ManageUsers">Na čekanju</a>
+        }
+        <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home")" method="post" class="logout-inline">
+            <button type="submit" class="btn-link">Odjava</button>
+        </form>
+    </div>
+}
+else
+{
+    <a class="btn btn-secondary btn-sm" asp-area="Identity" asp-page="/Account/Login">Prijava</a>
+}

@@ -1,16 +1,44 @@
 @model Reservation
+@{
+    var vehicle = Model.Vehicle;
+    var vehicleLabel = vehicle is null ? $"vozilo #{Model.VehicleId}" : $"{vehicle.Brand} {vehicle.Model} ({vehicle.RegistrationNumber})";
+}
 
-<section class="panel detail-card">
+<section class="panel detail-card rise-in">
     <h1>Rezervacija #@Model.Id</h1>
-    <p><strong>Kupac ID:</strong> @Model.CustomerId</p>
-    <p><strong>Vozilo ID:</strong> @Model.VehicleId</p>
-    <p><strong>Od:</strong> @Model.StartDate:yyyy-MM-dd</p>
-    <p><strong>Do:</strong> @Model.EndDate:yyyy-MM-dd</p>
-    <p><strong>Status:</strong> @Model.Status</p>
-    <p><strong>Preuzimanje:</strong> @Model.PickupLocation</p>
-    <p><strong>Povrat:</strong> @Model.DropoffLocation</p>
-    <p><strong>Bazna cijena:</strong> @Model.BasePrice EUR</p>
-    <p><strong>Ukupno:</strong> @Model.TotalCost() EUR</p>
-    <p><strong>Addons:</strong> @Model.Addons.Count</p>
-    <a asp-action="Index">Natrag na listu</a>
+
+    @if (Model.MileageUpdateSuggested && vehicle is not null)
+    {
+        <div class="glass glass-sm" style="margin:var(--space-md) 0;padding:var(--space-md);border-color:rgba(255,209,102,0.35)">
+            <strong style="color:var(--warning)">Ažuriraj kilometražu vozila</strong>
+            <p style="margin:6px 0 10px;font-size:13px;color:var(--muted)">
+                Najam je završen. Trenutna kilometraža: <strong>@vehicle.MileageKm km</strong>.
+            </p>
+            <a asp-controller="Vehicle" asp-action="Edit" asp-route-id="@vehicle.Id" class="btn btn-primary btn-sm">
+                Uredi vozilo — kilometraža
+            </a>
+        </div>
+    }
+
+    <div class="detail-grid" style="margin-top:var(--space-md)">
+        <div class="glass">
+            <div class="form-section-title">Osnovno</div>
+            <div class="detail-row"><span>Status</span><span><partial name="_StatusChip" model="@(UiDisplayHelper.ReservationChipClass(Model.Status), UiDisplayHelper.ReservationStatusLabel(Model.Status))" /></span></div>
+            <div class="detail-row"><span>Kupac</span><span>@(Model.Customer is null ? $"#{Model.CustomerId}" : $"{Model.Customer.FirstName} {Model.Customer.LastName}")</span></div>
+            <div class="detail-row"><span>Vozilo</span><span>@vehicleLabel</span></div>
+            <div class="detail-row"><span>Period</span><span>@Model.StartDate.ToString("g") – @Model.EndDate.ToString("g")</span></div>
+        </div>
+        <div class="glass">
+            <div class="form-section-title">Lokacije i cijena</div>
+            <div class="detail-row"><span>Preuzimanje</span><span>@Model.PickupLocation</span></div>
+            <div class="detail-row"><span>Povrat</span><span>@Model.DropoffLocation</span></div>
+            <div class="detail-row"><span>Bazna cijena</span><span>@Model.BasePrice.ToString("N2") EUR</span></div>
+            <div class="detail-row"><span>Ukupno</span><span>@Model.TotalCost().ToString("N2") EUR</span></div>
+        </div>
+    </div>
+
+    <div class="panel-actions" style="margin-top:var(--space-md)">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary btn-sm">Uredi</a>
+        <a asp-action="Index" class="btn btn-secondary btn-sm">← Natrag na listu</a>
+    </div>
 </section>

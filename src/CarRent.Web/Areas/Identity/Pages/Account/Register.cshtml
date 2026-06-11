@@ -1,0 +1,46 @@
+@page
+@model CarRent.Web.Areas.Identity.Pages.Account.RegisterModel
+@{
+    ViewData["Title"] = "Novi korisnik";
+}
+
+<section class="panel auth-panel">
+    <h1>Novi korisnik</h1>
+    <p class="muted">Samo administrator može kreirati račune zaposlenika.</p>
+    <form asp-route-returnUrl="@Model.ReturnUrl" method="post" class="auth-form">
+        <div asp-validation-summary="ModelOnly" class="field-error"></div>
+        <label asp-for="Input.Email"></label>
+        <input asp-for="Input.Email" class="form-control" autocomplete="username" />
+        <span asp-validation-for="Input.Email" class="field-error"></span>
+
+        <label asp-for="Input.OIB"></label>
+        <input asp-for="Input.OIB" class="form-control" />
+        <span asp-validation-for="Input.OIB" class="field-error"></span>
+
+        <label asp-for="Input.JMBG"></label>
+        <input asp-for="Input.JMBG" class="form-control" />
+        <span asp-validation-for="Input.JMBG" class="field-error"></span>
+
+        <label asp-for="Input.RoleName"></label>
+        <select asp-for="Input.RoleName" class="form-control" asp-items="@(new SelectList(Model.AvailableRoles))"></select>
+        <span asp-validation-for="Input.RoleName" class="field-error"></span>
+
+        <label asp-for="Input.Password"></label>
+        <input asp-for="Input.Password" class="form-control" autocomplete="new-password" />
+        <span asp-validation-for="Input.Password" class="field-error"></span>
+
+        <label asp-for="Input.ConfirmPassword"></label>
+        <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" />
+        <span asp-validation-for="Input.ConfirmPassword" class="field-error"></span>
+
+        <button type="submit" class="btn btn-primary">Kreiraj korisnika</button>
+    </form>
+
+    <p class="auth-links">
+        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary btn-sm">← Natrag na početnu</a>
+    </p>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -24,11 +24,12 @@
         <div class="tl-legend-item"><div class="tl-legend-dot" style="background:rgba(138,125,255,0.65)"></div>Aktivna</div>
         <div class="tl-legend-item"><div class="tl-legend-dot" style="background:rgba(93,255,176,0.5)"></div>Završena</div>
         <div class="tl-legend-item"><div class="tl-legend-dot" style="background:rgba(168,178,217,0.3)"></div>Nacrt</div>
+        <div class="tl-legend-item"><div class="tl-legend-dot" style="background:rgba(255,209,102,0.65)"></div>Registracija</div>
     </div>
     <a asp-controller="Reservation" asp-action="Create" class="btn btn-primary btn-sm" style="margin-left:auto">+ Nova rezervacija</a>
 </div>
 
-<form method="get" class="glass glass-sm rise-in" style="margin-bottom:var(--space-md);display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+<form method="get" class="glass glass-sm rise-in tl-filters" style="margin-bottom:var(--space-md);display:flex;gap:12px;flex-wrap:wrap;align-items:center">
     <input type="hidden" name="month" value="@monthInputValue" />
     <input type="text" name="q" value="@Model.SearchText" class="field-input" placeholder="Pretraga vozila…" style="max-width:220px" />
     <select name="vehicleType" class="field-select" style="width:auto">
@@ -87,10 +88,15 @@
                         </div>
                         @foreach (var bar in row.Bars)
                         {
-                            var css = UiDisplayHelper.ReservationTimelineClass(bar.Reservation.Status);
-                            var label = bar.Reservation.Customer is null ? $"#{bar.Reservation.Id}" : $"{bar.Reservation.Customer.FirstName} {bar.Reservation.Customer.LastName}";
-                            <a asp-controller="Reservation" asp-action="Details" asp-route-id="@bar.Reservation.Id"
-                               class="tl-res @css" style="--s:@bar.StartDay;--n:@bar.Span" title="@label">@label</a>
+                            if (bar.IsRegistration)
+                            {
+                                <span class="tl-res @bar.CssClass" style="--s:@bar.StartDay;--n:@bar.Span" title="@bar.Label">@bar.Label</span>
+                            }
+                            else if (bar.Reservation is not null)
+                            {
+                                <a asp-controller="Reservation" asp-action="Details" asp-route-id="@bar.Reservation.Id"
+                                   class="tl-res @bar.CssClass" style="--s:@bar.StartDay;--n:@bar.Span" title="@bar.Label">@bar.Label</a>
+                            }
                         }
                     </div>
                 </div>

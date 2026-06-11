@@ -1,0 +1,7 @@
+@{
+    var returnUrl = ViewData["ReturnUrl"] as string;
+}
+@if (!string.IsNullOrEmpty(returnUrl))
+{
+    <input type="hidden" name="returnUrl" value="@returnUrl" />
+}

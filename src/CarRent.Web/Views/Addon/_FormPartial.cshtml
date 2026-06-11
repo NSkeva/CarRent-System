@@ -3,5 +3,8 @@
     <input type="hidden" asp-for="Id" />
     <div class="field"><label asp-for="Name"></label><input asp-for="Name" class="form-control" /><span asp-validation-for="Name" class="field-error"></span></div>
     <div class="field"><label asp-for="PricePerDay"></label><input asp-for="PricePerDay" class="form-control" /><span asp-validation-for="PricePerDay" class="field-error"></span></div>
-    <div class="actions"><button type="submit" class="btn-primary">Spremi</button><a asp-action="Index">Odustani</a></div>
+    <div class="actions">
+        <button type="submit" class="btn btn-primary">Spremi</button>
+        <a asp-action="Index" class="btn btn-secondary">Odustani</a>
+    </div>
 </form>

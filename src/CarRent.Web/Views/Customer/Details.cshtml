@@ -8,5 +8,7 @@
     <p><strong>Vozacka dozvola:</strong> @Model.DriverLicenseNumber</p>
     <p><strong>Kreirano:</strong> @Model.CreatedAt:yyyy-MM-dd</p>
     <p><strong>Rezervacije:</strong> @Model.Reservations.Count</p>
-    <a asp-action="Index">Natrag na listu</a>
+    <div class="panel-actions">
+        <a asp-action="Index" class="btn btn-secondary btn-sm">← Natrag na listu</a>
+    </div>
 </section>

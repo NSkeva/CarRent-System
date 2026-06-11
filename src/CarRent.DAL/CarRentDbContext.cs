@@ -1,10 +1,11 @@
 using CarRent.Model.Entities;
 using CarRent.Model.Enums;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarRent.DAL;
 
-public class CarRentDbContext : DbContext
+public class CarRentDbContext : IdentityDbContext<AppUser>
 {
     public CarRentDbContext(DbContextOptions<CarRentDbContext> options) : base(options)
     {
@@ -19,6 +20,8 @@ public class CarRentDbContext : DbContext
     public DbSet<ServiceRecord> ServiceRecords => Set<ServiceRecord>();
     public DbSet<Employee> Employees => Set<Employee>();
     public DbSet<Partner> Partners => Set<Partner>();
+    public DbSet<VehicleAttachment> VehicleAttachments => Set<VehicleAttachment>();
+    public DbSet<FleetNotificationOutbox> FleetNotificationOutbox => Set<FleetNotificationOutbox>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -26,6 +29,10 @@ public class CarRentDbContext : DbContext
 
         modelBuilder.Entity<ReservationAddon>()
             .HasKey(x => new { x.ReservationId, x.AddonId });
+
+        modelBuilder.Entity<FleetNotificationOutbox>()
+            .HasIndex(x => x.DedupKey)
+            .IsUnique();
 
         SeedData.Apply(modelBuilder);
     }

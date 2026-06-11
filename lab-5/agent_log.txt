@@ -1,0 +1,4 @@
+----- Lab 5 agent log -----
+----- 2026-06-11 13:43:57 -----
+Fleet lifecycle: otkazano ostaje otkazano; zavrseno samo iz aktivne rezervacije/servisa. Uklonjen repair Otkazana->Zavrsena. Confirmed bez preuzimanja nakon perioda -> Otkazana.
+

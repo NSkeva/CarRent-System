@@ -42,7 +42,20 @@ public class Vehicle
     public VehicleType Type { get; set; }
     public int MileageKm { get; set; }
     public bool IsActive { get; set; }
+
+    /// <summary>IsActive je privremeno isključen jer je servis u tijeku.</summary>
+    public bool BlockedByService { get; set; }
+
+    /// <summary>Vrijednost IsActive prije servisne blokade (za vraćanje nakon servisa).</summary>
+    public bool IsActiveBeforeServiceBlock { get; set; } = true;
+
     public decimal DailyPrice { get; set; }
+
+    [MaxLength(500)]
+    public string? MainImagePath { get; set; }
+
+    /// <summary>Godišnji datum registracije (dan i mjesec se ponavljaju svake godine).</summary>
+    public DateOnly? RegistrationDueDate { get; set; }
 
     [ForeignKey(nameof(BranchOffice))]
     public int BranchOfficeId { get; set; }
@@ -50,6 +63,7 @@ public class Vehicle
     public virtual BranchOffice? BranchOffice { get; set; }
     public virtual ICollection<ServiceRecord> ServiceRecords { get; set; } = new List<ServiceRecord>();
     public virtual ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
+    public virtual ICollection<VehicleAttachment> Attachments { get; set; } = new List<VehicleAttachment>();
 }
 
 public class Customer
@@ -97,6 +111,9 @@ public class Reservation
     public ReservationStatus Status { get; set; }
     public decimal BasePrice { get; set; }
     public DateTime CreatedAt { get; set; }
+
+    /// <summary>Prijedlog ažuriranja kilometraže vozila nakon završetka najma.</summary>
+    public bool MileageUpdateSuggested { get; set; }
 
     public virtual Customer? Customer { get; set; }
     public virtual Vehicle? Vehicle { get; set; }
@@ -179,6 +196,40 @@ public class Employee
     public DateTime HiredAt { get; set; }
 
     public virtual BranchOffice? BranchOffice { get; set; }
+}
+
+public class FleetNotificationOutbox
+{
+    [Key]
+    public int Id { get; set; }
+
+    [Required, MaxLength(20)]
+    public string Channel { get; set; } = "Prepared";
+
+    [Required, MaxLength(60)]
+    public string NotificationType { get; set; } = string.Empty;
+
+    [Required, MaxLength(200)]
+    public string Subject { get; set; } = string.Empty;
+
+    [Required, MaxLength(2000)]
+    public string Body { get; set; } = string.Empty;
+
+    [MaxLength(200)]
+    public string? Recipient { get; set; }
+
+    [Required, MaxLength(120)]
+    public string DedupKey { get; set; } = string.Empty;
+
+    [MaxLength(40)]
+    public string? RelatedEntityType { get; set; }
+
+    public int? RelatedEntityId { get; set; }
+
+    public DateTime CreatedAt { get; set; }
+
+    /// <summary>null = pripremljeno, nije poslano (email/push još nije spojen).</summary>
+    public DateTime? SentAt { get; set; }
 }
 
 public class Partner

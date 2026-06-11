@@ -9,5 +9,7 @@
     <p><strong>Kilometraza:</strong> @Model.MileageAtService km</p>
     <p><strong>Trosak:</strong> @Model.Cost EUR</p>
     <p><strong>Preporuceni iduci servis:</strong> @(Model.NextRecommendedServiceDate?.ToString("yyyy-MM-dd") ?? "-")</p>
-    <a asp-action="Index">Natrag na listu</a>
+    <div class="panel-actions">
+        <a asp-action="Index" class="btn btn-secondary btn-sm">← Natrag na listu</a>
+    </div>
 </section>

@@ -12,6 +12,7 @@ Thumbs.db
 .dotnet/
 .nuget/
 Data/
+src/CarRent.Web/wwwroot/uploads/
 *.db
 *.db-shm
 *.db-wal

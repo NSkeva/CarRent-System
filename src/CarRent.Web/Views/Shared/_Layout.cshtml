@@ -1,6 +1,10 @@
 @{
-    var operativaActive = new[] { "Home", "Timeline", "DailyPlan", "Fleet" }.Contains(ViewContext.RouteData.Values["controller"]?.ToString());
-    var podaciActive = !operativaActive && ViewContext.RouteData.Values["controller"]?.ToString() is not "Home";
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    var navSection = ViewData["NavSection"] as string;
+    var isAdmin = User.IsInRole("Admin");
+    var operativaActive = navSection == "operativa"
+        || new[] { "Home", "Timeline", "DailyPlan", "Fleet" }.Contains(controller);
+    var podaciActive = isAdmin && !operativaActive && controller is not "Home";
 }
 <!DOCTYPE html>
 <html lang="hr">
@@ -29,32 +33,33 @@
                         <a asp-controller="Timeline" asp-action="Index">📅 Timeline</a>
                         <a asp-controller="DailyPlan" asp-action="Index">📋 Dnevni plan</a>
                         <a asp-controller="Fleet" asp-action="Index">🚗 Vozni park</a>
+                        <a asp-controller="Notifications" asp-action="Index">🔔 Obavijesti</a>
                     </div>
                 </div>
-                <div class="nav-group @(podaciActive ? "open" : "")">
-                    <button type="button" class="nav-group-btn @(podaciActive ? "active" : "")">
-                        Podaci
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-                    </button>
-                    <div class="nav-dropdown">
-                        <a asp-controller="Reservation" asp-action="Index">🗓 Rezervacije</a>
-                        <a asp-controller="Vehicle" asp-action="Index">🚘 Vozila</a>
-                        <a asp-controller="Customer" asp-action="Index">👤 Kupci</a>
-                        <div class="nav-dropdown-divider"></div>
-                        <a asp-controller="ServiceRecord" asp-action="Index">🔧 Servisi</a>
-                        <a asp-controller="BranchOffice" asp-action="Index">🏢 Poslovnice</a>
-                        <a asp-controller="Addon" asp-action="Index">➕ Dodaci</a>
-                        <a asp-controller="Employee" asp-action="Index">👥 Zaposlenici</a>
-                        <a asp-controller="Partners" asp-action="Index">🤝 Partneri</a>
+                @if (isAdmin)
+                {
+                    <div class="nav-group @(podaciActive ? "open" : "")">
+                        <button type="button" class="nav-group-btn @(podaciActive ? "active" : "")">
+                            Podaci
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                        </button>
+                        <div class="nav-dropdown">
+                            <a asp-controller="Reservation" asp-action="Index">🗓 Rezervacije</a>
+                            <a asp-controller="Vehicle" asp-action="Index">🚘 Vozila</a>
+                            <a asp-controller="Customer" asp-action="Index">👤 Kupci</a>
+                            <div class="nav-dropdown-divider"></div>
+                            <a asp-controller="ServiceRecord" asp-action="Index">🔧 Servisi</a>
+                            <a asp-controller="BranchOffice" asp-action="Index">🏢 Poslovnice</a>
+                            <a asp-controller="Addon" asp-action="Index">➕ Dodaci</a>
+                            <a asp-controller="Employee" asp-action="Index">👥 Zaposlenici</a>
+                            <a asp-controller="Partners" asp-action="Index">🤝 Partneri</a>
+                        </div>
                     </div>
-                </div>
+                }
             </nav>
             <div class="header-actions">
                 <button type="button" class="lang-toggle" title="Jezik">HR</button>
-                <div class="user-chip">
-                    <div class="user-avatar">OP</div>
-                    Operater
-                </div>
+                <partial name="_LoginPartial" />
             </div>
         </div>
     </header>

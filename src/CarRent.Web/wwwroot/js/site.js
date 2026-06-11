@@ -50,6 +50,11 @@
             const url = wrap.dataset.autocomplete;
             if (!input || !hidden || !list || !url) return;
 
+            const setOpen = (open) => {
+                list.classList.toggle("open", open);
+                wrap.classList.toggle("is-open", open);
+            };
+
             const render = (items) => {
                 list.innerHTML = "";
                 items.forEach((item) => {
@@ -59,11 +64,11 @@
                     li.addEventListener("click", () => {
                         hidden.value = item.id;
                         input.value = item.label;
-                        list.classList.remove("open");
+                        setOpen(false);
                     });
                     list.appendChild(li);
                 });
-                list.classList.toggle("open", items.length > 0);
+                setOpen(items.length > 0);
             };
 
             const search = debounce(async () => {
@@ -76,7 +81,7 @@
             input.addEventListener("input", search);
             input.addEventListener("focus", search);
             document.addEventListener("click", (e) => {
-                if (!wrap.contains(e.target)) list.classList.remove("open");
+                if (!wrap.contains(e.target)) setOpen(false);
             });
         });
     }
@@ -134,7 +139,7 @@
                     cell.addEventListener("click", () => {
                         const dt = new Date(view.getFullYear(), view.getMonth(), d, selected.getHours(), selected.getMinutes());
                         syncHidden(dt);
-                        cal.classList.remove("open");
+                        setCalOpen(false);
                     });
                     grid.appendChild(cell);
                 }
@@ -156,14 +161,25 @@
                 });
             };
 
-            display.addEventListener("click", () => {
-                cal.classList.toggle("open");
-                draw();
+            const setCalOpen = (open) => {
+                cal.classList.toggle("open", open);
+                wrap.classList.toggle("is-open", open);
+            };
+
+            display.addEventListener("click", (e) => {
+                e.stopPropagation();
+                const willOpen = !cal.classList.contains("open");
+                setCalOpen(willOpen);
+                if (willOpen) draw();
             });
 
             display.addEventListener("blur", () => {
                 const parsed = parseDisplayDate(display.value);
                 if (parsed) syncHidden(parsed);
+            });
+
+            document.addEventListener("click", (e) => {
+                if (!wrap.contains(e.target)) setCalOpen(false);
             });
         });
     }

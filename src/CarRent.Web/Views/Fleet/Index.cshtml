@@ -1,7 +1,9 @@
 @model IReadOnlyList<FleetCardVm>
 @{
     ViewData["Title"] = "Vozni park";
+    ViewData["NavSection"] = "operativa";
     ViewData["Breadcrumbs"] = BreadcrumbHelper.Build("Home", "Vozni park");
+    var fleetReturn = Url.Action("Index", "Fleet");
     var activeCount = Model.Count(v => v.Vehicle.IsActive);
 }
 
@@ -21,7 +23,7 @@
         <article class="fleet-card rise-in">
             <div class="fleet-card-img">
                 <img src="@item.ImageUrl" alt="@item.Vehicle.Brand @item.Vehicle.Model" loading="lazy" />
-                <span class="chip @(item.Vehicle.IsActive ? "chip-completed" : "chip-cancelled") status-badge">@(item.Vehicle.IsActive ? "Aktivno" : "Neaktivno")</span>
+                <span class="chip @(item.Vehicle.BlockedByService ? "chip-planned" : item.Vehicle.IsActive ? "chip-completed" : "chip-cancelled") status-badge">@(item.Vehicle.BlockedByService ? "Na servisu" : item.Vehicle.IsActive ? "Aktivno" : "Neaktivno")</span>
             </div>
             <div class="fleet-card-body">
                 <div class="fleet-card-title">@item.Vehicle.Brand @item.Vehicle.Model</div>
@@ -33,8 +35,8 @@
                 <div class="fleet-card-price">@item.Vehicle.DailyPrice.ToString("N0") <span>EUR/dan</span></div>
             </div>
             <div class="fleet-card-actions">
-                <a asp-controller="Vehicle" asp-action="Details" asp-route-id="@item.Vehicle.Id" class="action-btn">Detalji</a>
-                <a asp-controller="Vehicle" asp-action="Edit" asp-route-id="@item.Vehicle.Id" class="action-btn">Uredi</a>
+                <a asp-controller="Vehicle" asp-action="Details" asp-route-id="@item.Vehicle.Id" asp-route-returnUrl="@fleetReturn" class="action-btn">Detalji</a>
+                <a asp-controller="Vehicle" asp-action="Edit" asp-route-id="@item.Vehicle.Id" asp-route-returnUrl="@fleetReturn" class="action-btn">Uredi</a>
                 <a asp-controller="Reservation" asp-action="Create" class="action-btn">Rezerviraj</a>
                 <a asp-controller="ServiceRecord" asp-action="Index" class="action-btn">Servisi</a>
             </div>

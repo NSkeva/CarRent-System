@@ -1,9 +1,11 @@
 using CarRent.Web.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CarRent.Web.Controllers;
 
 [Route("api/lookup")]
+[Authorize]
 public sealed class LookupApiController(
     CustomerRepository customers,
     VehicleRepository vehicles,

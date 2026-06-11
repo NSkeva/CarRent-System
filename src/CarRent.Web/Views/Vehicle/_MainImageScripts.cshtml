@@ -1,0 +1,50 @@
+@model int
+<script>
+(function () {
+    const vehicleId = @Model;
+    const uploadUrl = "@Url.Action("UploadMainImage", "Vehicle")";
+    const deleteUrl = "@Url.Action("DeleteMainImage", "Vehicle")";
+    const input = document.getElementById("mainImageInput");
+    const removeBtn = document.getElementById("btnRemoveMainImage");
+
+    function setPreview(url) {
+        const cacheBust = url.startsWith("/") ? `${url}?t=${Date.now()}` : url;
+        document.querySelectorAll("#vehicleMainImagePreview, #vehicleHeroImage").forEach((img) => {
+            img.src = cacheBust;
+        });
+    }
+
+    input?.addEventListener("change", async () => {
+        const file = input.files?.[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const response = await fetch(`${uploadUrl}?vehicleId=${vehicleId}`, { method: "POST", body: formData });
+        const data = await response.json();
+        if (!response.ok) {
+            alert(data.error || "Upload slike nije uspio.");
+            input.value = "";
+            return;
+        }
+
+        setPreview(data.imageUrl);
+        removeBtn?.removeAttribute("hidden");
+        document.getElementById("mainImageUploadLabel")?.replaceChildren(document.createTextNode("Promijeni sliku"));
+        input.value = "";
+    });
+
+    removeBtn?.addEventListener("click", async () => {
+        if (!confirm("Ukloniti glavnu sliku vozila?")) return;
+
+        const response = await fetch(`${deleteUrl}?vehicleId=${vehicleId}`, { method: "POST" });
+        const data = await response.json();
+        if (!response.ok) return;
+
+        setPreview(data.imageUrl);
+        removeBtn.setAttribute("hidden", "");
+        document.getElementById("mainImageUploadLabel")?.replaceChildren(document.createTextNode("Učitaj sliku"));
+    });
+})();
+</script>

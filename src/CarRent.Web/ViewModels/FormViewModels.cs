@@ -62,6 +62,9 @@ public sealed class VehicleFormVm
 
     public bool IsActive { get; set; } = true;
 
+    [Display(Name = "Datum registracije")]
+    public DateOnly? RegistrationDueDate { get; set; }
+
     [Range(1, 10_000)]
     public decimal DailyPrice { get; set; }
 

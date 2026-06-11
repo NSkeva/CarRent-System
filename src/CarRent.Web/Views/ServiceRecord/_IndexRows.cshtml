@@ -7,9 +7,12 @@
         <td>@item.Status</td>
         <td>@item.Description</td>
         <td class="row-actions">
-            <a asp-action="Details" asp-route-id="@item.Id">Detalji</a>
-            <a asp-action="Edit" asp-route-id="@item.Id">Uredi</a>
-            <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="inline-form">@Html.AntiForgeryToken()<button type="submit" class="link-btn">Obriši</button></form>
+            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-ghost btn-sm">Detalji</a>
+            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-ghost btn-sm">Uredi</a>
+            <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="inline-form">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-ghost btn-sm" style="color:var(--danger)">Obriši</button>
+            </form>
         </td>
     </tr>
 }

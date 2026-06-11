@@ -1,6 +1,13 @@
 @model VehicleFormVm
+@{
+    var returnUrl = ViewData["ReturnUrl"] as string;
+}
 <form asp-action="@(Model.Id == 0 ? "Create" : "Edit")" method="post" class="crud-form">
     <input type="hidden" asp-for="Id" />
+    @if (!string.IsNullOrEmpty(returnUrl))
+    {
+        <input type="hidden" name="returnUrl" value="@returnUrl" />
+    }
     <div class="field"><label asp-for="RegistrationNumber"></label><input asp-for="RegistrationNumber" class="form-control" /><span asp-validation-for="RegistrationNumber" class="field-error"></span></div>
     <div class="field"><label asp-for="Brand"></label><input asp-for="Brand" class="form-control" /><span asp-validation-for="Brand" class="field-error"></span></div>
     <div class="field"><label asp-for="Model"></label><input asp-for="Model" class="form-control" /><span asp-validation-for="Model" class="field-error"></span></div>
@@ -8,7 +15,37 @@
     <div class="field"><label asp-for="Type"></label><select asp-for="Type" asp-items="Html.GetEnumSelectList<VehicleType>()" class="form-control"></select></div>
     <div class="field"><label asp-for="MileageKm"></label><input asp-for="MileageKm" class="form-control" /></div>
     <div class="field"><label asp-for="DailyPrice"></label><input asp-for="DailyPrice" class="form-control" /></div>
-    <div class="field"><label asp-for="IsActive"></label><input asp-for="IsActive" type="checkbox" /></div>
+    <div class="field">
+        <label asp-for="RegistrationDueDate" class="field-label"></label>
+        <input asp-for="RegistrationDueDate" class="form-control" type="date" />
+        <span class="field-help">Prikazuje se na timelineu svake godine (dan registracije)</span>
+    </div>
+    <label class="field-toggle">
+        <input asp-for="IsActive" class="field-toggle-input" type="checkbox" />
+        <span class="field-toggle-switch" aria-hidden="true"></span>
+        <span class="field-toggle-text">
+            <span class="field-toggle-label">Aktivno vozilo</span>
+            <span class="field-toggle-hint">Prikazuje se u voznom parku i može se rezervirati</span>
+        </span>
+    </label>
     <partial name="_AutocompletePartial" model='new AutocompleteFieldVm { InputId = "branchSearch", HiddenName = "BranchOfficeId", Label = "Poslovnica", SearchUrl = "/api/lookup/branches", SelectedId = Model.BranchOfficeId, DisplayText = Model.BranchOfficeDisplay }' />
-    <div class="actions"><button type="submit" class="btn-primary">Spremi</button><a asp-action="Index">Odustani</a></div>
+    <div class="actions">
+        <button type="submit" class="btn btn-primary">Spremi</button>
+        @if (!string.IsNullOrEmpty(returnUrl) && Model.Id > 0)
+        {
+            <a asp-action="Details" asp-route-id="@Model.Id" asp-route-returnUrl="@returnUrl" class="btn btn-secondary">Odustani</a>
+        }
+        else if (!string.IsNullOrEmpty(returnUrl))
+        {
+            <a href="@returnUrl" class="btn btn-secondary">Odustani</a>
+        }
+        else if (Model.Id > 0)
+        {
+            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary">Odustani</a>
+        }
+        else
+        {
+            <a asp-action="Index" class="btn btn-secondary">Odustani</a>
+        }
+    </div>
 </form>

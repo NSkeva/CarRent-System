@@ -1,6 +1,10 @@
 @model ServiceRecordFormVm
+@{
+    var returnUrl = ViewData["ReturnUrl"] as string;
+}
 <form asp-action="@(Model.Id == 0 ? "Create" : "Edit")" method="post" class="crud-form">
     <input type="hidden" asp-for="Id" />
+    <partial name="_FormReturnUrlPartial" />
     <partial name="_AutocompletePartial" model='new AutocompleteFieldVm { InputId = "vehSrv", HiddenName = "VehicleId", Label = "Vozilo", SearchUrl = "/api/lookup/vehicles", SelectedId = Model.VehicleId, DisplayText = Model.VehicleDisplay }' />
     <partial name="_DateTimePartial" model='new DateTimeFieldVm { FieldName = "ServiceDate", Label = "Datum servisa", Value = Model.ServiceDate }' />
     <div class="field"><label asp-for="Status"></label><select asp-for="Status" asp-items="Html.GetEnumSelectList<ServiceStatus>()" class="form-control"></select></div>
@@ -8,5 +12,15 @@
     <div class="field"><label asp-for="MileageAtService"></label><input asp-for="MileageAtService" class="form-control" /></div>
     <div class="field"><label asp-for="Cost"></label><input asp-for="Cost" class="form-control" /></div>
     <partial name="_DateTimePartial" model='new DateTimeFieldVm { FieldName = "NextRecommendedServiceDate", Label = "Sljedeći servis (opcionalno)", Value = Model.NextRecommendedServiceDate }' />
-    <div class="actions"><button type="submit" class="btn-primary">Spremi</button><a asp-action="Index">Odustani</a></div>
+    <div class="actions">
+        <button type="submit" class="btn btn-primary">Spremi</button>
+        @if (!string.IsNullOrEmpty(returnUrl))
+        {
+            <a href="@returnUrl" class="btn btn-secondary">Odustani</a>
+        }
+        else
+        {
+            <a asp-action="Index" class="btn btn-secondary">Odustani</a>
+        }
+    </div>
 </form>

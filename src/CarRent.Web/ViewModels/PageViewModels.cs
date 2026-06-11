@@ -44,15 +44,27 @@ public sealed class TimelineRowVm
 
 public sealed class TimelineBarVm
 {
-    public required Reservation Reservation { get; init; }
+    public Reservation? Reservation { get; init; }
     public int StartDay { get; init; }
-    public int Span { get; init; }
+    public int Span { get; init; } = 1;
+    public string Label { get; init; } = string.Empty;
+    public string CssClass { get; init; } = "draft";
+    public bool IsRegistration { get; init; }
 }
 
 public sealed class TimelineCellVm
 {
     public required DateOnly Day { get; init; }
     public required IReadOnlyList<Reservation> Reservations { get; init; }
+}
+
+public sealed class VehicleReservationEventVm
+{
+    public DateTime SortDate { get; init; }
+    public bool IsRegistration { get; init; }
+    public bool RegistrationIsPast { get; init; }
+    public bool RegistrationIsToday { get; init; }
+    public Reservation? Reservation { get; init; }
 }
 
 public sealed class DailyPlanVm

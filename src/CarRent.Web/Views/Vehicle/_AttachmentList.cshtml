@@ -1,0 +1,35 @@
+@model IReadOnlyList<CarRent.Model.Entities.VehicleAttachment>
+
+@if (Model.Count == 0)
+{
+    <p class="tab-empty">Nema uploadanih dokumenata.</p>
+}
+else
+{
+    <div class="table-wrap">
+        <table class="data-table attachment-table">
+            <thead>
+                <tr>
+                    <th>Datoteka</th>
+                    <th>Veličina</th>
+                    <th>Datum</th>
+                    <th>Akcije</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var attachment in Model)
+                {
+                    <tr>
+                        <td>@attachment.FileName</td>
+                        <td>@($"{attachment.FileSize / 1024.0:0} KB")</td>
+                        <td>@attachment.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                        <td class="row-actions">
+                            <a href="@attachment.FilePath" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">Preuzmi</a>
+                            <button type="button" class="btn btn-ghost btn-sm btn-danger-text" onclick="deleteAttachment(@attachment.Id)">Obriši</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
