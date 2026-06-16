@@ -1,4 +1,4 @@
-# Lab 4 Report - CRUD, AJAX, validacija, JS kontrole
+# Lab 4 Report - CRUD, AJAX, validacija, JS kontroles
 
 ## 1. Sto je novo u Lab 4
 
@@ -93,3 +93,165 @@ bash .github/hooks/export_cursor_transcript_lab4.sh
 ```
 
 Skripta izvozi samo Lab 4 razgovor iz glavnog Cursor transkripta (marker: „pogledaj lab-4”).
+
+## 11. Usmeno — pitanja profesora i kako objasniti
+
+Kratki vodič za usmenu: što bi profesor mogao pitati, gdje je to u kodu i kako to objasniti jednostavno.
+
+---
+
+### CRUD općenito
+
+**P: Gdje je implementiran CRUD i za koje entitete?**
+
+**O:** U `src/CarRent.Web/Controllers/EntityCrudControllers.cs` — zaseban controller po entitetu (BranchOffice, Vehicle, Customer, Reservation, Addon, ServiceRecord, Employee). Partneri su u `Controllers.cs` jer su bili već u Lab 3. Svaki controller ima `Index`, `Details`, `Create` (GET/POST), `Edit` (GET/POST), `Delete` (POST) i `SearchRows` za AJAX pretragu.
+
+**P: Zašto Create i Edit ne koriste direktno EF entitet na formi?**
+
+**O:** Forme koriste ViewModele u `FormViewModels.cs` (npr. `VehicleFormVm`), a mapiranje entitet ↔ forma ide kroz `EntityMappers.cs`. Razlog: forma ima drugačija polja od entiteta (npr. autocomplete ID-evi, format datuma), validacijske atribute i ne želimo izložiti cijeli entitet u viewu.
+
+**P: Kako Create radi od klika na „Spremi” do baze?**
+
+**O:** Korisnik pošalje POST na npr. `/Vehicle/Create` → controller provjeri `ModelState.IsValid` → `EntityMappers.ToEntity(formVm)` napravi entitet → `repository.AddAsync(entity)` → EF `SaveChanges` u repozitoriju → redirect na `Index`. Ako validacija padne, vraća se ista forma s porukama.
+
+**P: Kako Edit razlikuje od Create?**
+
+**O:** GET `Edit/{id}` učita zapis iz baze, mapper ga pretvori u `*FormVm` i popuni formu. POST `Edit` prima isti VM, ponovno validira, mapira na entitet, postavi `Id` i pozove `UpdateAsync`. U kodu je `[ActionName("Edit")]` na POST metodi da URL ostane `/Vehicle/Edit/5`.
+
+**P: Kako Delete radi i zašto neki delete ne prolazi?**
+
+**O:** Delete je POST (npr. gumb u listi s anti-forgery tokenom). Controller dohvati entitet po ID-u i pozove `DeleteAsync`. Za poslovnicu (`BranchOffice`) prije brisanja provjeravamo ima li vozila — ako ima, ne brišemo nego stavimo poruku u `TempData["Error"]` i vratimo korisnika na listu. To je poslovno pravilo umjesto cascade delete.
+
+**P: Što je `SearchRows` i zašto nije običan submit forme?**
+
+**O:** `SearchRows(string? q)` vraća samo partial view s redovima tablice (`_IndexRows`), ne cijelu stranicu. JavaScript na klijentu šalje `fetch` na tu akciju dok korisnik tipka u polje pretrage — to je AJAX pretraga bez reloada stranice.
+
+---
+
+### AJAX pretraga na listama
+
+**P: Gdje se AJAX pretraga „palí” u browseru?**
+
+**O:** U `wwwroot/js/site.js` — sluša `input` na elementima s `data-ajax-search` i `data-target`. Debounce (~300 ms) čeka da korisnik prestane tipkati, zatim `fetch(url + ?q=...)` i zamijeni HTML unutar ciljnog elementa (npr. `#vehicle-rows` tbody).
+
+**P: Gdje je to povezano u Razor viewu?**
+
+**O:** `Views/Shared/_CrudIndexHeaderPartial.cshtml` — polje za pretragu ima atribute `data-ajax-search="/Vehicle/SearchRows"` i `data-target="#vehicle-rows"`. Index stranica uključuje taj partial i ima prazan tbody s tim ID-om koji se puni iz servera.
+
+**P: Što server vraća AJAX pretrazi?**
+
+**O:** Samo HTML fragment — partial `Views/{Entity}/_IndexRows.cshtml` renderiran s filtriranom listom iz repozitorija (`GetAllAsync(q)` ili slično). Nema JSON-a; zamjena je „server-side HTML swap”.
+
+---
+
+### Autocomplete dropdown
+
+**P: Gdje je autocomplete i kako koristi AJAX?**
+
+**O:** Tri dijela:
+
+1. **API** — `LookupApiController.cs`, rute `/api/lookup/customers`, `vehicles`, `branches` — vraćaju JSON listu (`id`, `label`) filtriranu po `q`.
+2. **Partial** — `Views/Shared/_AutocompletePartial.cshtml` — skriveno polje za ID + vidljivo polje za tekst + dropdown lista.
+3. **JS** — `site.js` na `input` šalje `fetch` na API, prikazuje rezultate, na odabir upisuje label i ID u skriveno polje.
+
+**P: Zašto autocomplete nije običan `<select>`?**
+
+**O:** Jer ima puno zapisa (kupci, vozila) — učitavanje svega odjednom bi bilo sporo. AJAX dohvaća samo prvih N rezultata koji odgovaraju upitu dok korisnik tipka.
+
+**P: Gdje se autocomplete koristi u formama?**
+
+**O:** Npr. rezervacija — kupac i vozilo; vozilo — poslovnica; servis — vozilo; zaposlenik — poslovnica. U `FormViewModels` imamo `AutocompleteFieldVm` ili ID + display polja koja partial renderira.
+
+---
+
+### Validacija (client + server)
+
+**P: Gdje je server-side validacija?**
+
+**O:** Na ViewModel klasama u `FormViewModels.cs` — atributi `[Required]`, `[StringLength]`, `[Range]`, `[EmailAddress]`, custom `[Phone]`. U controlleru prije spremanja: `if (!ModelState.IsValid) return View(model);`.
+
+**P: Gdje je client-side validacija i zašto na blur?**
+
+**O:** Dva sloja:
+
+1. **jQuery Validate unobtrusive** — `_ValidationScriptsPartial.cshtml` u layoutu/formi, čita `data-val-`* atribute koje generira ASP.NET iz DataAnnotations.
+2. **Custom blur** u `site.js` — kad polje izgubi fokus, ručno označi grešku / poruku (zahtjev laba: validacija se okida na blur).
+
+**P: Gdje se prikazuju poruke korisniku?**
+
+**O:** U form viewovima: `<span asp-validation-for="Email" class="field-error">` — server renderira greške nakon POST-a; jQuery Validate dodaje iste klase na klijentu prije slanja.
+
+**P: Zašto mora postojati i server validacija ako imamo JS?**
+
+**O:** Klijent se može zaobići (DevTools, curl). Server je jedini pouzdan — uvijek provjeravamo `ModelState` prije pisanja u bazu.
+
+---
+
+### Datumska kontrola (partial view)
+
+**P: Gdje je custom datum+vrijeme i zašto nije browser `type="date"`?**
+
+**O:** Partial `Views/Shared/_DateTimePartial.cshtml` + logika u `site.js`. Lab eksplicitno traži da ne koristimo default browser datepicker — kontrola je naša (kalendar/vrijeme u JS-u ili tekstualni unos s parserom).
+
+**P: Kako radi hr vs en format?**
+
+**O:** U `site.js` čitamo `navigator.language` (ili postavke lokalizacije app-a). Za `hr` očekujemo npr. `dd.mm.yyyy hh:mm`, za `en-US` npr. `MM/dd/yyyy hh:mm`. Pri slanju forme vrijednost se normalizira u format koji server/EF razumije.
+
+**P: Gdje je lokalizacija aplikacije postavljena?**
+
+**O:** U `Program.cs` — `AddLocalization`, `UseRequestLocalization` s kulturama `hr` i `en-US`. To utječe na format brojeva/datuma na serveru; datumski picker na klijentu prati jezik preglednika prema zahtjevu laba.
+
+**P: Na kojim formama se koristi datumska kontrola?**
+
+**O:** Customer (`DateOfBirth`), Reservation (`StartDate`, `EndDate`), Employee (`HiredAt`), ServiceRecord (datumi servisa) — svugdje gdje entitet ima `DateTime` polje, umjesto običnog `<input type="datetime-local">`.
+
+---
+
+### JavaScript animacije
+
+**P: Gdje su animacije i čemu služe?**
+
+**O:** U `wwwroot/css/site.css` (ili `glass.css`) — klase `rise-in`, `fade-in` s `@keyframes`. U `site.js` nakon AJAX zamjene redova tablice dodajemo `fade-in` da prijelaz bude vidljiv. Na karticama/panelima (`glass-card`, `fleet-card`) `rise-in` pri učitavanju stranice — ilustrira „napredno” korištenje JS/CSS, ne samo statičan HTML.
+
+**P: Jesu li animacije samo ukras?**
+
+**O:** Da, ali u sklopu laba služe kao dokaz kontrole DOM-a nakon dinamičkog sadržaja (npr. nakon `fetch` i `innerHTML` zamjene redova).
+
+---
+
+### Entity Framework i CRUD u pozadini
+
+**P: Gdje se zapisi stvarno spremaju u bazu?**
+
+**O:** U EF repozitorijima (`EfRepositories.cs` ili slično u Web projektu) — `AddAsync` → `context.Set<T>().Add`, `UpdateAsync` → attach/update, `DeleteAsync` → `Remove` ili provjera relacija. `SaveChangesAsync` šalje SQL prema SQLite/SQL Server bazi iz Lab 3.
+
+**P: Razlika između soft delete i našeg brisanja poslovnice?**
+
+**O:** Soft delete (iz predavanja) = polje `DeletedAt`, zapis ostaje u bazi. Mi za poslovnicu radimo **zabranu brisanja** ako postoje vozila — to je poslovno pravilo, ne cascade. Ostali entiteti mogu ići na fizički `Remove` ako EF i relacije dopuste.
+
+**P: Što ako profesor pita cascade delete?**
+
+**O:** U EF konfiguraciji (`CarRentDbContext` / fluent API) može se postaviti `OnDelete(DeleteBehavior.Cascade)` ili `Restrict`. U Lab 4 smo za kritične slučajeve eksplicitno provjerili u controlleru prije `Delete` — sigurnije za demonstraciju i jasnije korisniku (`TempData` poruka).
+
+---
+
+### Brzi „mapa datoteka” za usmeno
+
+
+| Tema               | Gdje pogledati                                                         |
+| ------------------ | ---------------------------------------------------------------------- |
+| CRUD akcije        | `Controllers/EntityCrudControllers.cs`, `Controllers.cs` (Partneri)    |
+| Forme / validacija | `ViewModels/FormViewModels.cs`, `Views/*/Create.cshtml`, `Edit.cshtml` |
+| Mapiranje          | `Services/EntityMappers.cs`                                            |
+| AJAX lista         | `site.js`, `_CrudIndexHeaderPartial.cshtml`, `*/_IndexRows.cshtml`     |
+| Autocomplete API   | `Controllers/LookupApiController.cs`, `_AutocompletePartial.cshtml`    |
+| Datum              | `_DateTimePartial.cshtml`, `site.js`                                   |
+| Baza               | `Repositories/EfRepositories.cs`, `CarRent.DAL/CarRentDbContext.cs`    |
+| Lokalizacija       | `Program.cs`                                                           |
+
+
+---
+
+### Jedna rečenica za cijeli Lab 4 (ako traže sažetak)
+
+Lab 4 je MVC aplikacija s punim CRUD-om preko form ViewModela i EF repozitorija, AJAX pretragom listi i autocomplete dropdownom koji dohvaćaju podatke s API-ja, dvostrukom validacijom (blur + server), custom datumskom kontrolom preko partial viewa i JS animacijama — sve povezano kroz postojeću Lab 3 arhitekturu bez mijenjanja plan datoteka labova.
