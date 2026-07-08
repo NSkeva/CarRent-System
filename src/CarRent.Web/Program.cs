@@ -9,10 +9,24 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var logDirectory = Path.Combine(builder.Environment.ContentRootPath, "logs");
+Directory.CreateDirectory(logDirectory);
+
+builder.Host.UseSerilog((ctx, _, cfg) => cfg
+    .ReadFrom.Configuration(ctx.Configuration)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File(
+        Path.Combine(logDirectory, "carrent-.log"),
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 14));
+
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpClient();
 builder.Services.AddAuthorization(options =>
 {
     options.FallbackPolicy = new AuthorizationPolicyBuilder()
@@ -84,6 +98,8 @@ builder.Services.Configure<FleetNotificationOptions>(
 builder.Services.AddScoped<IFleetNotificationSender, PreparedFleetNotificationSender>();
 builder.Services.AddScoped<FleetNotificationService>();
 builder.Services.AddScoped<FleetLifecycleService>();
+builder.Services.AddScoped<GlobalSearchService>();
+builder.Services.AddScoped<AiClientChatService>();
 
 var app = builder.Build();
 
@@ -123,6 +139,7 @@ if (!app.Environment.IsDevelopment())
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
+app.UseMiddleware<McpApiKeyMiddleware>();
 app.UseAuthorization();
 app.UseMiddleware<PendingRoleMiddleware>();
 app.UseMiddleware<FleetLifecycleMiddleware>();

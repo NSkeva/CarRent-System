@@ -31,6 +31,9 @@ src/CarRent.Web/wwwroot/uploads/
 
 # Logs
 *.log
+logs/
+.playwright/
+.tools/
 
 # Secrets
 .env

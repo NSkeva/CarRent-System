@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "carrent": {
+      "command": "dotnet",
+      "args": [
+        "run",
+        "--project",
+        "src/CarRent.McpServer/CarRent.McpServer.csproj"
+      ],
+      "env": {
+        "CarRent__BaseUrl": "http://localhost:5000",
+        "CarRent__McpApiKey": "carrent-mcp-dev-key"
+      }
+    }
+  }
+}

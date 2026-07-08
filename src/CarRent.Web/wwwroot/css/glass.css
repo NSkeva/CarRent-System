@@ -595,7 +595,6 @@ select option {
 @media (max-width: 980px) {
   .kpi-grid   { grid-template-columns: repeat(2, 1fr); }
   .quick-grid { grid-template-columns: repeat(2, 1fr); }
-  .nav-primary { display: none; }
   .page-content { padding: var(--space-md); }
 }
 @media (max-width: 640px) {

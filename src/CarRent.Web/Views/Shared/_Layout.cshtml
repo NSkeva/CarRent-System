@@ -22,7 +22,7 @@
                 <div class="logo-mark">🚗</div>
                 CarRent <span>Control Surface</span>
             </a>
-            <nav class="nav-primary">
+            <nav class="nav-primary" id="siteNav">
                 <div class="nav-group @(operativaActive ? "open" : "")">
                     <button type="button" class="nav-group-btn @(operativaActive ? "active" : "")">
                         Operativa
@@ -34,6 +34,7 @@
                         <a asp-controller="DailyPlan" asp-action="Index">📋 Dnevni plan</a>
                         <a asp-controller="Fleet" asp-action="Index">🚗 Vozni park</a>
                         <a asp-controller="Notifications" asp-action="Index">🔔 Obavijesti</a>
+                        <a asp-controller="ClientChat" asp-action="Index">💬 Klijentski chat</a>
                     </div>
                 </div>
                 @if (isAdmin)
@@ -58,6 +59,14 @@
                 }
             </nav>
             <div class="header-actions">
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <button type="button" class="btn btn-ghost btn-sm global-search-trigger" data-global-search-open title="Pretraga (Ctrl+K)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                        Pretraga
+                    </button>
+                }
+                <button type="button" class="mobile-nav-toggle" data-mobile-nav-toggle aria-label="Izbornik">☰</button>
                 <button type="button" class="lang-toggle" title="Jezik">HR</button>
                 <partial name="_LoginPartial" />
             </div>
@@ -77,6 +86,7 @@
     </footer>
 </div>
 
+<partial name="_GlobalSearchPartial" />
 <partial name="_ValidationScriptsPartial" />
 <script src="~/js/site.js" asp-append-version="true"></script>
 @await RenderSectionAsync("Scripts", required: false)

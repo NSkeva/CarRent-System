@@ -191,6 +191,108 @@
         });
     }
 
+    function initGlobalSearch() {
+        const modal = document.querySelector("[data-global-search-modal]");
+        const backdrop = document.querySelector("[data-global-search-backdrop]");
+        const input = document.querySelector("[data-global-search-input]");
+        const results = document.querySelector("[data-global-search-results]");
+        const openBtns = document.querySelectorAll("[data-global-search-open]");
+        if (!modal || !input || !results) return;
+
+        let items = [];
+        let activeIndex = -1;
+        let debounceTimer;
+
+        const setOpen = (open) => {
+            modal.hidden = !open;
+            if (backdrop) backdrop.hidden = !open;
+            document.body.classList.toggle("global-search-open", open);
+            if (open) {
+                input.value = "";
+                results.innerHTML = "";
+                items = [];
+                activeIndex = -1;
+                setTimeout(() => input.focus(), 0);
+                fetchResults("");
+            }
+        };
+
+        const render = (list) => {
+            items = list;
+            activeIndex = list.length ? 0 : -1;
+            results.innerHTML = "";
+            list.forEach((item, idx) => {
+                const a = document.createElement("a");
+                a.href = item.url;
+                a.className = "global-search-item" + (idx === activeIndex ? " active" : "");
+                a.innerHTML = `<span class="gs-type">${item.type}</span><strong>${item.title}</strong><span class="gs-sub">${item.subtitle || ""}</span>`;
+                a.addEventListener("mouseenter", () => {
+                    activeIndex = idx;
+                    results.querySelectorAll(".global-search-item").forEach((el, i) => el.classList.toggle("active", i === idx));
+                });
+                results.appendChild(a);
+            });
+        };
+
+        const fetchResults = async (q) => {
+            const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+            if (!res.ok) return;
+            render(await res.json());
+        };
+
+        const scheduleSearch = () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => fetchResults(input.value.trim()), 200);
+        };
+
+        openBtns.forEach((btn) => btn.addEventListener("click", () => setOpen(true)));
+        backdrop?.addEventListener("click", () => setOpen(false));
+        input.addEventListener("input", scheduleSearch);
+        input.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") { setOpen(false); return; }
+            if (!items.length) return;
+            if (e.key === "ArrowDown") {
+                e.preventDefault();
+                activeIndex = Math.min(items.length - 1, activeIndex + 1);
+            } else if (e.key === "ArrowUp") {
+                e.preventDefault();
+                activeIndex = Math.max(0, activeIndex - 1);
+            } else if (e.key === "Enter" && activeIndex >= 0) {
+                e.preventDefault();
+                window.location.href = items[activeIndex].url;
+                return;
+            }
+            results.querySelectorAll(".global-search-item").forEach((el, i) => el.classList.toggle("active", i === activeIndex));
+        });
+
+        document.addEventListener("keydown", (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+                if (!openBtns.length) return;
+                e.preventDefault();
+                setOpen(true);
+            }
+        });
+    }
+
+    function initMobileNav() {
+        const toggle = document.querySelector("[data-mobile-nav-toggle]");
+        const nav = document.getElementById("siteNav");
+        if (!toggle || !nav) return;
+
+        toggle.addEventListener("click", (e) => {
+            e.stopPropagation();
+            nav.classList.toggle("mobile-open");
+            document.body.classList.toggle("mobile-nav-open");
+        });
+
+        document.addEventListener("click", (e) => {
+            if (!e.target.closest("#siteNav") && !e.target.closest("[data-mobile-nav-toggle]")) {
+                nav.classList.remove("mobile-open");
+                document.body.classList.remove("mobile-nav-open");
+            }
+        });
+    }
+
     function initNavDropdowns() {
         const closeDelayMs = 420;
 
@@ -242,6 +344,8 @@
         initAutocomplete(document);
         initDateTimePickers(document);
         initCardAnimations();
+        initGlobalSearch();
+        initMobileNav();
         initNavDropdowns();
     });
 })();
