@@ -1,21 +1,71 @@
 @model IReadOnlyList<FleetNotificationOutbox>
 @{
-    ViewData["Title"] = "Pripremljene obavijesti";
+    ViewData["Title"] = "Obavijesti flote";
+    var emailActive = ViewData["EmailDispatchEnabled"] as bool? == true;
+    var pushActive = ViewData["PushDispatchEnabled"] as bool? == true;
+    var pendingEmails = ViewData["PendingEmailCount"] as int? ?? 0;
+    var pendingPush = ViewData["PendingPushCount"] as int? ?? 0;
+    var pushSubs = ViewData["PushSubscriptionCount"] as int? ?? 0;
+    var canDispatch = emailActive || pushActive;
 }
 
 <section class="panel rise-in">
-    <div class="tab-toolbar">
+    <div class="tab-toolbar" style="flex-wrap:wrap;gap:12px">
         <div>
-            <h1 style="font-size:22px;font-weight:800;margin:0">Pripremljene obavijesti</h1>
+            <h1 style="font-size:22px;font-weight:800;margin:0">Obavijesti flote</h1>
             <p style="font-size:13px;color:var(--muted);margin:6px 0 0">
-                Email i push kanali su u pripremi — poruke se zapisuju u outbox bez stvarnog slanja.
+                Outbox → Gmail email + browser push (Web Push). Lifecycle automatski kreira poruke.
             </p>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;margin-left:auto;flex-wrap:wrap">
+            @if (emailActive) { <span class="chip chip-completed">Gmail SMTP</span> }
+            @if (pushActive) { <span class="chip chip-completed">Web Push</span> }
+            <form method="post" asp-action="DispatchNow">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-primary btn-sm" @(canDispatch ? null : "disabled")>
+                    Pošalji pending (📧@pendingEmails / 🔔@pendingPush)
+                </button>
+            </form>
         </div>
     </div>
 
+    <div class="glass glass-sm push-panel" style="margin-bottom:var(--space-md);padding:var(--space-md)">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <div>
+                <strong>Browser push</strong>
+                <p style="margin:4px 0 0;font-size:13px;color:var(--muted)">
+                    Pretplata: @pushSubs uređaj(a). Klik omogućuje native obavijesti u browseru.
+                </p>
+            </div>
+            <span class="chip chip-planned" data-push-status>Push nije uključen</span>
+            <button type="button" class="btn btn-secondary btn-sm" data-push-enable>Uključi push</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-push-disable hidden>Isključi push</button>
+        </div>
+    </div>
+
+    @if (!emailActive)
+    {
+        <div class="glass glass-sm" style="margin-bottom:var(--space-md);padding:var(--space-md);border-color:rgba(255,209,102,0.35)">
+            <strong style="color:var(--warning)">Gmail nije konfiguriran</strong>
+            <p style="margin:6px 0 0;font-size:13px;color:var(--muted)">
+                <code>./scripts/setup-gmail-secrets.sh tvoj@gmail.com "app password"</code>
+            </p>
+        </div>
+    }
+
+    @if (!pushActive)
+    {
+        <div class="glass glass-sm" style="margin-bottom:var(--space-md);padding:var(--space-md);border-color:rgba(255,209,102,0.35)">
+            <strong style="color:var(--warning)">Web Push VAPID nije postavljen</strong>
+            <p style="margin:6px 0 0;font-size:13px;color:var(--muted)">
+                <code>./scripts/setup-push-secrets.sh</code>
+            </p>
+        </div>
+    }
+
     @if (!Model.Any())
     {
-        <p class="tab-empty">Nema pripremljenih obavijesti.</p>
+        <p class="tab-empty">Nema obavijesti u outboxu.</p>
     }
     else
     {
@@ -38,19 +88,19 @@
                         <td>@item.CreatedAt.ToLocalTime().ToString("g")</td>
                         <td><span class="chip chip-planned">@item.Channel</span></td>
                         <td>@item.NotificationType</td>
-                        <td>@(string.IsNullOrWhiteSpace(item.Recipient) ? "—" : item.Recipient)</td>
+                        <td>@(string.IsNullOrWhiteSpace(item.Recipient) ? (item.Channel == "Push" ? "browser" : "(default inbox)") : item.Recipient)</td>
                         <td>
                             <strong>@item.Subject</strong>
                             <div style="font-size:12px;color:var(--muted);margin-top:4px">@item.Body</div>
                         </td>
                         <td>
-                            @if (item.SentAt is null)
+                            @if (item.SentAt is not null)
                             {
-                                <span class="chip chip-draft">Pripremljeno</span>
+                                <span class="chip chip-completed" title="@item.SentAt!.Value.ToLocalTime().ToString("g")">Poslano</span>
                             }
                             else
                             {
-                                <span class="chip chip-completed">Poslano</span>
+                                <span class="chip chip-draft">Čeka slanje</span>
                             }
                         </td>
                     </tr>
@@ -60,3 +110,7 @@
         </div>
     }
 </section>
+
+@section Scripts {
+    <script src="~/js/push-notifications.js" asp-append-version="true"></script>
+}

@@ -1,8 +1,9 @@
 # FULL-08 — API integracijski testovi + CRUD stabilnost
 
 **Kriterij PDF:**  
+
 - Testovi za sve API endpointe (dio kriterija s Playwright) — **2 boda**  
-- CRUD mora raditi bez grešaka — **2 boda**  
+- CRUD mora raditi bez grešaka — **2 boda**
 
 **Status:** ✅ Iz Lab 5 (xUnit) + pokriveno Playwright E2E
 
@@ -15,6 +16,7 @@
 Testira **cijeli sustav** kroz HTTP: routing, auth, validacija, baza, JSON — zajedno.
 
 **Zašto uz Playwright:**  
+
 - xUnit integracijski = brz, pokriva **sve API endpointe** sustavno  
 - Playwright = dokaz da **UI + browser + sesija** rade u stvarnom scenariju
 
@@ -46,14 +48,16 @@ tests/CarRent.Web.IntegrationTests/
 
 Za **svaki** entitet (8 komada):
 
-| Operacija | Provjera |
-|-----------|----------|
-| GET lista | 200 + JSON |
-| GET by id | 200 / 404 |
-| POST | 201 Created |
-| PUT | 200 / 404 |
-| DELETE | 200 (Admin) / 403 (Manager) |
-| Bez auth | 401 Unauthorized |
+
+| Operacija | Provjera                    |
+| --------- | --------------------------- |
+| GET lista | 200 + JSON                  |
+| GET by id | 200 / 404                   |
+| POST      | 201 Created                 |
+| PUT       | 200 / 404                   |
+| DELETE    | 200 (Admin) / 403 (Manager) |
+| Bez auth  | 401 Unauthorized            |
+
 
 Entiteti: BranchOffice, Vehicle, Customer, Reservation, Addon, ServiceRecord, Employee, Partner.
 
@@ -91,14 +95,17 @@ Passed!  - Failed: 0, Passed: 55
 
 ## 5. CRUD u aplikaciji (MVC + API)
 
-| Sloj | Putanja |
-|------|---------|
-| MVC CRUD | `Controllers/EntityCrudControllers.cs` |
-| REST API | `Api/Controllers/EntityApiControllers.cs` |
+
+| Sloj      | Putanja                                         |
+| --------- | ----------------------------------------------- |
+| MVC CRUD  | `Controllers/EntityCrudControllers.cs`          |
+| REST API  | `Api/Controllers/EntityApiControllers.cs`       |
 | Mapiranje | `EntityMappers.cs` (MVC), `ApiMappers.cs` (API) |
-| Baza | `Repositories/EfRepositories.cs` |
+| Baza      | `Repositories/EfRepositories.cs`                |
+
 
 **Playwright E2E** dodatno provjerava:
+
 - Admin login
 - API create/update addon
 - Manager ne smije DELETE
@@ -140,11 +147,13 @@ O: Integracijski ne otvara browser; Playwright testira cijeli UX (vidi FULL-01).
 
 ## 9. Koraci koje TI moraš poduzeti
 
-| Korak | Obavezno? | Akcija |
-|-------|-----------|--------|
-| Pokreni testove prije predaje | **Da** | `dotnet test tests/CarRent.Web.IntegrationTests/` |
-| Pokaži 55 passed profesoru | Preporuka | Screenshot terminala |
-| Ručno prođi CRUD u UI | Preporuka | Admin create/edit, Manager bez delete |
+
+| Korak                         | Obavezno? | Akcija                                            |
+| ----------------------------- | --------- | ------------------------------------------------- |
+| Pokreni testove prije predaje | **Da**    | `dotnet test tests/CarRent.Web.IntegrationTests/` |
+| Pokaži 55 passed profesoru    | Preporuka | Screenshot terminala                              |
+| Ručno prođi CRUD u UI         | Preporuka | Admin create/edit, Manager bez delete             |
+
 
 **Nema** dodatne instalacije — samo .NET SDK.
 

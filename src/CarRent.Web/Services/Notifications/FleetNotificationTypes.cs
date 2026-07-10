@@ -9,4 +9,5 @@ public static class FleetNotificationTypes
     public const string DraftExpired = "DraftExpired";
     public const string NoShowCancelled = "NoShowCancelled";
     public const string MileageUpdateSuggested = "MileageUpdateSuggested";
+    public const string ClientAssistantBooking = "ClientAssistantBooking";
 }

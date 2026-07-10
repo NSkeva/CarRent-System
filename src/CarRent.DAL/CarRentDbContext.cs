@@ -22,6 +22,7 @@ public class CarRentDbContext : IdentityDbContext<AppUser>
     public DbSet<Partner> Partners => Set<Partner>();
     public DbSet<VehicleAttachment> VehicleAttachments => Set<VehicleAttachment>();
     public DbSet<FleetNotificationOutbox> FleetNotificationOutbox => Set<FleetNotificationOutbox>();
+    public DbSet<FleetPushSubscription> FleetPushSubscriptions => Set<FleetPushSubscription>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -32,6 +33,10 @@ public class CarRentDbContext : IdentityDbContext<AppUser>
 
         modelBuilder.Entity<FleetNotificationOutbox>()
             .HasIndex(x => x.DedupKey)
+            .IsUnique();
+
+        modelBuilder.Entity<FleetPushSubscription>()
+            .HasIndex(x => new { x.UserId, x.Endpoint })
             .IsUnique();
 
         SeedData.Apply(modelBuilder);

@@ -18,6 +18,19 @@ Projekt za kolegij Programiranje web aplikacija u ASP.NET.
 - `.cursor/skills/` - project skillovi (EF, list page, edit form)
 - `.github/hooks/` - skripte za transcript/agent logging workflow
 
+## FULL projekt (predaja — 70 bodova)
+
+Kompletna dokumentacija za predaju i usmeni:
+
+| Dokument | Svrha |
+|----------|-------|
+| [FULL-TUTORIAL-KOMPLET.md](FULL%20PROJECT/FULL-TUTORIAL-KOMPLET.md) | Cijeli tutorijal — znaš projekt kao autor |
+| [FULL-USMENO-PITANJA.md](FULL%20PROJECT/FULL-USMENO-PITANJA.md) | Pitanja profesora + odgovori |
+| [FULL-DEMO-CHEAT-SHEET.md](FULL%20PROJECT/FULL-DEMO-CHEAT-SHEET.md) | 1 stranica za ispit |
+| [FULL-REPORT.md](FULL%20PROJECT/FULL-REPORT.md) | Bodovi, checklist, deploy URL |
+
+**Cloud:** https://carrent-web-hfcdfitrgq-ew.a.run.app
+
 ## Lab 2 (MVC + HTML Binding)
 
 Web aplikacija je u projektu `src/CarRent.Web/` i koristi:

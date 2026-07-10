@@ -10,6 +10,7 @@
 **Responsive web design** = UI se prilagođava **širini ekrana** (desktop, tablet, mobitel) bez zasebne mobilne aplikacije.
 
 **Tehnike:**
+
 - **CSS media queries** (`@media (max-width: …)`)
 - **Flexbox / grid** koji prelama sadržaj
 - **Mobilni izbornik** umjesto horizontalne navigacije
@@ -42,6 +43,7 @@ src/CarRent.Web/
 ```
 
 **JS** (`site.js` → `initMobileNav()`):
+
 - Klik na ☰ → `nav` dobije klasu `mobile-open`
 - Klik izvan → zatvara meni
 
@@ -57,11 +59,13 @@ src/CarRent.Web/
 
 ### Ostali responsive dijelovi (već iz Lab 2–4)
 
-| Breakpoint | Što se mijenja |
-|------------|----------------|
-| ≤980px | KPI 2 kolone; mobilni nav |
-| ≤640px | KPI 1 kolona; toolbar stupci |
-| ≤900px | Vehicle edit grid 1 kolona |
+
+| Breakpoint | Što se mijenja               |
+| ---------- | ---------------------------- |
+| ≤980px     | KPI 2 kolone; mobilni nav    |
+| ≤640px     | KPI 1 kolona; toolbar stupci |
+| ≤900px     | Vehicle edit grid 1 kolona   |
+
 
 ---
 
@@ -108,10 +112,12 @@ O: Da — `_Layout.cshtml`: `<meta name="viewport" content="width=device-width, 
 
 ## 8. Koraci koje TI moraš poduzeti
 
-| Korak | Obavezno? | Akcija |
-|-------|-----------|--------|
-| Pokreni app | Da | `./scripts/run-local.sh` |
-| Demo na usmenom | Preporuka | F12 → mobilni viewport |
-| Ništa instalirati | — | Čisto CSS/JS |
+
+| Korak             | Obavezno? | Akcija                   |
+| ----------------- | --------- | ------------------------ |
+| Pokreni app       | Da        | `./scripts/run-local.sh` |
+| Demo na usmenom   | Preporuka | F12 → mobilni viewport   |
+| Ništa instalirati | —         | Čisto CSS/JS             |
+
 
 **Nema** dodatne konfiguracije.

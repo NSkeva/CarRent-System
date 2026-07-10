@@ -15,7 +15,11 @@ public static class ReservationAvailabilityHelper
     public static bool IsBlockingStatus(ReservationStatus status) => BlockingStatuses.Contains(status);
 
     public static bool DatesOverlap(DateTime startA, DateTime endA, DateTime startB, DateTime endB)
-        => startA.Date <= endB.Date && startB.Date <= endA.Date;
+        => TimelineSlotHelper.RangesOverlap(
+            DateOnly.FromDateTime(startA),
+            DateOnly.FromDateTime(endA),
+            DateOnly.FromDateTime(startB),
+            DateOnly.FromDateTime(endB));
 
     public static bool ConflictsWith(Reservation candidate, Reservation existing)
     {

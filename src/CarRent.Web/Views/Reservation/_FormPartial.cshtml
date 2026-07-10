@@ -1,9 +1,21 @@
 @model ReservationFormVm
 @{
     var returnUrl = ViewData["ReturnUrl"] as string;
+    var modalMode = ViewData["ModalMode"] as bool? == true;
 }
-<form asp-action="@(Model.Id == 0 ? "Create" : "Edit")" method="post" class="form-grid">
-    <partial name="_FormReturnUrlPartial" />
+<form method="post" class="form-grid@(modalMode ? " tl-modal-form-grid" : "")"
+      asp-controller="@(modalMode ? "Timeline" : "Reservation")"
+      asp-action="@(modalMode ? (Model.Id == 0 ? "ModalCreatePost" : "ModalEditPost") : (Model.Id == 0 ? "Create" : "Edit"))"
+      asp-route-id="@(modalMode && Model.Id > 0 ? Model.Id : (int?)null)"
+      data-timeline-modal-form="@(modalMode ? "true" : null)">
+    @if (modalMode)
+    {
+        @Html.AntiForgeryToken()
+    }
+    @if (!modalMode)
+    {
+        <partial name="_FormReturnUrlPartial" />
+    }
     <div>
         <div class="glass form-section" style="margin-bottom:var(--space-md)">
             <div class="form-section-title">Sudionici</div>
@@ -51,7 +63,11 @@
         <input type="hidden" asp-for="Id" />
         <div style="margin-top:var(--space-lg);display:flex;flex-direction:column;gap:8px">
             <button type="submit" class="btn btn-primary">Spremi rezervaciju</button>
-            @if (!string.IsNullOrEmpty(returnUrl))
+            @if (modalMode)
+            {
+                <button type="button" class="btn btn-secondary" data-tl-modal-cancel>Odustani</button>
+            }
+            else if (!string.IsNullOrEmpty(returnUrl))
             {
                 <a href="@returnUrl" class="btn btn-secondary">Odustani</a>
             }

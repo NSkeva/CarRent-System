@@ -1,0 +1,35 @@
+@model CarRent.Web.ViewModels.FleetChatPanelViewModel
+@{
+    var isPublic = ViewData["IsPublicAssistant"] as bool? == true;
+    Layout = "_Layout";
+}
+
+@if (isPublic)
+{
+    <section class="public-assistant-hero rise-in">
+        <div class="public-assistant-hero-inner">
+            <span class="public-assistant-badge">Demo — klijentski asistent</span>
+            <h1>CarRent asistent</h1>
+            <p>Pitajte o slobodnim vozilima, cijenama i terminima — prirodni jezik, podaci iz stvarne flote.</p>
+            <div class="public-assistant-hints">
+                <span>„Trebam auto ovaj vikend”</span>
+                <span>„Ok, Golf 7 dana”</span>
+                <span>„Zovem se Marko, marko@mail.com”</span>
+            </div>
+        </div>
+    </section>
+}
+
+<partial name="_FleetChatPanel" model="Model" />
+
+@if (isPublic)
+{
+    <p class="public-assistant-note">
+        Ovo je demo podstranica za klijente. Interni tim koristi
+        <a asp-controller="OperatorAi" asp-action="Index">AI asistent (operativa)</a> nakon prijave.
+    </p>
+}
+
+@section Scripts {
+    <script src="~/js/fleet-ai-chat.js" asp-append-version="true"></script>
+}

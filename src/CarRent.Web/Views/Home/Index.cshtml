@@ -1,7 +1,9 @@
 @model HomeIndexVm
 @{
-    ViewData["Title"] = "Početna";
+    ViewData["Title"] = "Home";
+    ViewData["NavSection"] = "operativa";
     ViewData["Breadcrumbs"] = BreadcrumbHelper.Build("Home");
+    var homeReturn = Url.Action("Index", "Home");
     var now = DateTime.Now;
     var dani = new[] { "nedjelja", "ponedjeljak", "utorak", "srijeda", "četvrtak", "petak", "subota" };
     var mjeseci = new[] { "siječnja", "veljače", "ožujka", "travnja", "svibnja", "lipnja", "srpnja", "kolovoza", "rujna", "listopada", "studenog", "prosinca" };
@@ -16,7 +18,7 @@
         <div class="hero-date">@dateLabel</div>
     </div>
     <div class="hero-actions">
-        <a asp-controller="Reservation" asp-action="Create" class="btn btn-primary">+ Nova rezervacija</a>
+        <a asp-controller="Reservation" asp-action="Create" asp-route-returnUrl="@homeReturn" class="btn btn-primary">+ Nova rezervacija</a>
         <a asp-controller="DailyPlan" asp-action="Index" class="btn btn-secondary btn-sm">📋 Dnevni plan →</a>
     </div>
 </div>
@@ -65,7 +67,7 @@
                         <div class="event-customer">@item.Customer.FirstName @item.Customer.LastName</div>
                     </div>
                     <div class="event-time">@item.Reservation.StartDate.ToString("HH:mm")</div>
-                    <a class="event-link" asp-controller="Reservation" asp-action="Details" asp-route-id="@item.Reservation.Id">→</a>
+                    <a class="event-link" asp-controller="Reservation" asp-action="Details" asp-route-id="@item.Reservation.Id" asp-route-returnUrl="@homeReturn">→</a>
                 </div>
             }
         </div>
@@ -84,7 +86,7 @@
                         <div class="event-customer">@item.Customer.FirstName @item.Customer.LastName</div>
                     </div>
                     <div class="event-time">@item.Reservation.EndDate.ToString("HH:mm")</div>
-                    <a class="event-link" asp-controller="Reservation" asp-action="Details" asp-route-id="@item.Reservation.Id">→</a>
+                    <a class="event-link" asp-controller="Reservation" asp-action="Details" asp-route-id="@item.Reservation.Id" asp-route-returnUrl="@homeReturn">→</a>
                 </div>
             }
         </div>

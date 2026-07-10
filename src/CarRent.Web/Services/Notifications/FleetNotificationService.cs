@@ -83,7 +83,6 @@ public sealed class FleetNotificationService(
                 NotificationType = FleetNotificationTypes.ReturnToday,
                 Subject = $"Povrat vozila danas — rezervacija #{reservation.Id}",
                 Body = $"{customer} vraća {reservation.Vehicle?.RegistrationNumber ?? "vozilo"} na lokaciji {reservation.DropoffLocation}.",
-                Recipient = reservation.Customer?.Email,
                 DedupKey = $"ret-today:{reservation.Id}:{today:yyyy-MM-dd}",
                 RelatedEntityType = nameof(Reservation),
                 RelatedEntityId = reservation.Id
@@ -99,8 +98,8 @@ public sealed class FleetNotificationService(
         {
             NotificationType = FleetNotificationTypes.DraftExpiryReminder,
             Subject = $"Nacrt rezervacije #{reservationId} ističe uskoro",
-            Body = $"Nacrt rezervacije #{reservationId} bit će automatski otkazan {expiryDate:dd.MM.yyyy} ako se ne potvrdi.",
-            Recipient = recipientEmail,
+            Body = $"Nacrt rezervacije #{reservationId} bit će automatski otkazan {expiryDate:dd.MM.yyyy} ako se ne potvrdi." +
+                   (string.IsNullOrWhiteSpace(recipientEmail) ? "" : $" (kupac: {recipientEmail})"),
             DedupKey = $"draft-reminder:{reservationId}:{expiryDate:yyyy-MM-dd}",
             RelatedEntityType = nameof(Reservation),
             RelatedEntityId = reservationId
@@ -122,8 +121,8 @@ public sealed class FleetNotificationService(
         {
             NotificationType = FleetNotificationTypes.NoShowCancelled,
             Subject = $"Rezervacija #{reservationId} otkazana (no-show)",
-            Body = $"Rezervacija #{reservationId} automatski je otkazana jer vozilo nije preuzeto u roku od 24 sata.",
-            Recipient = recipientEmail,
+            Body = $"Rezervacija #{reservationId} automatski je otkazana jer vozilo nije preuzeto u roku od 24 sata." +
+                   (string.IsNullOrWhiteSpace(recipientEmail) ? "" : $" (kupac: {recipientEmail})"),
             DedupKey = $"no-show:{reservationId}:{DateTime.UtcNow:yyyy-MM-dd}",
             RelatedEntityType = nameof(Reservation),
             RelatedEntityId = reservationId

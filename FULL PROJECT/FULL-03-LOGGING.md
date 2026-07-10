@@ -10,6 +10,7 @@
 **Logging** = zapisivanje događaja tijekom rada aplikacije (info, warning, error).
 
 **Zašto:**
+
 - Debug produkcijskih grešaka
 - Audit (tko je što napravio)
 - Monitoring
@@ -47,9 +48,11 @@ builder.Host.UseSerilog(...);
 
 ### API logging (`LogsApiController.cs`)
 
-| Metoda | Ruta | Tko smije |
-|--------|------|-----------|
-| GET | `/api/logs/recent?count=50` | Samo **Admin** |
+
+| Metoda | Ruta                        | Tko smije      |
+| ------ | --------------------------- | -------------- |
+| GET    | `/api/logs/recent?count=50` | Samo **Admin** |
+
 
 Vraća zadnjih N linija iz **najnovije** `carrent-*.log` datoteke.
 
@@ -118,10 +121,12 @@ O: Ne — Identity i naš kod ne logiraju plain lozinke; logira se npr. „Koris
 
 ## 8. Koraci koje TI moraš poduzeti
 
-| Korak | Obavezno? | Akcija |
-|-------|-----------|--------|
-| Pokreni app barem jednom | Da | Da se kreira `logs/` mapa |
-| Provjeri datoteku | Preporuka | `tail logs/carrent-*.log` |
-| Ništa instalirati | — | Serilog je NuGet u `.csproj` |
+
+| Korak                    | Obavezno? | Akcija                       |
+| ------------------------ | --------- | ---------------------------- |
+| Pokreni app barem jednom | Da        | Da se kreira `logs/` mapa    |
+| Provjeri datoteku        | Preporuka | `tail logs/carrent-*.log`    |
+| Ništa instalirati        | —         | Serilog je NuGet u `.csproj` |
+
 
 **Na deployu:** osiguraj da container ima writable `/app/logs` (Dockerfile već `mkdir -p /app/logs`).

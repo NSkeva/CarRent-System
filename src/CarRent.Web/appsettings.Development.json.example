@@ -1,0 +1,21 @@
+{
+  "OpenAI": {
+    "ApiKey": "",
+    "Model": "gpt-4o-mini"
+  },
+  "FleetNotifications": {
+    "EmailEnabled": true,
+    "DispatchEnabled": true,
+    "DispatchIntervalSeconds": 30,
+    "DefaultRecipient": "TVOJ_GMAIL@gmail.com",
+    "Smtp": {
+      "Host": "smtp.gmail.com",
+      "Port": 587,
+      "UseSsl": true,
+      "Username": "TVOJ_GMAIL@gmail.com",
+      "Password": "APP_PASSWORD_16_ZNAKOVA",
+      "FromAddress": "TVOJ_GMAIL@gmail.com",
+      "FromName": "CarRent"
+    }
+  }
+}

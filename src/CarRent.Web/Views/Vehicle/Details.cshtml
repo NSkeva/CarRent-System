@@ -5,6 +5,7 @@
     var returnUrl = ViewData["ReturnUrl"] as string;
     var fromFleet = ViewData["NavSection"] as string == "operativa";
     var vehicleReturn = Url.Action("Details", "Vehicle", new { id = Model.Id, returnUrl });
+    var backLabel = ViewData["BackLabel"] as string;
     var attachments = Model.Attachments.OrderByDescending(a => a.CreatedAt).ToList();
     var mainImageUrl = VehicleImageHelper.GetDisplayUrl(Model);
     var reservationEvents = VehicleRegistrationHelper.BuildTabEvents(Model);
@@ -28,7 +29,7 @@
             <a asp-action="Edit" asp-route-id="@Model.Id" asp-route-returnUrl="@returnUrl" class="btn btn-primary btn-sm">Uredi vozilo</a>
             @if (fromFleet && !string.IsNullOrEmpty(returnUrl))
             {
-                <a href="@returnUrl" class="btn btn-secondary btn-sm">← Vozni park</a>
+                <a href="@returnUrl" class="btn btn-secondary btn-sm">← @(backLabel ?? "Natrag")</a>
             }
             else if (User.IsInRole("Admin"))
             {
@@ -157,7 +158,7 @@
                             <td>@r.StartDate.ToString("g") – @r.EndDate.ToString("g")</td>
                             <td><partial name="_StatusChip" model="@(UiDisplayHelper.ReservationChipClass(r.Status), UiDisplayHelper.ReservationStatusLabel(r.Status))" /></td>
                             <td class="row-actions">
-                                <a asp-controller="Reservation" asp-action="Details" asp-route-id="@r.Id" class="btn btn-ghost btn-sm">Detalji</a>
+                                <a asp-controller="Reservation" asp-action="Details" asp-route-id="@r.Id" asp-route-returnUrl="@vehicleReturn" class="btn btn-ghost btn-sm">Detalji</a>
                                 <a asp-controller="Reservation" asp-action="Edit" asp-route-id="@r.Id" asp-route-returnUrl="@vehicleReturn" class="btn btn-ghost btn-sm">Uredi</a>
                             </td>
                         </tr>

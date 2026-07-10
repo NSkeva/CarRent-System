@@ -72,8 +72,8 @@ public sealed class FullProjectScenarioTests(PlaywrightFixture fixture)
         });
         Assert.True(putRes.Ok, await putRes.TextAsync());
 
-        // 9. Klijentski AI chat (javna stranica)
-        await page.GotoAsync($"{_base}/ClientChat");
+        // 9. Klijentski AI asistent (javna demo stranica)
+        await page.GotoAsync($"{_base}/asistent");
         await page.WaitForSelectorAsync("[data-chat-input]");
         await page.FillAsync("[data-chat-input]", "Ima li slobodnih vozila?");
         await page.ClickAsync("[data-chat-send]");

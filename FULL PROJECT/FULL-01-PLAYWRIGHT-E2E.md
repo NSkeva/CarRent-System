@@ -10,6 +10,7 @@
 **End-to-end (E2E) test** pokreće **pravi browser** (Chromium), otvara aplikaciju kao korisnik i provjerava cijeli tok: login, navigacija, API, UI.
 
 **Razlika od integracijskog testa (xUnit):**
+
 - Integracijski: `HttpClient` → server (bez browsera)
 - Playwright: browser + klikovi + tipkovnica + cookie sesija
 
@@ -34,21 +35,23 @@ scripts/run-e2e.sh                ← jedna naredba za pokretanje
 
 ## 3. Gdje u kodu — 13 koraka scenarija
 
-| Korak | Što radi | Gdje u kodu |
-|-------|----------|-------------|
-| 1 | Bez prijave → redirect Login | `FullProjectScenarioTests.cs` ~L19 |
-| 2 | Admin prijava | L23–26 |
-| 3 | Navigacija `/Addon` | L29 |
-| 4 | API POST create addon | L33–37 |
-| 5 | AJAX pretraga na listi | L41–47 |
-| 6 | Global search Ctrl+K | L49–55 |
-| 7 | API GET `/api/addon` | L57–61 |
-| 8 | API PUT edit addon | L63–71 |
-| 9 | Klijentski chat `/ClientChat` | L76–80 |
-| 10 | Logs API `/api/logs/recent` | L83–84 |
-| 11 | Odjava | L87–89 |
-| 12 | Manager prijava + DELETE zabranjen | L92–97 |
-| 13 | Mobilni viewport + hamburger | L99–102 |
+
+| Korak | Što radi                           | Gdje u kodu                        |
+| ----- | ---------------------------------- | ---------------------------------- |
+| 1     | Bez prijave → redirect Login       | `FullProjectScenarioTests.cs` ~L19 |
+| 2     | Admin prijava                      | L23–26                             |
+| 3     | Navigacija `/Addon`                | L29                                |
+| 4     | API POST create addon              | L33–37                             |
+| 5     | AJAX pretraga na listi             | L41–47                             |
+| 6     | Global search Ctrl+K               | L49–55                             |
+| 7     | API GET `/api/addon`               | L57–61                             |
+| 8     | API PUT edit addon                 | L63–71                             |
+| 9     | Klijentski chat `/ClientChat`      | L76–80                             |
+| 10    | Logs API `/api/logs/recent`        | L83–84                             |
+| 11    | Odjava                             | L87–89                             |
+| 12    | Manager prijava + DELETE zabranjen | L92–97                             |
+| 13    | Mobilni viewport + hamburger       | L99–102                            |
+
 
 **Fixture:** `PlaywrightFixture.cs` — subprocess `dotnet run` na `http://127.0.0.1:17071`.
 
@@ -107,11 +110,13 @@ O: MVC forma ima problem s decimalnim separatorom (hr kultura) u automatiziranom
 
 ## 8. Koraci koje TI moraš poduzeti
 
-| Korak | Obavezno? | Akcija |
-|-------|-----------|--------|
-| Prvo pokretanje E2E | Da | `./scripts/run-e2e.sh` (preuzme Chromium, ~2 min) |
-| Node/npx | Da | Treba `npx` za instalaciju browsera (Node iz Cursora/npm) |
-| Port 17071 slobodan | Da | E2E koristi taj port; zatvori drugi instance ako fail |
-| Prije predaje | Da | Pokreni test i pokaži profesoru zeleni output |
+
+| Korak               | Obavezno? | Akcija                                                    |
+| ------------------- | --------- | --------------------------------------------------------- |
+| Prvo pokretanje E2E | Da        | `./scripts/run-e2e.sh` (preuzme Chromium, ~2 min)         |
+| Node/npx            | Da        | Treba `npx` za instalaciju browsera (Node iz Cursora/npm) |
+| Port 17071 slobodan | Da        | E2E koristi taj port; zatvori drugi instance ako fail     |
+| Prije predaje       | Da        | Pokreni test i pokaži profesoru zeleni output             |
+
 
 **Nema** dodatnih API ključeva ili cloud postavki za Playwright.

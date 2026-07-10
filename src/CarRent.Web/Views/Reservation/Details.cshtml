@@ -2,6 +2,8 @@
 @{
     var vehicle = Model.Vehicle;
     var vehicleLabel = vehicle is null ? $"vozilo #{Model.VehicleId}" : $"{vehicle.Brand} {vehicle.Model} ({vehicle.RegistrationNumber})";
+    var returnUrl = ViewData["ReturnUrl"] as string;
+    var detailsReturn = Url.Action("Details", "Reservation", new { id = Model.Id, returnUrl });
 }
 
 <section class="panel detail-card rise-in">
@@ -14,7 +16,7 @@
             <p style="margin:6px 0 10px;font-size:13px;color:var(--muted)">
                 Najam je završen. Trenutna kilometraža: <strong>@vehicle.MileageKm km</strong>.
             </p>
-            <a asp-controller="Vehicle" asp-action="Edit" asp-route-id="@vehicle.Id" class="btn btn-primary btn-sm">
+            <a asp-controller="Vehicle" asp-action="Edit" asp-route-id="@vehicle.Id" asp-route-returnUrl="@detailsReturn" class="btn btn-primary btn-sm">
                 Uredi vozilo — kilometraža
             </a>
         </div>
@@ -38,7 +40,7 @@
     </div>
 
     <div class="panel-actions" style="margin-top:var(--space-md)">
-        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary btn-sm">Uredi</a>
-        <a asp-action="Index" class="btn btn-secondary btn-sm">← Natrag na listu</a>
+        <a asp-action="Edit" asp-route-id="@Model.Id" asp-route-returnUrl="@returnUrl" class="btn btn-primary btn-sm">Uredi</a>
+        <partial name="_ReturnNavPartial" />
     </div>
 </section>

@@ -1,0 +1,42 @@
+@model Reservation
+@{
+    var vehicle = Model.Vehicle;
+    var vehicleLabel = vehicle is null ? $"vozilo #{Model.VehicleId}" : $"{vehicle.Brand} {vehicle.Model} ({vehicle.RegistrationNumber})";
+    var canEdit = User.IsInRole("Admin") || User.IsInRole("Manager");
+}
+
+<div class="tl-modal-details">
+    @if (Model.MileageUpdateSuggested && vehicle is not null)
+    {
+        <div class="glass glass-sm tl-modal-hint">
+            <strong style="color:var(--warning)">Ažuriraj kilometražu vozila</strong>
+            <p>Trenutna: <strong>@vehicle.MileageKm km</strong>. Otvori uređivanje vozila u novom prozoru.</p>
+            <a asp-controller="Vehicle" asp-action="Edit" asp-route-id="@vehicle.Id" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">Uredi vozilo</a>
+        </div>
+    }
+
+    <div class="detail-grid tl-modal-detail-grid">
+        <div class="glass">
+            <div class="form-section-title">Osnovno</div>
+            <div class="detail-row"><span>Status</span><span><partial name="_StatusChip" model="@(UiDisplayHelper.ReservationChipClass(Model.Status), UiDisplayHelper.ReservationStatusLabel(Model.Status))" /></span></div>
+            <div class="detail-row"><span>Kupac</span><span>@(Model.Customer is null ? $"#{Model.CustomerId}" : $"{Model.Customer.FirstName} {Model.Customer.LastName}")</span></div>
+            <div class="detail-row"><span>Vozilo</span><span>@vehicleLabel</span></div>
+            <div class="detail-row"><span>Period</span><span>@Model.StartDate.ToString("g") – @Model.EndDate.ToString("g")</span></div>
+        </div>
+        <div class="glass">
+            <div class="form-section-title">Lokacije i cijena</div>
+            <div class="detail-row"><span>Preuzimanje</span><span>@Model.PickupLocation</span></div>
+            <div class="detail-row"><span>Povrat</span><span>@Model.DropoffLocation</span></div>
+            <div class="detail-row"><span>Bazna cijena</span><span>@Model.BasePrice.ToString("N2") EUR</span></div>
+            <div class="detail-row"><span>Ukupno</span><span>@Model.TotalCost().ToString("N2") EUR</span></div>
+        </div>
+    </div>
+
+    <div class="tl-modal-footer-actions">
+        @if (canEdit)
+        {
+            <button type="button" class="btn btn-primary btn-sm" data-tl-modal-edit="@Model.Id">Uredi rezervaciju</button>
+        }
+        <button type="button" class="btn btn-secondary btn-sm" data-tl-modal-close>← Natrag na timeline</button>
+    </div>
+</div>

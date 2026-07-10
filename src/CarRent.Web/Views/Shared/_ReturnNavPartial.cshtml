@@ -1,0 +1,13 @@
+@{
+    var returnUrl = ViewData["ReturnUrl"] as string;
+    var backLabel = ViewData["BackLabel"] as string;
+    var fallbackArea = ViewData["ReturnFallbackArea"] as string ?? "Podaci";
+}
+@if (!string.IsNullOrEmpty(returnUrl))
+{
+    <a href="@returnUrl" class="btn btn-secondary btn-sm">← @(backLabel ?? "Natrag")</a>
+}
+else
+{
+    <a asp-action="Index" class="btn btn-secondary btn-sm">← Natrag na listu</a>
+}

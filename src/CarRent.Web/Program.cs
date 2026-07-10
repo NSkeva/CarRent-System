@@ -26,6 +26,14 @@ builder.Host.UseSerilog((ctx, _, cfg) => cfg
         retainedFileCountLimit: 14));
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromHours(3);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 builder.Services.AddHttpClient();
 builder.Services.AddAuthorization(options =>
 {
@@ -97,9 +105,21 @@ builder.Services.Configure<FleetNotificationOptions>(
     builder.Configuration.GetSection(FleetNotificationOptions.SectionName));
 builder.Services.AddScoped<IFleetNotificationSender, PreparedFleetNotificationSender>();
 builder.Services.AddScoped<FleetNotificationService>();
+builder.Services.AddScoped<FleetNotificationDispatchService>();
+builder.Services.AddSingleton<IEmailTransport, SmtpEmailTransport>();
+builder.Services.AddSingleton<IPushTransport, WebPushTransport>();
+builder.Services.AddScoped<PushSubscriptionService>();
+if (!builder.Environment.IsEnvironment("Testing"))
+    builder.Services.AddHostedService<FleetNotificationOutboxDispatcher>();
+builder.Services.AddScoped<ReservationSchedulingValidator>();
 builder.Services.AddScoped<FleetLifecycleService>();
 builder.Services.AddScoped<GlobalSearchService>();
+builder.Services.AddScoped<FleetAiAvailabilityService>();
+builder.Services.AddScoped<FleetClientChatConversation>();
+builder.Services.AddScoped<FleetClientReservationSubmissionService>();
+builder.Services.AddScoped<FleetClientChatSessionStore>();
 builder.Services.AddScoped<AiClientChatService>();
+builder.Services.AddScoped<AiOperatorChatService>();
 
 var app = builder.Build();
 
@@ -114,9 +134,17 @@ if (!app.Environment.IsEnvironment("Testing"))
         useSqlServer ? "SQL Server" : "SQLite",
         useSqlServer ? connectionString : ResolveSqlitePath(builder));
     await IdentitySeedData.SeedAsync(scope.ServiceProvider);
+    await VehicleDefaultImageBootstrap.ApplyAsync(db, logger);
 
     var lifecycle = scope.ServiceProvider.GetRequiredService<FleetLifecycleService>();
-    await lifecycle.SyncAsync();
+    try
+    {
+        await lifecycle.SyncAsync();
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Fleet lifecycle sync pri startu nije uspio — aplikacija se ipak pokreće.");
+    }
 }
 
 if (!app.Environment.IsDevelopment())
@@ -138,6 +166,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseStaticFiles();
 app.UseRouting();
+app.UseSession();
 app.UseAuthentication();
 app.UseMiddleware<McpApiKeyMiddleware>();
 app.UseAuthorization();
@@ -151,6 +180,8 @@ app.MapControllerRoute("fleet_short", "vozni-park", new { controller = "Fleet", 
 app.MapControllerRoute("daily_plan_short", "dnevni-plan", new { controller = "DailyPlan", action = "Index" });
 app.MapControllerRoute("timeline_short", "raspored", new { controller = "Timeline", action = "Index" });
 app.MapControllerRoute("home_hr", "pocetna", new { controller = "Home", action = "Index" });
+app.MapControllerRoute("public_assistant", "asistent", new { controller = "PublicAssistant", action = "Index" });
+app.MapControllerRoute("operator_ai", "operativa/ai-asistent", new { controller = "OperatorAi", action = "Index" });
 
 app.MapControllerRoute(
     name: "default",

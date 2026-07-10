@@ -34,13 +34,15 @@ src/CarRent.Web/
 
 ## 3. Gdje u kodu — alati
 
-| MCP alat | Što radi | HTTP poziv |
-|----------|----------|------------|
-| `SearchVehicles` | Pretraga vozila | GET `/api/vehicle?q=` |
-| `ListAddons` | Lista dodataka | GET `/api/addon` |
-| `GlobalSearch` | Globalna pretraga | GET `/api/search?q=` |
-| `AskClientAssistant` | AI chat | POST `/ClientChat/Ask` |
-| `GetRecentLogs` | Zadnje log linije | GET `/api/logs/recent` |
+
+| MCP alat             | Što radi          | HTTP poziv             |
+| -------------------- | ----------------- | ---------------------- |
+| `SearchVehicles`     | Pretraga vozila   | GET `/api/vehicle?q=`  |
+| `ListAddons`         | Lista dodataka    | GET `/api/addon`       |
+| `GlobalSearch`       | Globalna pretraga | GET `/api/search?q=`   |
+| `AskClientAssistant` | AI chat           | POST `/ClientChat/Ask` |
+| `GetRecentLogs`      | Zadnje log linije | GET `/api/logs/recent` |
+
 
 ### Autentikacija MCP → Web
 
@@ -123,13 +125,17 @@ O: MCP server čita/piše JSON preko stdin/stdout — Cursor ga pokreće kao sub
 
 ## 8. Koraci koje TI moraš poduzeti
 
-| Korak | Obavezno? | Akcija |
-|-------|-----------|--------|
-| App na :5000 | **Da** | `./scripts/run-local.sh` prije korištenja MCP u Cursoru |
-| Restart Cursor | Preporuka | Nakon dodavanja `.cursor/mcp.json` |
-| Provjeri MCP u Settings | Da za demo | Vidi je li server zelen |
-| Promijeni API ključ u produkciji | Na deployu | Ne ostavljaj `carrent-mcp-dev-key` |
+
+| Korak                            | Obavezno?  | Akcija                                                  |
+| -------------------------------- | ---------- | ------------------------------------------------------- |
+| App na :5000                     | **Da**     | `./scripts/run-local.sh` prije korištenja MCP u Cursoru |
+| Restart Cursor                   | Preporuka  | Nakon dodavanja `.cursor/mcp.json`                      |
+| Provjeri MCP u Settings          | Da za demo | Vidi je li server zelen                                 |
+| Promijeni API ključ u produkciji | Na deployu | Ne ostavljaj `carrent-mcp-dev-key`                      |
+
 
 **Ako MCP ne radi u Cursoru:**
+
 - Provjeri putanju u `mcp.json` → `dotnet` mora biti u PATH (ili koristi puni path do `.dotnet/dotnet`)
 - Provjeri da app radi i da port 5000 odgovara
+

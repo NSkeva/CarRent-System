@@ -8,12 +8,14 @@
 ## 1. Teorija — što je global search?
 
 **Global search** je jedan unos (npr. paleta pretrage) koji pretražuje:
+
 - **Navigaciju** (stranice aplikacije)
 - **Podatke u bazi** (vozila, kupci, rezervacije…)
 
 Inspiracija: VS Code Command Palette, Spotlight, Ctrl+K u modernim appovima.
 
 **Zašto nije ista stvar kao AJAX pretraga na listi (Lab 4):**
+
 - AJAX na listi filtrira **jednu tablicu** na jednoj stranici
 - Global search radi **iz bilo koje stranice** i vraća **mješovite rezultate** (stranica + entitet)
 
@@ -46,19 +48,23 @@ Korisnik Ctrl+K ili klik "Pretraga"
 
 ### API
 
-| Metoda | Ruta | Auth |
-|--------|------|------|
-| GET | `/api/search?q=tekst` | `[Authorize]` — moraš biti prijavljen |
+
+| Metoda | Ruta                  | Auth                                  |
+| ------ | --------------------- | ------------------------------------- |
+| GET    | `/api/search?q=tekst` | `[Authorize]` — moraš biti prijavljen |
+
 
 ### Što se pretražuje
 
-| Tip rezultata | Primjer |
-|---------------|---------|
-| `page` | Početna, Vozila, Rezervacije, Klijentski chat… |
-| `vehicle` | Brand, model, registracija |
-| `customer` | Ime, email |
-| `reservation` | ID, kupac, vozilo |
-| `addon` | Naziv (samo Admin) |
+
+| Tip rezultata | Primjer                                        |
+| ------------- | ---------------------------------------------- |
+| `page`        | Početna, Vozila, Rezervacije, Klijentski chat… |
+| `vehicle`     | Brand, model, registracija                     |
+| `customer`    | Ime, email                                     |
+| `reservation` | ID, kupac, vozilo                              |
+| `addon`       | Naziv (samo Admin)                             |
+
 
 **Admin** vidi i admin stranice + dodatke; **Manager** vidi operativu + podatke bez admin-only stranica.
 
@@ -113,10 +119,12 @@ O: Lookup je za autocomplete na formi (Lab 4); global search pokriva **više ent
 
 ## 8. Koraci koje TI moraš poduzeti
 
-| Korak | Obavezno? | Akcija |
-|-------|-----------|--------|
-| Pokreni app | Da | `./scripts/run-local.sh` |
-| Prijavi se | Da | Search radi samo za autentificirane korisnike |
-| Ništa dodatno | — | Nema API ključeva ili configa |
+
+| Korak         | Obavezno? | Akcija                                        |
+| ------------- | --------- | --------------------------------------------- |
+| Pokreni app   | Da        | `./scripts/run-local.sh`                      |
+| Prijavi se    | Da        | Search radi samo za autentificirane korisnike |
+| Ništa dodatno | —         | Nema API ključeva ili configa                 |
+
 
 **Napomena:** Gumb „Pretraga” vidljiv je samo kad si prijavljen (`_Layout.cshtml`).

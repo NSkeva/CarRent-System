@@ -232,6 +232,26 @@ public class FleetNotificationOutbox
     public DateTime? SentAt { get; set; }
 }
 
+public class FleetPushSubscription
+{
+    [Key]
+    public int Id { get; set; }
+
+    [Required, MaxLength(450)]
+    public string UserId { get; set; } = string.Empty;
+
+    [Required, MaxLength(512)]
+    public string Endpoint { get; set; } = string.Empty;
+
+    [Required, MaxLength(256)]
+    public string P256dh { get; set; } = string.Empty;
+
+    [Required, MaxLength(128)]
+    public string Auth { get; set; } = string.Empty;
+
+    public DateTime CreatedAt { get; set; }
+}
+
 public class Partner
 {
     [Key]

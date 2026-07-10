@@ -1,0 +1,25 @@
+@model CarRent.Web.ViewModels.FleetChatPanelViewModel
+@{
+    Layout = "_Layout";
+}
+
+<section class="panel glass-card operator-ai-intro rise-in">
+    <div class="chat-header">
+        <h1>AI asistent — operativa</h1>
+        <p class="auth-subtitle">
+            Interni pomoćnik za tim: današnji plan, slobodna vozila, nacrti, navigacija po sustavu.
+        </p>
+    </div>
+    <div class="operator-ai-quick-prompts">
+        <button type="button" class="btn btn-ghost btn-sm" data-chat-suggestion="Što je danas na rasporedu?">Danas</button>
+        <button type="button" class="btn btn-ghost btn-sm" data-chat-suggestion="Tko vraća vozila danas?">Povrati</button>
+        <button type="button" class="btn btn-ghost btn-sm" data-chat-suggestion="Ima li slobodnih vozila ovaj vikend?">Slobodna vozila</button>
+        <button type="button" class="btn btn-ghost btn-sm" data-chat-suggestion="Koji su nacrti rezervacija?">Nacrti</button>
+    </div>
+</section>
+
+<partial name="_FleetChatPanel" model="Model" />
+
+@section Scripts {
+    <script src="~/js/fleet-ai-chat.js" asp-append-version="true"></script>
+}

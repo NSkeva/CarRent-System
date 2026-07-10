@@ -10,6 +10,6 @@
     <p><strong>Trosak:</strong> @Model.Cost EUR</p>
     <p><strong>Preporuceni iduci servis:</strong> @(Model.NextRecommendedServiceDate?.ToString("yyyy-MM-dd") ?? "-")</p>
     <div class="panel-actions">
-        <a asp-action="Index" class="btn btn-secondary btn-sm">← Natrag na listu</a>
+        <partial name="_ReturnNavPartial" />
     </div>
 </section>

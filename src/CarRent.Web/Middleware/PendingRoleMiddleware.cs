@@ -12,6 +12,7 @@ public sealed class PendingRoleMiddleware(RequestDelegate next)
         "/Identity/Account/ExternalLogin",
         "/Identity/Account/PendingAccess",
         "/ClientChat",
+        "/asistent",
         "/css/",
         "/js/",
         "/lib/",

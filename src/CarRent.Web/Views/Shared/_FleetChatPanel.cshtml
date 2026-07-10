@@ -1,0 +1,24 @@
+@model CarRent.Web.ViewModels.FleetChatPanelViewModel
+
+<section class="panel glass-card @(Model.PanelClass ?? "chat-panel") rise-in" data-fleet-chat data-ask-url="@Model.AskUrl">
+  @if (string.IsNullOrEmpty(Model.PanelClass) || !Model.PanelClass.Contains("chat-panel-public", StringComparison.Ordinal))
+  {
+    <div class="chat-header">
+      <h1>CarRent asistent</h1>
+      <p class="auth-subtitle">AI podržan upit — odgovori temelje se na podacima iz baze.</p>
+    </div>
+  }
+
+  <div class="chat-messages" data-chat-messages>
+    <div class="chat-msg chat-msg-bot">@Model.WelcomeMessage</div>
+  </div>
+
+  <form class="chat-composer" onsubmit="return false;">
+    <input type="text"
+           class="form-control"
+           data-chat-input
+           placeholder="@Model.Placeholder"
+           autocomplete="off" />
+    <button type="button" class="btn btn-primary" data-chat-send>Pošalji</button>
+  </form>
+</section>

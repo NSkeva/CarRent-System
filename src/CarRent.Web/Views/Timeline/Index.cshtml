@@ -1,16 +1,25 @@
 @model TimelineVm
+@using CarRent.Model.Enums
 @{
     ViewData["Title"] = "Timeline";
     ViewData["Breadcrumbs"] = BreadcrumbHelper.Build("Home", "Timeline");
     var monthInputValue = $"{Model.Month:yyyy-MM}-01";
+    var monthIso = $"{Model.Month:yyyy-MM}-01";
     var today = DateOnly.FromDateTime(DateTime.UtcNow);
     var dayNames = new[] { "Ned", "Pon", "Uto", "Sri", "Čet", "Pet", "Sub" };
+    var canEdit = User.IsInRole("Admin") || User.IsInRole("Manager");
 }
 
 <div class="tl-toolbar rise-in">
     <div>
         <h1 style="font-size:22px;font-weight:800">Raspored flote</h1>
-        <p style="font-size:13px;color:var(--muted);margin-top:2px">Pregled rezervacija po vozilu i danu</p>
+        <p style="font-size:13px;color:var(--muted);margin-top:2px">
+            Pregled rezervacija po vozilu i danu (AM / PM)
+            @if (canEdit)
+            {
+                <span class="tl-hint"> · Povucite događaj · Rubovi za trajanje · Prazan termin za novu rezervaciju · Klik za detalje</span>
+            }
+        </p>
     </div>
     <form method="get" class="tl-month-nav" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
         <input type="hidden" name="q" value="@Model.SearchText" />
@@ -26,7 +35,10 @@
         <div class="tl-legend-item"><div class="tl-legend-dot" style="background:rgba(168,178,217,0.3)"></div>Nacrt</div>
         <div class="tl-legend-item"><div class="tl-legend-dot" style="background:rgba(255,209,102,0.65)"></div>Registracija</div>
     </div>
-    <a asp-controller="Reservation" asp-action="Create" class="btn btn-primary btn-sm" style="margin-left:auto">+ Nova rezervacija</a>
+    @if (canEdit)
+    {
+        <button type="button" class="btn btn-primary btn-sm" style="margin-left:auto" data-tl-open-create>+ Nova rezervacija</button>
+    }
 </div>
 
 <form method="get" class="glass glass-sm rise-in tl-filters" style="margin-bottom:var(--space-md);display:flex;gap:12px;flex-wrap:wrap;align-items:center">
@@ -49,7 +61,12 @@
     <button type="submit" class="btn btn-secondary btn-sm">Filtriraj</button>
 </form>
 
-<div class="timeline-outer rise-in">
+<div class="timeline-outer rise-in"
+     data-timeline-scheduler
+     data-can-edit="@(canEdit ? "true" : "false")"
+     data-month="@monthIso"
+     data-day-count="@Model.Days.Count"
+     data-slot-count="@(Model.Days.Count * 2)">
     <div class="timeline-scroll">
         <div class="tl-inner">
             <div class="tl-header">
@@ -62,6 +79,7 @@
                         var isToday = day == today;
                         <div class="tl-day-header @(isWeekend ? "weekend" : "") @(isToday ? "today" : "")">
                             <span class="dn">@day.Day.ToString("00")</span>@dayNames[dow]
+                            <span class="tl-day-halves" aria-hidden="true"><span>AM</span><span>PM</span></span>
                         </div>
                     }
                 </div>
@@ -69,7 +87,7 @@
             @foreach (var row in Model.Rows)
             {
                 var dayCount = Model.Days.Count;
-                <div class="tl-row">
+                <div class="tl-row" data-vehicle-id="@row.Vehicle.Id">
                     <div class="tl-row-side">
                         <div class="tl-veh-name">@row.Vehicle.Brand @row.Vehicle.Model</div>
                         <div class="tl-veh-reg">@row.Vehicle.RegistrationNumber</div>
@@ -83,19 +101,45 @@
                             @foreach (var day in Model.Days)
                             {
                                 var dow = (int)day.DayOfWeek;
-                                <div class="tl-cell @(dow == 0 || dow == 6 ? "weekend" : "") @(day == today ? "today" : "")"></div>
+                                <div class="tl-day-group @(dow == 0 || dow == 6 ? "weekend" : "") @(day == today ? "today" : "")">
+                                    <div class="tl-cell-half am"
+                                         data-day="@day.Day"
+                                         data-date="@day.ToString("yyyy-MM-dd")"
+                                         data-half="am"></div>
+                                    <div class="tl-cell-half pm"
+                                         data-day="@day.Day"
+                                         data-date="@day.ToString("yyyy-MM-dd")"
+                                         data-half="pm"></div>
+                                </div>
                             }
                         </div>
                         @foreach (var bar in row.Bars)
                         {
                             if (bar.IsRegistration)
                             {
-                                <span class="tl-res @bar.CssClass" style="--s:@bar.StartDay;--n:@bar.Span" title="@bar.Label">@bar.Label</span>
+                                <div class="tl-event tl-res @bar.CssClass"
+                                     style="--s:@bar.StartSlot;--n:@bar.SpanSlots"
+                                     title="@bar.Label"
+                                     data-editable="false">
+                                    <span class="tl-event-label">@bar.Label</span>
+                                </div>
                             }
-                            else if (bar.Reservation is not null)
+                            else if (bar.Reservation is not null && bar.ActualStart is not null && bar.ActualEnd is not null)
                             {
-                                <a asp-controller="Reservation" asp-action="Details" asp-route-id="@bar.Reservation.Id"
-                                   class="tl-res @bar.CssClass" style="--s:@bar.StartDay;--n:@bar.Span" title="@bar.Label">@bar.Label</a>
+                                var statusLabel = UiDisplayHelper.ReservationStatusLabel(bar.Reservation.Status);
+                                <div class="tl-event tl-res @bar.CssClass @(bar.IsEditable && canEdit ? "editable" : "")"
+                                     style="--s:@bar.StartSlot;--n:@bar.SpanSlots"
+                                     title="@bar.Label"
+                                     data-reservation-id="@bar.ReservationId"
+                                     data-vehicle-id="@bar.VehicleId"
+                                     data-start="@bar.ActualStart.Value.ToString("yyyy-MM-dd")"
+                                     data-end="@bar.ActualEnd.Value.ToString("yyyy-MM-dd")"
+                                     data-editable="@(bar.IsEditable && canEdit ? "true" : "false")"
+                                     data-status-label="@statusLabel">
+                                    <span class="tl-resize-handle tl-resize-w" data-handle="w" aria-hidden="true"></span>
+                                    <span class="tl-event-label">@bar.Label</span>
+                                    <span class="tl-resize-handle tl-resize-e" data-handle="e" aria-hidden="true"></span>
+                                </div>
                             }
                         }
                     </div>
@@ -103,4 +147,24 @@
             }
         </div>
     </div>
+    <div class="tl-create-selection" hidden aria-hidden="true"></div>
 </div>
+
+<div class="tl-modal-root" data-timeline-modal hidden>
+    <div class="tl-modal-backdrop" data-tl-modal-backdrop>
+        <div class="tl-modal-panel glass" data-tl-modal-panel role="dialog" aria-modal="true" aria-labelledby="tl-modal-title">
+            <header class="tl-modal-header">
+                <button type="button" class="tl-modal-back btn btn-ghost btn-sm" data-tl-modal-back hidden aria-label="Natrag">← Natrag</button>
+                <h2 class="tl-modal-title" id="tl-modal-title" data-tl-modal-title>Rezervacija</h2>
+                <button type="button" class="tl-modal-close" data-tl-modal-close aria-label="Zatvori">×</button>
+            </header>
+            <div class="tl-modal-body" data-tl-modal-body></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/timeline-scheduler.js" asp-append-version="true"></script>
+    <script src="~/js/timeline-modal.js" asp-append-version="true"></script>
+}

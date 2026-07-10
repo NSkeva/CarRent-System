@@ -1,3 +1,4 @@
+using CarRent.Model.Entities;
 using CarRent.Web.Repositories;
 using CarRent.Web.Services;
 using CarRent.Web.ViewModels;
@@ -13,20 +14,109 @@ public sealed class HomeController(DashboardRepository dashboardRepository) : Co
     public async Task<IActionResult> Index()
     {
         ViewData["Title"] = "Home";
+        ViewData["NavSection"] = "operativa";
         ViewData["Breadcrumbs"] = BreadcrumbHelper.Build("Home");
         return View(await dashboardRepository.BuildHomeVmAsync());
     }
 }
 
-public sealed class TimelineController(DashboardRepository dashboardRepository) : Controller
+public sealed class TimelineController(
+    DashboardRepository dashboardRepository,
+    ReservationRepository reservationRepository,
+    VehicleRepository vehicleRepository,
+    ReservationSchedulingValidator schedulingValidator) : Controller
 {
     [Route("raspored/mjesecni")]
     public async Task<IActionResult> Index(string? q, string? vehicleType, string? reservationStatus, string? month)
     {
         var selectedMonth = DateOnly.TryParse(month, out var parsed) ? parsed : DateOnly.FromDateTime(DateTime.UtcNow);
         ViewData["Title"] = "Timeline";
+        ViewData["NavSection"] = "operativa";
         ViewData["Breadcrumbs"] = BreadcrumbHelper.Build("Home", "Timeline");
         return View(await dashboardRepository.BuildTimelineVmAsync(selectedMonth, q, vehicleType, reservationStatus));
+    }
+
+    [Authorize(Roles = "Admin,Manager")]
+    [Route("raspored/mjesecni/modal/rezervacija/nova")]
+    public async Task<IActionResult> ModalCreate(int? vehicleId, DateTime? startDate, DateTime? endDate)
+    {
+        var vm = await BuildCreateFormAsync(vehicleId, startDate, endDate);
+        return PartialView("_ReservationModalForm", vm);
+    }
+
+    [Authorize]
+    [Route("raspored/mjesecni/modal/rezervacija/{id:int}")]
+    public async Task<IActionResult> ModalDetails(int id)
+    {
+        var model = await reservationRepository.GetByIdAsync(id);
+        return model is null ? NotFound() : PartialView("_ReservationModalDetails", model);
+    }
+
+    [Authorize(Roles = "Admin,Manager")]
+    [Route("raspored/mjesecni/modal/rezervacija/{id:int}/uredi")]
+    public async Task<IActionResult> ModalEdit(int id)
+    {
+        var full = await reservationRepository.GetByIdAsync(id);
+        return full is null ? NotFound() : PartialView("_ReservationModalForm", EntityMappers.ToForm(full));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin,Manager")]
+    [Route("raspored/mjesecni/modal/rezervacija/nova")]
+    public async Task<IActionResult> ModalCreatePost(ReservationFormVm model)
+    {
+        await schedulingValidator.ValidateAsync(model, ModelState);
+        if (!ModelState.IsValid)
+            return PartialView("_ReservationModalForm", model);
+
+        var entity = new Reservation();
+        EntityMappers.Apply(model, entity);
+        FleetLifecycleRules.ApplyReservationLifecycle(entity);
+        await reservationRepository.AddAsync(entity);
+        return Json(new { success = true, id = entity.Id });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin,Manager")]
+    [Route("raspored/mjesecni/modal/rezervacija/{id:int}/uredi")]
+    public async Task<IActionResult> ModalEditPost(int id, ReservationFormVm model)
+    {
+        if (id != model.Id) return BadRequest();
+        await schedulingValidator.ValidateAsync(model, ModelState, id);
+        if (!ModelState.IsValid)
+            return PartialView("_ReservationModalForm", model);
+
+        var entity = await reservationRepository.GetTrackedAsync(id);
+        if (entity is null) return NotFound();
+        EntityMappers.Apply(model, entity);
+        FleetLifecycleRules.ApplyReservationLifecycle(entity);
+        await reservationRepository.UpdateAsync(entity);
+        return Json(new { success = true, id = entity.Id });
+    }
+
+    private async Task<ReservationFormVm> BuildCreateFormAsync(int? vehicleId, DateTime? startDate, DateTime? endDate)
+    {
+        var vm = new ReservationFormVm();
+        if (vehicleId is > 0)
+        {
+            var vehicle = await vehicleRepository.GetByIdAsync(vehicleId.Value);
+            if (vehicle is not null)
+            {
+                vm.VehicleId = vehicle.Id;
+                vm.VehicleDisplay = $"{vehicle.Brand} {vehicle.Model} ({vehicle.RegistrationNumber})";
+            }
+        }
+
+        if (startDate is { } start)
+            vm.StartDate = start.Date;
+        if (endDate is { } end)
+            vm.EndDate = end.Date;
+        if (vm.EndDate < vm.StartDate)
+            vm.EndDate = vm.StartDate.AddDays(1);
+
+        return vm;
     }
 }
 
@@ -37,6 +127,7 @@ public sealed class DailyPlanController(DashboardRepository dashboardRepository)
     {
         var selectedDay = DateOnly.TryParse(day, out var parsed) ? parsed : DateOnly.FromDateTime(DateTime.UtcNow);
         ViewData["Title"] = "Dnevni plan";
+        ViewData["NavSection"] = "operativa";
         ViewData["Breadcrumbs"] = BreadcrumbHelper.Build("Home", "Dnevni plan");
         return View(await dashboardRepository.BuildDailyPlanVmAsync(selectedDay));
     }
@@ -47,6 +138,7 @@ public sealed class FleetController(DashboardRepository dashboardRepository) : C
     public async Task<IActionResult> Index()
     {
         ViewData["Title"] = "Vozni park";
+        ViewData["NavSection"] = "operativa";
         ViewData["Breadcrumbs"] = BreadcrumbHelper.Build("Home", "Vozni park");
         return View(await dashboardRepository.BuildFleetCardsAsync());
     }

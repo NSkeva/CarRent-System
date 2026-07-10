@@ -2,9 +2,13 @@
     var controller = ViewContext.RouteData.Values["controller"]?.ToString();
     var navSection = ViewData["NavSection"] as string;
     var isAdmin = User.IsInRole("Admin");
-    var operativaActive = navSection == "operativa"
-        || new[] { "Home", "Timeline", "DailyPlan", "Fleet" }.Contains(controller);
+    var isSignedIn = User.Identity?.IsAuthenticated == true;
+    var operativaControllers = new[] { "Home", "Timeline", "DailyPlan", "Fleet", "Notifications", "OperatorAi" };
+    var operativaActive = navSection == "operativa" || operativaControllers.Contains(controller);
     var podaciActive = isAdmin && !operativaActive && controller is not "Home";
+
+    string OpsNavClass(string ctrl) => controller == ctrl ? "ops-nav-link active" : "ops-nav-link";
+    string PodaciLinkClass(string ctrl) => controller == ctrl ? "active" : "";
 }
 <!DOCTYPE html>
 <html lang="hr">
@@ -14,76 +18,114 @@
     <title>@ViewData["Title"] - CarRent Control Surface</title>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
-<body>
-<div class="page-shell">
-    <header class="site-header no-print">
-        <div class="header-inner">
-            <a class="site-logo" asp-controller="Home" asp-action="Index">
+<body class="@(isSignedIn ? "app-authenticated" : "app-guest")">
+<div class="page-shell @(isSignedIn ? "app-shell" : "")">
+    @if (isSignedIn)
+    {
+        <div class="ops-sidebar-backdrop no-print" data-ops-sidebar-backdrop hidden></div>
+        <aside class="ops-sidebar no-print" id="opsSidebar">
+            <a class="ops-sidebar-logo" asp-controller="Home" asp-action="Index">
                 <div class="logo-mark">🚗</div>
-                CarRent <span>Control Surface</span>
-            </a>
-            <nav class="nav-primary" id="siteNav">
-                <div class="nav-group @(operativaActive ? "open" : "")">
-                    <button type="button" class="nav-group-btn @(operativaActive ? "active" : "")">
-                        Operativa
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-                    </button>
-                    <div class="nav-dropdown">
-                        <a asp-controller="Home" asp-action="Index">🏠 Početna</a>
-                        <a asp-controller="Timeline" asp-action="Index">📅 Timeline</a>
-                        <a asp-controller="DailyPlan" asp-action="Index">📋 Dnevni plan</a>
-                        <a asp-controller="Fleet" asp-action="Index">🚗 Vozni park</a>
-                        <a asp-controller="Notifications" asp-action="Index">🔔 Obavijesti</a>
-                        <a asp-controller="ClientChat" asp-action="Index">💬 Klijentski chat</a>
-                    </div>
+                <div class="ops-sidebar-logo-text">
+                    <span class="ops-sidebar-logo-title">CarRent</span>
+                    <span class="ops-sidebar-logo-sub">Control Surface</span>
                 </div>
-                @if (isAdmin)
-                {
-                    <div class="nav-group @(podaciActive ? "open" : "")">
-                        <button type="button" class="nav-group-btn @(podaciActive ? "active" : "")">
-                            Podaci
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-                        </button>
-                        <div class="nav-dropdown">
-                            <a asp-controller="Reservation" asp-action="Index">🗓 Rezervacije</a>
-                            <a asp-controller="Vehicle" asp-action="Index">🚘 Vozila</a>
-                            <a asp-controller="Customer" asp-action="Index">👤 Kupci</a>
-                            <div class="nav-dropdown-divider"></div>
-                            <a asp-controller="ServiceRecord" asp-action="Index">🔧 Servisi</a>
-                            <a asp-controller="BranchOffice" asp-action="Index">🏢 Poslovnice</a>
-                            <a asp-controller="Addon" asp-action="Index">➕ Dodaci</a>
-                            <a asp-controller="Employee" asp-action="Index">👥 Zaposlenici</a>
-                            <a asp-controller="Partners" asp-action="Index">🤝 Partneri</a>
-                        </div>
-                    </div>
-                }
+            </a>
+            <div class="ops-sidebar-section">Operativa</div>
+            <nav class="ops-nav" aria-label="Operativa">
+                <a class="@OpsNavClass("Home")" asp-controller="Home" asp-action="Index">
+                    <span class="ops-nav-icon" aria-hidden="true">🏠</span>
+                    <span class="ops-nav-label">Početna</span>
+                </a>
+                <a class="@OpsNavClass("Timeline")" asp-controller="Timeline" asp-action="Index">
+                    <span class="ops-nav-icon" aria-hidden="true">📅</span>
+                    <span class="ops-nav-label">Timeline</span>
+                </a>
+                <a class="@OpsNavClass("DailyPlan")" asp-controller="DailyPlan" asp-action="Index">
+                    <span class="ops-nav-icon" aria-hidden="true">📋</span>
+                    <span class="ops-nav-label">Dnevni plan</span>
+                </a>
+                <a class="@OpsNavClass("Fleet")" asp-controller="Fleet" asp-action="Index">
+                    <span class="ops-nav-icon" aria-hidden="true">🚗</span>
+                    <span class="ops-nav-label">Vozni park</span>
+                </a>
+                <a class="@OpsNavClass("Notifications")" asp-controller="Notifications" asp-action="Index">
+                    <span class="ops-nav-icon" aria-hidden="true">🔔</span>
+                    <span class="ops-nav-label">Obavijesti</span>
+                </a>
+                <a class="@OpsNavClass("OperatorAi")" asp-controller="OperatorAi" asp-action="Index">
+                    <span class="ops-nav-icon" aria-hidden="true">🤖</span>
+                    <span class="ops-nav-label">AI asistent</span>
+                </a>
             </nav>
-            <div class="header-actions">
-                @if (User.Identity?.IsAuthenticated == true)
+        </aside>
+    }
+
+    <div class="app-body">
+        <header class="site-header no-print">
+            <div class="header-inner">
+                @if (!isSignedIn)
                 {
-                    <button type="button" class="btn btn-ghost btn-sm global-search-trigger" data-global-search-open title="Pretraga (Ctrl+K)">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-                        Pretraga
-                    </button>
+                    <a class="site-logo" asp-controller="Home" asp-action="Index">
+                        <div class="logo-mark">🚗</div>
+                        CarRent <span>Control Surface</span>
+                    </a>
+                    <nav class="guest-nav">
+                        <a asp-controller="PublicAssistant" asp-action="Index">AI asistent</a>
+                    </nav>
                 }
-                <button type="button" class="mobile-nav-toggle" data-mobile-nav-toggle aria-label="Izbornik">☰</button>
-                <button type="button" class="lang-toggle" title="Jezik">HR</button>
-                <partial name="_LoginPartial" />
+                else if (isAdmin)
+                {
+                    <nav class="nav-primary header-nav" id="siteNav">
+                        <div class="nav-group @(podaciActive ? "open" : "")">
+                            <button type="button" class="nav-group-btn @(podaciActive ? "active" : "")">
+                                Podaci
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                            </button>
+                            <div class="nav-dropdown">
+                                <a class="@PodaciLinkClass("Reservation")" asp-controller="Reservation" asp-action="Index">🗓 Rezervacije</a>
+                                <a class="@PodaciLinkClass("Vehicle")" asp-controller="Vehicle" asp-action="Index">🚘 Vozila</a>
+                                <a class="@PodaciLinkClass("Customer")" asp-controller="Customer" asp-action="Index">👤 Kupci</a>
+                                <div class="nav-dropdown-divider"></div>
+                                <a class="@PodaciLinkClass("ServiceRecord")" asp-controller="ServiceRecord" asp-action="Index">🔧 Servisi</a>
+                                <a class="@PodaciLinkClass("BranchOffice")" asp-controller="BranchOffice" asp-action="Index">🏢 Poslovnice</a>
+                                <a class="@PodaciLinkClass("Addon")" asp-controller="Addon" asp-action="Index">➕ Dodaci</a>
+                                <a class="@PodaciLinkClass("Employee")" asp-controller="Employee" asp-action="Index">👥 Zaposlenici</a>
+                                <a class="@PodaciLinkClass("Partners")" asp-controller="Partners" asp-action="Index">🤝 Partneri</a>
+                            </div>
+                        </div>
+                    </nav>
+                }
+                <div class="header-actions">
+                    @if (isSignedIn)
+                    {
+                        <button type="button" class="btn btn-ghost btn-sm global-search-trigger" data-global-search-open title="Pretraga (Ctrl+K)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                            Pretraga
+                        </button>
+                    }
+                    @if (isSignedIn)
+                    {
+                        <button type="button" class="mobile-nav-toggle" data-mobile-nav-toggle aria-label="Operativa izbornik">☰</button>
+                    }
+                    <button type="button" class="lang-toggle" title="Jezik">HR</button>
+                    <partial name="_LoginPartial" />
+                </div>
             </div>
-        </div>
-    </header>
+        </header>
 
-    <partial name="_Breadcrumbs" />
-    <partial name="_FlashMessages" />
+        <partial name="_Breadcrumbs" />
+        <partial name="_FlashMessages" />
 
-    <main class="page-content">
-        @RenderBody()
-    </main>
+        <main class="page-content">
+            @RenderBody()
+        </main>
 
-    <footer class="site-footer no-print">
-        <span>CarRent Control Surface</span>
-        <span>ASP.NET Core MVC</span>
-    </footer>
+        <footer class="site-footer no-print">
+            <span>CarRent Control Surface</span>
+            <span>ASP.NET Core MVC</span>
+        </footer>
+    </div>
 </div>
 
 <partial name="_GlobalSearchPartial" />

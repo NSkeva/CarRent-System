@@ -276,19 +276,31 @@
 
     function initMobileNav() {
         const toggle = document.querySelector("[data-mobile-nav-toggle]");
-        const nav = document.getElementById("siteNav");
-        if (!toggle || !nav) return;
+        const sidebar = document.getElementById("opsSidebar");
+        const backdrop = document.querySelector("[data-ops-sidebar-backdrop]");
+        if (!toggle || !sidebar) return;
+
+        const setOpen = (open) => {
+            document.body.classList.toggle("mobile-nav-open", open);
+            if (backdrop) backdrop.hidden = !open;
+        };
 
         toggle.addEventListener("click", (e) => {
             e.stopPropagation();
-            nav.classList.toggle("mobile-open");
-            document.body.classList.toggle("mobile-nav-open");
+            setOpen(!document.body.classList.contains("mobile-nav-open"));
+        });
+
+        if (backdrop) {
+            backdrop.addEventListener("click", () => setOpen(false));
+        }
+
+        sidebar.querySelectorAll(".ops-nav-link").forEach((link) => {
+            link.addEventListener("click", () => setOpen(false));
         });
 
         document.addEventListener("click", (e) => {
-            if (!e.target.closest("#siteNav") && !e.target.closest("[data-mobile-nav-toggle]")) {
-                nav.classList.remove("mobile-open");
-                document.body.classList.remove("mobile-nav-open");
+            if (!e.target.closest("#opsSidebar") && !e.target.closest("[data-mobile-nav-toggle]")) {
+                setOpen(false);
             }
         });
     }
@@ -347,5 +359,11 @@
         initGlobalSearch();
         initMobileNav();
         initNavDropdowns();
+
+        window.CarRentUi = {
+            initBlurValidation,
+            initAutocomplete,
+            initDateTimePickers
+        };
     });
 })();

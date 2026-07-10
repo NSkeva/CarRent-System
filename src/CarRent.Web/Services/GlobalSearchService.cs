@@ -32,7 +32,8 @@ public sealed class GlobalSearchService(CarRentDbContext db)
         new("page", "Dnevni plan", "Operativa", "/DailyPlan"),
         new("page", "Vozni park", "Operativa", "/Fleet"),
         new("page", "Obavijesti", "Operativa", "/Notifications"),
-        new("page", "Klijentski chat", "AI asistent", "/ClientChat"),
+        new("page", "AI asistent", "Operativa", "/operativa/ai-asistent"),
+        new("page", "Klijentski asistent", "Demo", "/asistent"),
         new("page", "Prijava", "Račun", "/Identity/Account/Login"),
     ];
 

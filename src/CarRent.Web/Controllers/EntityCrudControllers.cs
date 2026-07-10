@@ -160,8 +160,6 @@ public sealed class VehicleController(
         if (model is null) return NotFound();
         ViewData["Title"] = "Detalji vozila";
         NavContext.ApplyVehicle(this, returnUrl, model.RegistrationNumber);
-        if (ViewData["Breadcrumbs"] is null)
-            ViewData["Breadcrumbs"] = BreadcrumbHelper.Build("Home", "Vozila", model.RegistrationNumber);
         ViewData["MainImageUrl"] = VehicleImageHelper.GetDisplayUrl(model);
         ViewData["HasCustomMainImage"] = VehicleImageHelper.HasCustomImage(model);
         return View(model);
@@ -364,7 +362,10 @@ public sealed class CustomerController(CustomerRepository repository) : Controll
     }
 }
 
-public sealed class ReservationController(ReservationRepository repository, VehicleRepository vehicles) : Controller
+public sealed class ReservationController(
+    ReservationRepository repository,
+    VehicleRepository vehicles,
+    ReservationSchedulingValidator schedulingValidator) : Controller
 {
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Index() => View(await repository.GetAllAsync());
@@ -374,7 +375,7 @@ public sealed class ReservationController(ReservationRepository repository, Vehi
         => PartialView("_IndexRows", await repository.GetAllAsync(q));
 
     [Authorize(Roles = "Admin,Manager")]
-    public async Task<IActionResult> Create(int? vehicleId, string? returnUrl)
+    public async Task<IActionResult> Create(int? vehicleId, string? returnUrl, DateTime? startDate, DateTime? endDate)
     {
         var vm = new ReservationFormVm();
         if (vehicleId is > 0)
@@ -387,8 +388,17 @@ public sealed class ReservationController(ReservationRepository repository, Vehi
             }
         }
 
+        if (startDate is { } start)
+            vm.StartDate = start.Date;
+
+        if (endDate is { } end)
+            vm.EndDate = end.Date;
+
+        if (vm.EndDate < vm.StartDate)
+            vm.EndDate = vm.StartDate.AddDays(1);
+
         ViewData["Title"] = "Nova rezervacija";
-        ViewData["ReturnUrl"] = returnUrl;
+        NavContext.Apply(this, returnUrl, "Rezervacije", "Nova");
         return View(vm);
     }
 
@@ -399,7 +409,7 @@ public sealed class ReservationController(ReservationRepository repository, Vehi
         await ValidateSchedulingAsync(model);
         if (!ModelState.IsValid)
         {
-            ViewData["ReturnUrl"] = returnUrl;
+            NavContext.Apply(this, returnUrl, "Rezervacije", "Nova");
             return View(model);
         }
 
@@ -416,7 +426,7 @@ public sealed class ReservationController(ReservationRepository repository, Vehi
         var full = await repository.GetByIdAsync(id);
         if (full is null) return NotFound();
         ViewData["Title"] = "Uredi rezervaciju";
-        ViewData["ReturnUrl"] = returnUrl;
+        NavContext.Apply(this, returnUrl, "Rezervacije", $"#{full.Id}");
         return View(EntityMappers.ToForm(full));
     }
 
@@ -428,7 +438,7 @@ public sealed class ReservationController(ReservationRepository repository, Vehi
         await ValidateSchedulingAsync(model, id);
         if (!ModelState.IsValid)
         {
-            ViewData["ReturnUrl"] = returnUrl;
+            NavContext.Apply(this, returnUrl, "Rezervacije", $"#{model.Id}");
             return View("Edit", model);
         }
 
@@ -449,53 +459,17 @@ public sealed class ReservationController(ReservationRepository repository, Vehi
 
     [Authorize]
     [Route("rezervacije/pregled/{id:int}")]
-    public async Task<IActionResult> Details(int id)
+    public async Task<IActionResult> Details(int id, string? returnUrl)
     {
         var model = await repository.GetByIdAsync(id);
         if (model is null) return NotFound();
         ViewData["Title"] = "Detalji rezervacije";
+        NavContext.Apply(this, returnUrl, "Rezervacije", $"#{model.Id}");
         return View(model);
     }
 
-    private async Task ValidateSchedulingAsync(ReservationFormVm model, int excludeReservationId = 0)
-    {
-        if (model.EndDate <= model.StartDate)
-        {
-            ModelState.AddModelError(nameof(model.EndDate), "Datum završetka mora biti nakon početka.");
-            return;
-        }
-
-        if (model.VehicleId <= 0)
-            return;
-
-        var vehicle = await vehicles.GetByIdAsync(model.VehicleId);
-        if (vehicle is { BlockedByService: true })
-        {
-            ModelState.AddModelError(
-                nameof(model.VehicleId),
-                "Vozilo je na servisu i privremeno je nedostupno za nove rezervacije.");
-        }
-
-        if (vehicle is { IsActive: false, BlockedByService: false })
-        {
-            ModelState.AddModelError(
-                nameof(model.VehicleId),
-                "Vozilo nije aktivno u voznom parku.");
-        }
-
-        var conflict = await repository.FindSchedulingConflictAsync(
-            model.VehicleId,
-            model.StartDate,
-            model.EndDate,
-            excludeReservationId);
-
-        if (conflict is not null)
-        {
-            ModelState.AddModelError(
-                string.Empty,
-                $"Vozilo je već rezervirano u odabranom periodu (rezervacija #{conflict.Id}, {conflict.StartDate:dd.MM.yyyy} – {conflict.EndDate:dd.MM.yyyy}).");
-        }
-    }
+    private Task ValidateSchedulingAsync(ReservationFormVm model, int excludeReservationId = 0)
+        => schedulingValidator.ValidateAsync(model, ModelState, excludeReservationId);
 }
 
 public sealed class AddonController(AddonRepository repository) : Controller
@@ -644,11 +618,12 @@ public sealed class ServiceRecordController(ServiceRecordRepository repository, 
         return RedirectToAction(nameof(Index));
     }
 
-    public async Task<IActionResult> Details(int id)
+    public async Task<IActionResult> Details(int id, string? returnUrl)
     {
         var model = await repository.GetByIdAsync(id);
         if (model is null) return NotFound();
         ViewData["Title"] = "Detalji servisa";
+        NavContext.Apply(this, returnUrl, "Servisi", $"#{model.Id}");
         return View(model);
     }
 }

@@ -1,13 +1,18 @@
 @model DailyPlanVm
 @{
     ViewData["Title"] = "Dnevni plan";
+    ViewData["NavSection"] = "operativa";
     ViewData["Breadcrumbs"] = BreadcrumbHelper.Build("Home", "Dnevni plan");
     var dayInputValue = $"{Model.Day:yyyy-MM-dd}";
+    var pageReturn = NavContext.CurrentPageUrl(Context.Request);
+    var returnVehicleIds = Model.Returns.Select(r => r.Vehicle.Id).ToHashSet();
+    var turnaroundDepartures = Model.Departures.Where(d => returnVehicleIds.Contains(d.Vehicle.Id)).ToList();
 }
 
 <div class="plan-header no-print">
     <h1>Dnevni plan</h1>
-    <form method="get" class="date-input-group" style="display:flex;align-items:center;gap:8px">
+    <p style="font-size:13px;color:var(--muted);margin:4px 0 0">Povrati ujutro (AM) · Odlasci popodne (PM) · isti auto može imati oba na isti dan</p>
+    <form method="get" class="date-input-group" style="display:flex;align-items:center;gap:8px;margin-top:10px">
         <label for="day">Datum</label>
         <input type="date" id="day" name="day" value="@dayInputValue" class="field-input" style="width:auto" />
         <button type="submit" class="btn btn-secondary btn-sm">Učitaj</button>
@@ -15,11 +20,36 @@
     </form>
 </div>
 
+@if (turnaroundDepartures.Any())
+{
+    <div class="glass plan-turnaround-strip rise-in" style="margin-bottom:var(--space-md);padding:var(--space-md)">
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--acc-2);margin-bottom:8px">
+            Isti dan — povrat AM i odlazak PM
+        </div>
+        <div class="plan-turnaround-list">
+            @foreach (var dep in turnaroundDepartures)
+            {
+                var ret = Model.Returns.First(r => r.Vehicle.Id == dep.Vehicle.Id);
+                <div class="plan-turnaround-item">
+                    <span class="plan-half-chip am">AM</span>
+                    <span class="plan-turnaround-veh">@dep.Vehicle.Brand @dep.Vehicle.Model · @dep.Vehicle.RegistrationNumber</span>
+                    <span class="plan-turnaround-arrow">→</span>
+                    <span class="plan-half-chip pm">PM</span>
+                    <span style="font-size:12px;color:var(--muted)">@ret.Customer.FirstName @ret.Customer.LastName / @dep.Customer.FirstName @dep.Customer.LastName</span>
+                </div>
+            }
+        </div>
+    </div>
+}
+
 <div class="plan-cols">
     <div class="glass">
         <div class="plan-col-header">
             <div class="col-icon povrat">↙</div>
-            <h2>Povrati</h2>
+            <div>
+                <h2>Povrati</h2>
+                <div class="plan-col-sub">Ujutro · AM</div>
+            </div>
             <span class="count">@Model.Returns.Count</span>
         </div>
         @if (!Model.Returns.Any())
@@ -28,17 +58,21 @@
         }
         @foreach (var item in Model.Returns)
         {
-            <div class="ev-card return">
-                <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            var isTurnaround = turnaroundDepartures.Any(d => d.Vehicle.Id == item.Vehicle.Id);
+            <div class="ev-card return @(isTurnaround ? "is-turnaround" : "")">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
                     <div>
                         <div class="ev-vehicle">@item.Vehicle.Brand @item.Vehicle.Model</div>
                         <div class="ev-reg">@item.Vehicle.RegistrationNumber</div>
                     </div>
-                    <div class="ev-time">@item.Reservation.EndDate.ToString("HH:mm")</div>
+                    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+                        <span class="plan-half-chip am">AM</span>
+                        <div class="ev-time">@item.Reservation.EndDate.ToString("HH:mm")</div>
+                    </div>
                 </div>
                 <div style="font-size:13px;color:var(--muted);margin:6px 0">@item.Customer.FirstName @item.Customer.LastName</div>
                 <div class="day-card-actions">
-                    <a asp-controller="Reservation" asp-action="Details" asp-route-id="@item.Reservation.Id" class="btn btn-secondary btn-sm">Detalji</a>
+                    <a asp-controller="Reservation" asp-action="Details" asp-route-id="@item.Reservation.Id" asp-route-returnUrl="@pageReturn" class="btn btn-secondary btn-sm">Detalji</a>
                 </div>
             </div>
         }
@@ -46,7 +80,10 @@
     <div class="glass">
         <div class="plan-col-header">
             <div class="col-icon odlaz">↗</div>
-            <h2>Odlasci</h2>
+            <div>
+                <h2>Odlasci</h2>
+                <div class="plan-col-sub">Popodne · PM</div>
+            </div>
             <span class="count">@Model.Departures.Count</span>
         </div>
         @if (!Model.Departures.Any())
@@ -55,17 +92,21 @@
         }
         @foreach (var item in Model.Departures)
         {
-            <div class="ev-card">
-                <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            var isTurnaround = returnVehicleIds.Contains(item.Vehicle.Id);
+            <div class="ev-card @(isTurnaround ? "is-turnaround" : "")">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
                     <div>
                         <div class="ev-vehicle">@item.Vehicle.Brand @item.Vehicle.Model</div>
                         <div class="ev-reg">@item.Vehicle.RegistrationNumber</div>
                     </div>
-                    <div class="ev-time">@item.Reservation.StartDate.ToString("HH:mm")</div>
+                    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+                        <span class="plan-half-chip pm">PM</span>
+                        <div class="ev-time">@item.Reservation.StartDate.ToString("HH:mm")</div>
+                    </div>
                 </div>
                 <div style="font-size:13px;color:var(--muted);margin:6px 0">@item.Customer.FirstName @item.Customer.LastName</div>
                 <div class="day-card-actions">
-                    <a asp-controller="Reservation" asp-action="Details" asp-route-id="@item.Reservation.Id" class="btn btn-secondary btn-sm">Detalji</a>
+                    <a asp-controller="Reservation" asp-action="Details" asp-route-id="@item.Reservation.Id" asp-route-returnUrl="@pageReturn" class="btn btn-secondary btn-sm">Detalji</a>
                 </div>
             </div>
         }

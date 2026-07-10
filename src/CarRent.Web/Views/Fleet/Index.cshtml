@@ -37,7 +37,7 @@
             <div class="fleet-card-actions">
                 <a asp-controller="Vehicle" asp-action="Details" asp-route-id="@item.Vehicle.Id" asp-route-returnUrl="@fleetReturn" class="action-btn">Detalji</a>
                 <a asp-controller="Vehicle" asp-action="Edit" asp-route-id="@item.Vehicle.Id" asp-route-returnUrl="@fleetReturn" class="action-btn">Uredi</a>
-                <a asp-controller="Reservation" asp-action="Create" class="action-btn">Rezerviraj</a>
+                <a asp-controller="Reservation" asp-action="Create" asp-route-vehicleId="@item.Vehicle.Id" asp-route-returnUrl="@fleetReturn" class="action-btn">Rezerviraj</a>
                 <a asp-controller="ServiceRecord" asp-action="Index" class="action-btn">Servisi</a>
             </div>
         </article>

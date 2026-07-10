@@ -26,7 +26,7 @@ public sealed class CarRentTools(CarRentApiClient api)
     public Task<string> AskClientAssistant(
         [Description("Poruka klijenta")] string message,
         CancellationToken cancellationToken = default)
-        => api.PostJsonAsync("/ClientChat/Ask", new { message }, cancellationToken);
+        => api.PostJsonAsync("/asistent/ask", new { message }, cancellationToken);
 
     [McpServerTool, Description("Dohvati zadnjih N linija iz CarRent log datoteke (Admin).")]
     public Task<string> GetRecentLogs(

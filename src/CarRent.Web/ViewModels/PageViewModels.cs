@@ -45,11 +45,17 @@ public sealed class TimelineRowVm
 public sealed class TimelineBarVm
 {
     public Reservation? Reservation { get; init; }
-    public int StartDay { get; init; }
-    public int Span { get; init; } = 1;
+    public int StartSlot { get; init; }
+    public int SpanSlots { get; init; } = 1;
     public string Label { get; init; } = string.Empty;
     public string CssClass { get; init; } = "draft";
     public bool IsRegistration { get; init; }
+    public DateOnly? ActualStart { get; init; }
+    public DateOnly? ActualEnd { get; init; }
+    public bool IsEditable { get; init; }
+    public int? VehicleId { get; init; }
+    public int? ReservationId { get; init; }
+    public string? DetailsUrl { get; init; }
 }
 
 public sealed class TimelineCellVm
